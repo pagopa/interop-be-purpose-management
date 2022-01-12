@@ -1,0 +1,15 @@
+target/
+.idea
+project/project
+project/target
+.vscode
+metals.sbt
+.bloop
+.metals
+.bsp
+.openapi-generator
+.DS_Store
+generated/src
+client/src
+client/project/build.properties
+.env

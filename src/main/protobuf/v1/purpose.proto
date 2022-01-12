@@ -8,19 +8,13 @@ option (scalapb.options) = {
 
 message PurposeV1 {
   required string id = 1;
-  required string eServiceId = 2;
+  required string eserviceId = 2;
   required string consumerId = 3;
-  required int64 createdAt = 4;
-  optional int64 updatedAt = 5;
-}
-
-message PurposeVersionV1 {
-  required string id = 1;
-  required PurposeStateV1 state = 2;
-  optional bool suspendedByConsumer = 3;
-  optional bool suspendedByProducer = 4;
-  required int64 createdAt = 5;
-  optional int64 updatedAt = 6;
+  required PurposeStateV1 state = 4;
+  optional bool suspendedByConsumer = 5;
+  optional bool suspendedByProducer = 6;
+  required int64 createdAt = 7;
+  optional int64 updatedAt = 8;
 }
 
 enum PurposeStateV1 {

@@ -12,21 +12,17 @@ message PurposeAddedV1 {
 }
 
 message PurposeDeletedV1 {
-  required string purposeId = 1;
+  required PurposeV1 purpose = 1;
 }
 
-message PurposeVersionAddedV1 {
-  required PurposeVersionV1 purposeVersion = 1;
+message PurposeActivatedV1 {
+  required PurposeV1 purpose = 1;
 }
 
-message PurposeVersionActivatedV1 {
-  required string purposeVersionId = 1;
+message PurposeSuspendedV1 {
+  required PurposeV1 purpose = 1;
 }
 
-message PurposeVersionSuspendedV1 {
-  required string purposeVersionId = 1;
-}
-
-message PurposeVersionArchivedV1 {
-  required string purposeVersionId = 1;
+message PurposeArchivedV1 {
+  required PurposeV1 purpose = 1;
 }

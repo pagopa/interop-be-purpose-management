@@ -66,6 +66,11 @@ paths:
             type: string
             format: uuid
         - in: query
+          name: consumerId
+          schema:
+            type: string
+            format: uuid
+        - in: query
           name: states
           description: comma separated sequence of states to filter the response with
           schema:
@@ -220,7 +225,7 @@ components:
       description: Purpose State
       enum:
         - ACTIVE
-        - PENDING
+        - DRAFT
         - SUSPENDED
         - WAITING_FOR_APPROVAL
         - ARCHIVED

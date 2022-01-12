@@ -36,6 +36,6 @@ final case class ListPurposes(
   to: Int,
   consumerId: Option[String],
   eserviceId: Option[String],
-  state: Option[PersistentPurposeState],
+  state: List[PersistentPurposeState],
   replyTo: ActorRef[Seq[Purpose]]
 ) extends Command

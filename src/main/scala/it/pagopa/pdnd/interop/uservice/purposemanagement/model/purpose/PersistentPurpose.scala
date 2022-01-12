@@ -28,7 +28,7 @@ object PersistentPurpose {
       id = uuidSupplier.get,
       eserviceId = purpose.eserviceId,
       consumerId = purpose.consumerId,
-      state = PersistentPurposeState.Draft,
+      state = PersistentPurposeState.fromApi(purpose.state),
       suspendedByConsumer = None,
       suspendedByProducer = None,
       createdAt = dateTimeSupplier.get,

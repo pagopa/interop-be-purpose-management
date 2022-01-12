@@ -16,16 +16,16 @@ class PurposeArchivedSerializer extends SerializerWithStringManifest {
 
   override def manifest(o: AnyRef): String = s"${o.getClass.getName}|$currentVersion"
 
-  final val PurposeDeactivatedManifest: String = classOf[PurposeArchived].getName
+  final val PurposeArchivedManifest: String = classOf[PurposeArchived].getName
 
   override def toBinary(o: AnyRef): Array[Byte] = o match {
     case event: PurposeArchived =>
-      serialize(event, PurposeDeactivatedManifest, currentVersion)
+      serialize(event, PurposeArchivedManifest, currentVersion)
   }
 
   override def fromBinary(bytes: Array[Byte], manifest: String): AnyRef = manifest.split('|').toList match {
-    case PurposeDeactivatedManifest :: `version1` :: Nil =>
-      deserialize(v1.events.PurposeDeactivatedV1, bytes, manifest, currentVersion)
+    case PurposeArchivedManifest :: `version1` :: Nil =>
+      deserialize(v1.events.PurposeArchivedV1, bytes, manifest, currentVersion)
     case _ =>
       throw new NotSerializableException(
         s"Unable to handle manifest: [[$manifest]], currentVersion: [[$currentVersion]] "

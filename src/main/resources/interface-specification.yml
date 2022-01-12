@@ -206,6 +206,47 @@ paths:
       tags:
         - purpose
       description: suspends the purpose by id
+  /purposes/{id}/archive:
+    parameters:
+      - name: id
+        in: path
+        required:
+          true
+        schema:
+          type: string
+          format: uuid
+    post:
+      summary: Archive Purpose
+      operationId: archivePurpose
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StateChangeDetails'
+        description: the updated state
+        required: true
+      responses:
+        '200':
+          description: Updated Purpose
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Purpose'
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: Purpose Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+      tags:
+        - purpose
+      description: archives the purpose by id
 components:
   schemas:
     StateChangeDetails:

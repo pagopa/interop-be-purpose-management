@@ -1,0 +1,32 @@
+syntax = "proto2";
+
+import "scalapb/scalapb.proto";
+import "v1/purpose.proto";
+
+option (scalapb.options) = {
+  package_name: "it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence.serializer.v1"
+};
+
+message PurposeAddedV1 {
+  required PurposeV1 purpose = 1;
+}
+
+message PurposeDeletedV1 {
+  required string purposeId = 1;
+}
+
+message PurposeVersionAddedV1 {
+  required PurposeVersionV1 purposeVersion = 1;
+}
+
+message PurposeVersionActivatedV1 {
+  required string purposeVersionId = 1;
+}
+
+message PurposeVersionSuspendedV1 {
+  required string purposeVersionId = 1;
+}
+
+message PurposeVersionArchivedV1 {
+  required string purposeVersionId = 1;
+}

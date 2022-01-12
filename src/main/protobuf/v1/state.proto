@@ -1,0 +1,19 @@
+syntax = "proto2";
+
+import "scalapb/scalapb.proto";
+
+option (scalapb.options) = {
+  package_name: "it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence.serializer.v1"
+};
+
+import "v1/purpose.proto";
+
+
+message StateV1 {
+  repeated PurposesV1 purposes = 1;
+}
+
+message PurposesV1 {
+  required string key = 1;
+  required PurposeV1 value = 2;
+}

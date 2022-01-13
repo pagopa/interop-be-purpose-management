@@ -26,8 +26,8 @@ paths:
     post:
       tags:
         - purpose
-      summary: Add a new purpose
-      operationId: addPurpose
+      summary: Create a new purpose
+      operationId: createPurpose
       requestBody:
         description: A Purpose seed
         content:
@@ -76,7 +76,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/PurposeState'
+              $ref: '#/components/schemas/PurposeVersionState'
             default: [ ]
           explode: false
       responses:
@@ -125,9 +125,16 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /purposes/{id}/activate:
+  /purposes/{purposeId}/versions/{versionId}:
     parameters:
-      - name: id
+      - name: purposeId
+        in: path
+        required:
+          true
+        schema:
+          type: string
+          format: uuid
+      - name: versionId
         in: path
         required:
           true
@@ -135,8 +142,66 @@ paths:
           type: string
           format: uuid
     post:
-      summary: Activate Purpose
-      operationId: activatePurpose
+      tags:
+        - purpose
+      summary: Create a new purpose version
+      operationId: createPurposeVersion
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurposeVersionSeed'
+        required: true
+      responses:
+        '200':
+          description: Purpose Version created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurposeVersion'
+        '400':
+          description: Invalid input
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    get:
+      tags:
+        - purpose
+      summary: Retrieve a purpose version
+      operationId: getPurposeVersion
+      responses:
+        '200':
+          description: Purpose Version
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurposeVersion'
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /purposes/{purposeId}/versions/{versionId}/activate:
+    parameters:
+      - name: purposeId
+        in: path
+        required:
+          true
+        schema:
+          type: string
+          format: uuid
+      - name: versionId
+        in: path
+        required:
+          true
+        schema:
+          type: string
+          format: uuid
+    post:
+      summary: Activate Purpose Version
+      operationId: activatePurposeVersion
       requestBody:
         content:
           application/json:
@@ -144,12 +209,8 @@ paths:
               $ref: '#/components/schemas/StateChangeDetails'
         required: true
       responses:
-        '200':
-          description: Purpose activated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Purpose'
+        '204':
+          description: Purpose Version Activated
         '400':
           description: Bad Request
           content:
@@ -162,12 +223,19 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-      description: 'activates the purpose, if any.'
+      description: activates the purpose version by id
       tags:
         - purpose
-  /purposes/{id}/suspend:
+  /purposes/{purposeId}/versions/{versionId}/suspend:
     parameters:
-      - name: id
+      - name: purposeId
+        in: path
+        required:
+          true
+        schema:
+          type: string
+          format: uuid
+      - name: versionId
         in: path
         required:
           true
@@ -175,22 +243,17 @@ paths:
           type: string
           format: uuid
     post:
-      summary: Suspend Purpose
-      operationId: suspendPurpose
+      summary: Suspend Purpose Version
+      operationId: suspendPurposeVersion
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/StateChangeDetails'
-        description: the updated state
         required: true
       responses:
-        '200':
-          description: Updated Purpose
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Purpose'
+        '204':
+          description: Purpose Version Suspended
         '400':
           description: Bad Request
           content:
@@ -205,10 +268,17 @@ paths:
                 $ref: '#/components/schemas/Problem'
       tags:
         - purpose
-      description: suspends the purpose by id
-  /purposes/{id}/archive:
+      description: suspends the purpose version by id
+  /purposes/{purposeId}/versions/{versionId}/archive:
     parameters:
-      - name: id
+      - name: purposeId
+        in: path
+        required:
+          true
+        schema:
+          type: string
+          format: uuid
+      - name: versionId
         in: path
         required:
           true
@@ -216,22 +286,17 @@ paths:
           type: string
           format: uuid
     post:
-      summary: Archive Purpose
-      operationId: archivePurpose
+      summary: Archive Purpose Version
+      operationId: archivePurposeVersion
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/StateChangeDetails'
-        description: the updated state
         required: true
       responses:
-        '200':
-          description: Updated Purpose
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Purpose'
+        '204':
+          description: Purpose Version Archived
         '400':
           description: Bad Request
           content:
@@ -246,7 +311,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
       tags:
         - purpose
-      description: archives the purpose by id
+      description: archives the purpose version by id
 components:
   schemas:
     StateChangeDetails:
@@ -261,7 +326,7 @@ components:
       enum:
         - PRODUCER
         - CONSUMER
-    PurposeState:
+    PurposeVersionState:
       type: string
       description: Purpose State
       enum:
@@ -280,11 +345,16 @@ components:
         consumerId:
           type: string
           format: uuid
-        state:
-          $ref: '#/components/schemas/PurposeState'
       required:
         - eserviceId
         - consumerId
+    PurposeVersionSeed:
+      type: object
+      description: contains the expected payload for purpose version persistence.
+      properties:
+        state:
+          $ref: '#/components/schemas/PurposeVersionState'
+      required:
         - state
     Purpose:
       type: object
@@ -298,8 +368,10 @@ components:
         consumerId:
           type: string
           format: uuid
-        state:
-          $ref: '#/components/schemas/PurposeState'
+        versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PurposeVersion'
         suspendedByConsumer:
           type: boolean
         suspendedByProducer:
@@ -314,13 +386,32 @@ components:
         - id
         - eserviceId
         - consumerId
-        - state
+        - versions
         - createdAt
       description: business representation of an purpose
     Purposes:
       type: array
       items:
         $ref: '#/components/schemas/Purpose'
+    PurposeVersion:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        state:
+          $ref: '#/components/schemas/PurposeVersionState'
+        createdAt:
+          type: string
+          format: date-time
+        expectedApprovalDate:
+          type: string
+          format: date-time
+      required:
+        - id
+        - state
+        - createdAt
+      description: business representation of an purpose version
     Problem:
       properties:
         type:

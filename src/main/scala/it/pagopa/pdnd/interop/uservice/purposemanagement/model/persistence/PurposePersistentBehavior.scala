@@ -6,7 +6,10 @@ import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityTypeKey}
 import akka.pattern.StatusReply
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior, RetentionCriteria}
-import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.{PersistentPurpose, PersistentPurposeState}
+import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.{
+  PersistentPurpose,
+  PersistentPurposeVersionState
+}
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.{ChangedBy, Purpose, StateChangeDetails}
 
 import java.time.temporal.ChronoUnit
@@ -23,16 +26,16 @@ object PurposePersistentBehavior {
       context.system.settings.config.getDuration("uservice-purpose-management.idle-timeout")
     context.setReceiveTimeout(idleTimeout.get(ChronoUnit.SECONDS) seconds, Idle)
     command match {
-      case AddPurpose(newPurpose, replyTo) =>
+      case CreatePurpose(newPurpose, replyTo) =>
         val purpose: Option[PersistentPurpose] = state.purposes.get(newPurpose.id.toString)
         purpose
           .map { es =>
             replyTo ! StatusReply.Error[Purpose](s"Purpose ${es.id.toString} already exists")
-            Effect.none[PurposeAdded, State]
+            Effect.none[PurposeCreated, State]
           }
           .getOrElse {
             Effect
-              .persist(PurposeAdded(newPurpose))
+              .persist(PurposeCreated(newPurpose))
               .thenRun((_: State) => replyTo ! StatusReply.Success(PersistentPurpose.toAPI(newPurpose)))
           }
 
@@ -41,75 +44,47 @@ object PurposePersistentBehavior {
         replyTo ! StatusReply.Success[Option[Purpose]](purpose.map(PersistentPurpose.toAPI))
         Effect.none[Event, State]
 
-      case ActivatePurpose(purposeId, stateChangeDetails, replyTo) =>
-        val purpose: Option[PersistentPurpose] = state.purposes.get(purposeId)
-        purpose
-          .map { purpose =>
-            val updatedPurpose =
-              updatePurposeState(purpose, PersistentPurposeState.Active, stateChangeDetails)
+      case ActivatePurposeVersion(purposeId, versionId, stateChangeDetails, replyTo) =>
+        updatePurposeState(state, purposeId, versionId, PersistentPurposeVersionState.Active, stateChangeDetails)
+          .fold {
+            replyTo ! StatusReply.Error[PersistentPurpose](s"Purpose $purposeId and version $versionId not found.")
+            Effect.none[PurposeVersionActivated, State]
+          } { updatedPurpose =>
             Effect
-              .persist(PurposeActivated(updatedPurpose))
-              .thenRun((_: State) => replyTo ! StatusReply.Success(PersistentPurpose.toAPI(updatedPurpose)))
-          }
-          .getOrElse {
-            replyTo ! StatusReply.Error[Purpose](s"Purpose $purposeId not found.")
-            Effect.none[PurposeActivated, State]
+              .persist(PurposeVersionActivated(updatedPurpose))
+              .thenRun((_: State) => replyTo ! StatusReply.Success(updatedPurpose))
           }
 
-      case SuspendPurpose(purposeId, stateChangeDetails, replyTo) =>
-        val purpose: Option[PersistentPurpose] = state.purposes.get(purposeId)
-        purpose
-          .map { purpose =>
-            val updatedPurpose =
-              updatePurposeState(purpose, PersistentPurposeState.Suspended, stateChangeDetails)
+      case SuspendPurposeVersion(purposeId, versionId, stateChangeDetails, replyTo) =>
+        updatePurposeState(state, purposeId, versionId, PersistentPurposeVersionState.Suspended, stateChangeDetails)
+          .fold {
+            replyTo ! StatusReply.Error[PersistentPurpose](s"Purpose $purposeId and version $versionId not found.")
+            Effect.none[PurposeVersionSuspended, State]
+          } { updatedPurpose =>
             Effect
-              .persist(PurposeSuspended(updatedPurpose))
-              .thenRun((_: State) => replyTo ! StatusReply.Success(PersistentPurpose.toAPI(updatedPurpose)))
-          }
-          .getOrElse {
-            replyTo ! StatusReply.Error[Purpose](s"Purpose $purposeId not found.")
-            Effect.none[PurposeSuspended, State]
+              .persist(PurposeVersionSuspended(updatedPurpose))
+              .thenRun((_: State) => replyTo ! StatusReply.Success(updatedPurpose))
           }
 
-      case ArchivePurpose(purposeId, stateChangeDetails, replyTo) =>
-        val purpose: Option[PersistentPurpose] = state.purposes.get(purposeId)
-        purpose
-          .map { purpose =>
-            val updatedPurpose =
-              updatePurposeState(purpose, PersistentPurposeState.Archived, stateChangeDetails)
+      case ArchivePurposeVersion(purposeId, versionId, stateChangeDetails, replyTo) =>
+        updatePurposeState(state, purposeId, versionId, PersistentPurposeVersionState.Archived, stateChangeDetails)
+          .fold {
+            replyTo ! StatusReply.Error[PersistentPurpose](s"Purpose $purposeId and version $versionId not found.")
+            Effect.none[PurposeVersionArchived, State]
+          } { updatedPurpose =>
             Effect
-              .persist(PurposeArchived(updatedPurpose))
-              .thenRun((_: State) => replyTo ! StatusReply.Success(PersistentPurpose.toAPI(updatedPurpose)))
-          }
-          .getOrElse {
-            replyTo ! StatusReply.Error[Purpose](s"Purpose $purposeId not found.")
-            Effect.none[PurposeArchived, State]
-          }
-
-      case WaitForPurposeApproval(purposeId, stateChangeDetails, replyTo) =>
-        val purpose: Option[PersistentPurpose] = state.purposes.get(purposeId)
-        purpose
-          .map { purpose =>
-            val updatedPurpose =
-              updatePurposeState(purpose, PersistentPurposeState.WaitingForApproval, stateChangeDetails)
-            Effect
-              .persist(PurposeArchived(updatedPurpose))
-              .thenRun((_: State) => replyTo ! StatusReply.Success(PersistentPurpose.toAPI(updatedPurpose)))
-          }
-          .getOrElse {
-            replyTo ! StatusReply.Error[Purpose](s"Purpose $purposeId not found.")
-            Effect.none[PurposeArchived, State]
+              .persist(PurposeVersionArchived(updatedPurpose))
+              .thenRun((_: State) => replyTo ! StatusReply.Success(updatedPurpose))
           }
 
       case ListPurposes(from, to, consumerId, eserviceId, purposeState, replyTo) =>
-        val purposes: Seq[Purpose] = state.purposes
+        val purposes: Seq[PersistentPurpose] = state.purposes
           .slice(from, to)
-          .filter(purpose => consumerId.forall(filter => filter == purpose._2.consumerId.toString))
-          .filter(purpose => eserviceId.forall(filter => filter == purpose._2.eserviceId.toString))
-          .filter(purpose => purposeState.forall(filter => filter == purpose._2.state))
+          .filter(purpose => consumerId.forall(_ == purpose._2.consumerId.toString))
+          .filter(purpose => eserviceId.forall(_ == purpose._2.eserviceId.toString))
+          .filter(purpose => purposeState.forall(state => purpose._2.versions.exists(_.state == state)))
           .values
           .toSeq
-          .map(PersistentPurpose.toAPI)
 
         replyTo ! purposes
         Effect.none[Event, State]
@@ -123,11 +98,10 @@ object PurposePersistentBehavior {
 
   val eventHandler: (State, Event) => State = (state, event) =>
     event match {
-      case PurposeAdded(purpose)              => state.add(purpose)
-      case PurposeActivated(purpose)          => state.updatePurpose(purpose)
-      case PurposeSuspended(purpose)          => state.updatePurpose(purpose)
-      case PurposeArchived(purpose)           => state.updatePurpose(purpose)
-      case PurposeWaitingForApproval(purpose) => state.updatePurpose(purpose)
+      case PurposeCreated(purpose)          => state.add(purpose)
+      case PurposeVersionActivated(purpose) => state.updatePurpose(purpose)
+      case PurposeVersionSuspended(purpose) => state.updatePurpose(purpose)
+      case PurposeVersionArchived(purpose)  => state.updatePurpose(purpose)
     }
 
   val TypeKey: EntityTypeKey[Command] =
@@ -150,21 +124,35 @@ object PurposePersistentBehavior {
     }
   }
 
+  // TODO Test me
   private def updatePurposeState(
-    persistentPurpose: PersistentPurpose,
-    state: PersistentPurposeState,
+    state: State,
+    purposeId: String,
+    versionId: String,
+    newVersionState: PersistentPurposeVersionState,
     stateChangeDetails: StateChangeDetails
-  ): PersistentPurpose = {
+  ): Option[PersistentPurpose] = {
 
-    def isSuspended = state == PersistentPurposeState.Suspended
+    def isSuspended = newVersionState == PersistentPurposeVersionState.Suspended
 
-    stateChangeDetails.changedBy match {
-      case Some(changedBy) =>
-        changedBy match {
-          case ChangedBy.CONSUMER => persistentPurpose.copy(state = state, suspendedByConsumer = Some(isSuspended))
-          case ChangedBy.PRODUCER => persistentPurpose.copy(state = state, suspendedByProducer = Some(isSuspended))
-        }
-      case None => persistentPurpose.copy(state = state)
+    for {
+      purpose <- state.purposes.get(purposeId)
+      version <- purpose.versions.find(_.id.toString == versionId)
+    } yield {
+
+      val updatedVersions =
+        purpose.versions.filterNot(_.id != version.id) :+ version
+
+      stateChangeDetails.changedBy match {
+        case Some(changedBy) =>
+          changedBy match {
+            case ChangedBy.CONSUMER =>
+              purpose.copy(versions = updatedVersions, suspendedByConsumer = Some(isSuspended))
+            case ChangedBy.PRODUCER =>
+              purpose.copy(versions = updatedVersions, suspendedByProducer = Some(isSuspended))
+          }
+        case None => purpose.copy(versions = updatedVersions)
+      }
     }
 
   }

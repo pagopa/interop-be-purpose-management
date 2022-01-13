@@ -2,33 +2,45 @@ package it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence
 
 import akka.actor.typed.ActorRef
 import akka.pattern.StatusReply
-import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.{PersistentPurpose, PersistentPurposeState}
-import it.pagopa.pdnd.interop.uservice.purposemanagement.model.{Purpose, StateChangeDetails}
+import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.{
+  PersistentPurpose,
+  PersistentPurposeVersion,
+  PersistentPurposeVersionState
+}
+import it.pagopa.pdnd.interop.uservice.purposemanagement.model.{Purpose, PurposeVersion, StateChangeDetails}
 
 sealed trait Command
 
-case object Idle                                                                                 extends Command
-final case class AddPurpose(purpose: PersistentPurpose, replyTo: ActorRef[StatusReply[Purpose]]) extends Command
-final case class GetPurpose(purposeId: String, replyTo: ActorRef[StatusReply[Option[Purpose]]])  extends Command
-final case class ActivatePurpose(
+case object Idle                                                                                    extends Command
+final case class CreatePurpose(purpose: PersistentPurpose, replyTo: ActorRef[StatusReply[Purpose]]) extends Command
+final case class GetPurpose(purposeId: String, replyTo: ActorRef[StatusReply[Option[Purpose]]])     extends Command
+final case class GetPurposeVersion(
   purposeId: String,
-  stateChangeDetails: StateChangeDetails,
-  replyTo: ActorRef[StatusReply[Purpose]]
+  versionId: String,
+  replyTo: ActorRef[StatusReply[Option[PurposeVersion]]]
 ) extends Command
-final case class SuspendPurpose(
+final case class CreatePurposeVersion(
   purposeId: String,
-  stateChangeDetails: StateChangeDetails,
-  replyTo: ActorRef[StatusReply[Purpose]]
+  purposeVersion: PersistentPurposeVersion,
+  replyTo: ActorRef[StatusReply[PersistentPurposeVersion]]
 ) extends Command
-final case class ArchivePurpose(
+final case class ActivatePurposeVersion(
   purposeId: String,
+  versionId: String,
   stateChangeDetails: StateChangeDetails,
-  replyTo: ActorRef[StatusReply[Purpose]]
+  replyTo: ActorRef[StatusReply[PersistentPurpose]]
 ) extends Command
-final case class WaitForPurposeApproval(
+final case class SuspendPurposeVersion(
   purposeId: String,
+  versionId: String,
   stateChangeDetails: StateChangeDetails,
-  replyTo: ActorRef[StatusReply[Purpose]]
+  replyTo: ActorRef[StatusReply[PersistentPurpose]]
+) extends Command
+final case class ArchivePurposeVersion(
+  purposeId: String,
+  versionId: String,
+  stateChangeDetails: StateChangeDetails,
+  replyTo: ActorRef[StatusReply[PersistentPurpose]]
 ) extends Command
 
 final case class ListPurposes(
@@ -36,6 +48,6 @@ final case class ListPurposes(
   to: Int,
   consumerId: Option[String],
   eserviceId: Option[String],
-  state: List[PersistentPurposeState],
-  replyTo: ActorRef[Seq[Purpose]]
+  state: List[PersistentPurposeVersionState],
+  replyTo: ActorRef[Seq[PersistentPurpose]]
 ) extends Command

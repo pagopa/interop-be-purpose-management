@@ -4,8 +4,8 @@ import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.Persisten
 
 sealed trait Event extends Persistable
 
-final case class PurposeAdded(purpose: PersistentPurpose)              extends Event
-final case class PurposeActivated(purpose: PersistentPurpose)          extends Event
-final case class PurposeSuspended(purpose: PersistentPurpose)          extends Event
-final case class PurposeArchived(purpose: PersistentPurpose)           extends Event
-final case class PurposeWaitingForApproval(purpose: PersistentPurpose) extends Event
+final case class PurposeCreated(purpose: PersistentPurpose)          extends Event
+final case class PurposeVersionCreated(purpose: PersistentPurpose)   extends Event
+final case class PurposeVersionActivated(purpose: PersistentPurpose) extends Event
+final case class PurposeVersionSuspended(purpose: PersistentPurpose) extends Event
+final case class PurposeVersionArchived(purpose: PersistentPurpose)  extends Event

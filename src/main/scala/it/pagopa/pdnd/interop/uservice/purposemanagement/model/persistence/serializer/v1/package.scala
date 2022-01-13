@@ -4,10 +4,11 @@ import cats.implicits.toTraverseOps
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.PersistentPurpose
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence._
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence.serializer.v1.events.{
-  PurposeActivatedV1,
-  PurposeAddedV1,
-  PurposeArchivedV1,
-  PurposeSuspendedV1
+  PurposeCreatedV1,
+  PurposeVersionActivatedV1,
+  PurposeVersionArchivedV1,
+  PurposeVersionCreatedV1,
+  PurposeVersionSuspendedV1
 }
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence.serializer.v1.protobufUtils.{
   toPersistentPurpose,
@@ -40,31 +41,42 @@ package object v1 {
       } yield StateV1(purposesV1)
     }
 
-  implicit def purposeAddedV1PersistEventDeserializer: PersistEventDeserializer[PurposeAddedV1, PurposeAdded] =
-    event => toPersistentPurpose(event.purpose).map(PurposeAdded)
+  implicit def purposeCreatedV1PersistEventDeserializer: PersistEventDeserializer[PurposeCreatedV1, PurposeCreated] =
+    event => toPersistentPurpose(event.purpose).map(PurposeCreated)
 
-  implicit def purposeAddedV1PersistEventSerializer: PersistEventSerializer[PurposeAdded, PurposeAddedV1] =
-    event => toProtobufPurpose(event.purpose).map(ag => PurposeAddedV1.of(ag))
+  implicit def purposeCreatedV1PersistEventSerializer: PersistEventSerializer[PurposeCreated, PurposeCreatedV1] =
+    event => toProtobufPurpose(event.purpose).map(ag => PurposeCreatedV1.of(ag))
 
-  implicit def purposeActivatedV1PersistEventSerializer: PersistEventSerializer[PurposeActivated, PurposeActivatedV1] =
-    event => toProtobufPurpose(event.purpose).map(ag => PurposeActivatedV1.of(ag))
+  implicit def purposeVersionCreatedV1PersistEventDeserializer
+    : PersistEventDeserializer[PurposeVersionCreatedV1, PurposeVersionCreated] =
+    event => toPersistentPurpose(event.purpose).map(PurposeVersionCreated)
+
+  implicit def purposeVersionCreatedV1PersistEventSerializer
+    : PersistEventSerializer[PurposeVersionCreated, PurposeVersionCreatedV1] =
+    event => toProtobufPurpose(event.purpose).map(ag => PurposeVersionCreatedV1.of(ag))
+
+  implicit def purposeActivatedV1PersistEventSerializer
+    : PersistEventSerializer[PurposeVersionActivated, PurposeVersionActivatedV1] =
+    event => toProtobufPurpose(event.purpose).map(ag => PurposeVersionActivatedV1.of(ag))
 
   implicit def purposeActivatedV1PersistEventDeserializer
-    : PersistEventDeserializer[PurposeActivatedV1, PurposeActivated] =
-    event => toPersistentPurpose(event.purpose).map(PurposeActivated)
+    : PersistEventDeserializer[PurposeVersionActivatedV1, PurposeVersionActivated] =
+    event => toPersistentPurpose(event.purpose).map(PurposeVersionActivated)
 
-  implicit def purposeSuspendedV1PersistEventSerializer: PersistEventSerializer[PurposeSuspended, PurposeSuspendedV1] =
-    event => toProtobufPurpose(event.purpose).map(ag => PurposeSuspendedV1.of(ag))
+  implicit def purposeSuspendedV1PersistEventSerializer
+    : PersistEventSerializer[PurposeVersionSuspended, PurposeVersionSuspendedV1] =
+    event => toProtobufPurpose(event.purpose).map(ag => PurposeVersionSuspendedV1.of(ag))
 
   implicit def purposeSuspendedV1PersistEventDeserializer
-    : PersistEventDeserializer[PurposeSuspendedV1, PurposeSuspended] =
-    event => toPersistentPurpose(event.purpose).map(PurposeSuspended)
+    : PersistEventDeserializer[PurposeVersionSuspendedV1, PurposeVersionSuspended] =
+    event => toPersistentPurpose(event.purpose).map(PurposeVersionSuspended)
 
-  implicit def purposeDeactivatedV1PersistEventSerializer: PersistEventSerializer[PurposeArchived, PurposeArchivedV1] =
-    event => toProtobufPurpose(event.purpose).map(ag => PurposeArchivedV1.of(ag))
+  implicit def purposeDeactivatedV1PersistEventSerializer
+    : PersistEventSerializer[PurposeVersionArchived, PurposeVersionArchivedV1] =
+    event => toProtobufPurpose(event.purpose).map(ag => PurposeVersionArchivedV1.of(ag))
 
   implicit def purposeDeactivatedV1PersistEventDeserializer
-    : PersistEventDeserializer[PurposeArchivedV1, PurposeArchived] =
-    event => toPersistentPurpose(event.purpose).map(PurposeArchived)
+    : PersistEventDeserializer[PurposeVersionArchivedV1, PurposeVersionArchived] =
+    event => toPersistentPurpose(event.purpose).map(PurposeVersionArchived)
 
 }

@@ -10,11 +10,18 @@ message PurposeV1 {
   required string id = 1;
   required string eserviceId = 2;
   required string consumerId = 3;
-  required PurposeStateV1 state = 4;
   optional bool suspendedByConsumer = 5;
   optional bool suspendedByProducer = 6;
-  required int64 createdAt = 7;
-  optional int64 updatedAt = 8;
+  repeated PurposeVersionV1 versions = 7;
+  required int64 createdAt = 8;
+  optional int64 updatedAt = 9;
+}
+
+message PurposeVersionV1 {
+  required string id = 1;
+  required PurposeStateV1 state = 2;
+  required int64 createdAt = 3;
+  optional int64 expectedApprovalDate = 4;
 }
 
 enum PurposeStateV1 {

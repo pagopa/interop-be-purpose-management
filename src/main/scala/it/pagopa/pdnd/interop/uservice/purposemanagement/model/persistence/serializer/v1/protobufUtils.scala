@@ -4,9 +4,14 @@ import cats.implicits.toTraverseOps
 import it.pagopa.pdnd.interop.commons.utils.TypeConversions.{LongOps, OffsetDateTimeOps, StringOps}
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence.serializer.v1.purpose.{
   PurposeStateV1,
-  PurposeV1
+  PurposeV1,
+  PurposeVersionV1
 }
-import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.{PersistentPurpose, PersistentPurposeState}
+import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.{
+  PersistentPurpose,
+  PersistentPurposeVersion,
+  PersistentPurposeVersionState
+}
 
 import scala.util.{Failure, Success, Try}
 
@@ -14,17 +19,17 @@ object protobufUtils {
 
   def toPersistentPurpose(protobufPurpose: PurposeV1): Either[Throwable, PersistentPurpose] = {
     val purpose = for {
-      status     <- fromProtobufPurposeState(protobufPurpose.state)
       id         <- protobufPurpose.id.toUUID
       eserviceId <- protobufPurpose.eserviceId.toUUID
       consumerId <- protobufPurpose.consumerId.toUUID
+      versions   <- protobufPurpose.versions.traverse(toPersistentPurposeVersion).toTry
       createdAt  <- protobufPurpose.createdAt.toOffsetDateTime
       updatedAt  <- protobufPurpose.updatedAt.traverse(_.toOffsetDateTime)
     } yield PersistentPurpose(
       id = id,
       eserviceId = eserviceId,
       consumerId = consumerId,
-      state = status,
+      versions = versions,
       suspendedByConsumer = protobufPurpose.suspendedByConsumer,
       suspendedByProducer = protobufPurpose.suspendedByProducer,
       createdAt = createdAt,
@@ -39,7 +44,7 @@ object protobufUtils {
         id = persistentPurpose.id.toString,
         eserviceId = persistentPurpose.eserviceId.toString,
         consumerId = persistentPurpose.consumerId.toString,
-        state = toProtobufPurposeState(persistentPurpose.state),
+        versions = persistentPurpose.versions.map(toProtobufPurposeVersion),
         suspendedByConsumer = persistentPurpose.suspendedByConsumer,
         suspendedByProducer = persistentPurpose.suspendedByProducer,
         createdAt = persistentPurpose.createdAt.toMillis,
@@ -48,21 +53,47 @@ object protobufUtils {
     )
   }
 
-  def toProtobufPurposeState(status: PersistentPurposeState): PurposeStateV1 =
+  def toPersistentPurposeVersion(
+    protobufPurposeVersion: PurposeVersionV1
+  ): Either[Throwable, PersistentPurposeVersion] = {
+    val purpose = for {
+      state                <- fromProtobufPurposeState(protobufPurposeVersion.state)
+      id                   <- protobufPurposeVersion.id.toUUID
+      createdAt            <- protobufPurposeVersion.createdAt.toOffsetDateTime
+      expectedApprovalDate <- protobufPurposeVersion.expectedApprovalDate.traverse(_.toOffsetDateTime)
+    } yield PersistentPurposeVersion(
+      id = id,
+      state = state,
+      createdAt = createdAt,
+      expectedApprovalDate = expectedApprovalDate
+    )
+    purpose.toEither
+  }
+
+  def toProtobufPurposeVersion(persistentPurposeVersion: PersistentPurposeVersion): PurposeVersionV1 =
+    PurposeVersionV1(
+      id = persistentPurposeVersion.id.toString,
+      state = toProtobufPurposeState(persistentPurposeVersion.state),
+      createdAt = persistentPurposeVersion.createdAt.toMillis,
+      expectedApprovalDate = persistentPurposeVersion.expectedApprovalDate.map(_.toMillis)
+    )
+
+  def toProtobufPurposeState(status: PersistentPurposeVersionState): PurposeStateV1 =
     status match {
-      case PersistentPurposeState.Draft              => PurposeStateV1.DRAFT
-      case PersistentPurposeState.Active             => PurposeStateV1.ACTIVE
-      case PersistentPurposeState.Suspended          => PurposeStateV1.SUSPENDED
-      case PersistentPurposeState.Archived           => PurposeStateV1.ARCHIVED
-      case PersistentPurposeState.WaitingForApproval => PurposeStateV1.WAITING_FOR_APPROVAL
+      case PersistentPurposeVersionState.Draft              => PurposeStateV1.DRAFT
+      case PersistentPurposeVersionState.Active             => PurposeStateV1.ACTIVE
+      case PersistentPurposeVersionState.Suspended          => PurposeStateV1.SUSPENDED
+      case PersistentPurposeVersionState.Archived           => PurposeStateV1.ARCHIVED
+      case PersistentPurposeVersionState.WaitingForApproval => PurposeStateV1.WAITING_FOR_APPROVAL
     }
-  def fromProtobufPurposeState(status: PurposeStateV1): Try[PersistentPurposeState] =
+
+  def fromProtobufPurposeState(status: PurposeStateV1): Try[PersistentPurposeVersionState] =
     status match {
-      case PurposeStateV1.DRAFT                => Success(PersistentPurposeState.Draft)
-      case PurposeStateV1.ACTIVE               => Success(PersistentPurposeState.Active)
-      case PurposeStateV1.SUSPENDED            => Success(PersistentPurposeState.Suspended)
-      case PurposeStateV1.ARCHIVED             => Success(PersistentPurposeState.Archived)
-      case PurposeStateV1.WAITING_FOR_APPROVAL => Success(PersistentPurposeState.WaitingForApproval)
+      case PurposeStateV1.DRAFT                => Success(PersistentPurposeVersionState.Draft)
+      case PurposeStateV1.ACTIVE               => Success(PersistentPurposeVersionState.Active)
+      case PurposeStateV1.SUSPENDED            => Success(PersistentPurposeVersionState.Suspended)
+      case PurposeStateV1.ARCHIVED             => Success(PersistentPurposeVersionState.Archived)
+      case PurposeStateV1.WAITING_FOR_APPROVAL => Success(PersistentPurposeVersionState.WaitingForApproval)
       case PurposeStateV1.Unrecognized(value) =>
         Failure(new RuntimeException(s"Protobuf PurposeStatus deserialization failed. Unrecognized value: $value"))
     }

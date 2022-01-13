@@ -7,22 +7,23 @@ option (scalapb.options) = {
   package_name: "it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence.serializer.v1"
 };
 
-message PurposeAddedV1 {
+message PurposeCreatedV1 {
   required PurposeV1 purpose = 1;
 }
 
-message PurposeDeletedV1 {
+message PurposeVersionCreatedV1 {
   required PurposeV1 purpose = 1;
 }
 
-message PurposeActivatedV1 {
+message PurposeVersionActivatedV1 {
   required PurposeV1 purpose = 1;
 }
 
-message PurposeSuspendedV1 {
+message PurposeVersionSuspendedV1 {
   required PurposeV1 purpose = 1;
 }
 
-message PurposeArchivedV1 {
+message PurposeVersionArchivedV1 {
   required PurposeV1 purpose = 1;
 }
+

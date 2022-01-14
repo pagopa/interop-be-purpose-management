@@ -125,16 +125,9 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /purposes/{purposeId}/versions/{versionId}:
+  /purposes/{purposeId}/versions:
     parameters:
       - name: purposeId
-        in: path
-        required:
-          true
-        schema:
-          type: string
-          format: uuid
-      - name: versionId
         in: path
         required:
           true
@@ -161,24 +154,6 @@ paths:
                 $ref: '#/components/schemas/PurposeVersion'
         '400':
           description: Invalid input
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/Problem'
-    get:
-      tags:
-        - purpose
-      summary: Retrieve a purpose version
-      operationId: getPurposeVersion
-      responses:
-        '200':
-          description: Purpose Version
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PurposeVersion'
-        '400':
-          description: Bad Request
           content:
             application/problem+json:
               schema:

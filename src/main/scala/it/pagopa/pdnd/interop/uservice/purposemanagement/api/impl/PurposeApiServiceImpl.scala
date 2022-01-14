@@ -18,8 +18,12 @@ import it.pagopa.pdnd.interop.uservice.purposemanagement.api.PurposeApiService
 import it.pagopa.pdnd.interop.uservice.purposemanagement.common.system._
 import it.pagopa.pdnd.interop.uservice.purposemanagement.error.PurposeManagementErrors._
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model._
-import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.{PersistentPurpose, PersistentPurposeState}
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence._
+import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.{
+  PersistentPurpose,
+  PersistentPurposeVersion,
+  PersistentPurposeVersionState
+}
 import it.pagopa.pdnd.interop.uservice.purposemanagement.service.OffsetDateTimeSupplier
 import org.slf4j.LoggerFactory
 
@@ -41,49 +45,36 @@ class PurposeApiServiceImpl(
     case Some(s) => s
   }
 
-  /** Code: 200, Message: Purpose created, DataType: Purpose
-    * Code: 405, Message: Invalid input, DataType: Problem
-    */
-  override def addPurpose(purposeSeed: PurposeSeed)(implicit
+  override def createPurpose(purposeSeed: PurposeSeed)(implicit
     toEntityMarshallerPurpose: ToEntityMarshaller[Purpose],
     toEntityMarshallerProblem: ToEntityMarshaller[Problem],
     contexts: Seq[(String, String)]
   ): Route = {
-    logger.info(
-      "Adding a purpose for consumer {} to e-service {} with state {}",
-      purposeSeed.consumerId,
-      purposeSeed.eserviceId,
-      purposeSeed.state
-    )
-    val purpose: PersistentPurpose           = PersistentPurpose.fromAPI(purposeSeed, UUIDSupplier, dateTimeSupplier)
-    val result: Future[StatusReply[Purpose]] = createPurpose(purpose)
+    logger.info("Adding a purpose for consumer {} to e-service {}", purposeSeed.consumerId, purposeSeed.eserviceId)
+    val purpose: PersistentPurpose                     = PersistentPurpose.fromAPI(purposeSeed, UUIDSupplier, dateTimeSupplier)
+    val result: Future[StatusReply[PersistentPurpose]] = createPurpose(purpose)
     onComplete(result) {
-      case Success(statusReply) if statusReply.isSuccess => addPurpose200(statusReply.getValue)
+      case Success(statusReply) if statusReply.isSuccess =>
+        createPurpose200(PersistentPurpose.toAPI(statusReply.getValue))
       case Success(statusReply) =>
         logger.error(
-          "Error while adding a purpose for consumer {} to e-service {} with state {}",
+          "Error while adding a purpose for consumer {} to e-service {}",
           purposeSeed.consumerId,
           purposeSeed.eserviceId,
-          purposeSeed.state,
           statusReply.getError
         )
-        addPurpose409(problemOf(StatusCodes.Conflict, AddPurposeConflict))
+        createPurpose409(problemOf(StatusCodes.Conflict, CreatePurposeConflict))
       case Failure(ex) =>
         logger.error(
-          "Error while adding a purpose for consumer {} to e-service {} with state {}",
+          "Error while adding a purpose for consumer {} to e-service {}",
           purposeSeed.consumerId,
           purposeSeed.eserviceId,
-          purposeSeed.state,
           ex
         )
-        addPurpose400(problemOf(StatusCodes.BadRequest, AddPurposeBadRequest))
+        createPurpose400(problemOf(StatusCodes.BadRequest, CreatePurposeBadRequest))
     }
   }
 
-  /** Code: 200, Message: EService retrieved, DataType: Purpose
-    * Code: 404, Message: Purpose not found, DataType: Problem
-    * Code: 400, Message: Bad request, DataType: Problem
-    */
   override def getPurpose(purposeId: String)(implicit
     toEntityMarshallerPurpose: ToEntityMarshaller[Purpose],
     toEntityMarshallerProblem: ToEntityMarshaller[Problem],
@@ -92,11 +83,11 @@ class PurposeApiServiceImpl(
     logger.info("Getting purpose {}", purposeId)
     val commander: EntityRef[Command] =
       sharding.entityRefFor(PurposePersistentBehavior.TypeKey, AkkaUtils.getShard(purposeId, settings.numberOfShards))
-    val result: Future[StatusReply[Option[Purpose]]] = commander.ask(ref => GetPurpose(purposeId, ref))
+    val result: Future[StatusReply[Option[PersistentPurpose]]] = commander.ask(ref => GetPurpose(purposeId, ref))
     onSuccess(result) {
       case statusReply if statusReply.isSuccess =>
         statusReply.getValue.fold(getPurpose404(problemOf(StatusCodes.NotFound, GetPurposeNotFound)))(purpose =>
-          getPurpose200(purpose)
+          getPurpose200(PersistentPurpose.toAPI(purpose))
         )
       case statusReply if statusReply.isError =>
         logger.error("Error in getting purpose {}", purposeId, statusReply.getError)
@@ -104,54 +95,77 @@ class PurposeApiServiceImpl(
     }
   }
 
-  override def activatePurpose(purposeId: String, stateChangeDetails: StateChangeDetails)(implicit
-    toEntityMarshallerPurpose: ToEntityMarshaller[Purpose],
+  override def createPurposeVersion(purposeId: String, purposeVersionSeed: PurposeVersionSeed)(implicit
+    toEntityMarshallerPurposeVersion: ToEntityMarshaller[PurposeVersion],
     toEntityMarshallerProblem: ToEntityMarshaller[Problem],
     contexts: Seq[(String, String)]
   ): Route = {
+    // TODO It could return 409 if state conflicts
+    logger.info("Adding a version to purpose", purposeId)
+    val purposeVersion: PersistentPurposeVersion =
+      PersistentPurposeVersion.fromAPI(purposeVersionSeed, UUIDSupplier, dateTimeSupplier)
+    val result: Future[StatusReply[PersistentPurposeVersion]] = createPurposeVersion(purposeId, purposeVersion)
+    onComplete(result) {
+      case Success(statusReply) if statusReply.isSuccess =>
+        createPurposeVersion200(PersistentPurposeVersion.toAPI(statusReply.getValue))
+      case Success(statusReply) =>
+        logger.error("Error while adding a version to purpose {}", purposeId, statusReply.getError)
+        createPurposeVersion400(problemOf(StatusCodes.BadRequest, CreatePurposeVersionBadRequest))
+      case Failure(ex) =>
+        logger.error("Error while adding a version to purpose {}", purposeId, ex)
+        createPurposeVersion400(problemOf(StatusCodes.BadRequest, CreatePurposeVersionBadRequest))
+    }
+  }
+
+  override def activatePurposeVersion(
+    purposeId: String,
+    versionId: String,
+    stateChangeDetails: StateChangeDetails
+  )(implicit toEntityMarshallerProblem: ToEntityMarshaller[Problem], contexts: Seq[(String, String)]): Route = {
     // TODO This could deactivate old purpose
-    logger.info("Activating purpose {}", purposeId)
-    val result: Future[StatusReply[Purpose]] = activatePurposeById(purposeId, stateChangeDetails)
+    logger.info("Activating purpose {} version {}", purposeId, versionId)
+    val result: Future[StatusReply[PersistentPurpose]] =
+      activatePurposeVersionById(purposeId, versionId, stateChangeDetails)
     onSuccess(result) {
-      case statusReply if statusReply.isSuccess => activatePurpose200(statusReply.getValue)
+      case statusReply if statusReply.isSuccess => activatePurposeVersion204
       case statusReply if statusReply.isError =>
-        logger.error("Error in activating purpose {}", purposeId, statusReply.getError)
-        activatePurpose404(problemOf(StatusCodes.NotFound, ActivatePurposeNotFound))
+        logger.error("Error in activating purpose {} version {}", purposeId, versionId, statusReply.getError)
+        activatePurposeVersion404(problemOf(StatusCodes.NotFound, ActivatePurposeNotFound))
     }
   }
 
-  override def suspendPurpose(purposeId: String, stateChangeDetails: StateChangeDetails)(implicit
-    toEntityMarshallerPurpose: ToEntityMarshaller[Purpose],
-    toEntityMarshallerProblem: ToEntityMarshaller[Problem],
-    contexts: Seq[(String, String)]
-  ): Route = {
-    logger.info("Suspending purpose {}", purposeId)
-    val result: Future[StatusReply[Purpose]] = suspendPurposeById(purposeId, stateChangeDetails)
+  override def suspendPurposeVersion(
+    purposeId: String,
+    versionId: String,
+    stateChangeDetails: StateChangeDetails
+  )(implicit toEntityMarshallerProblem: ToEntityMarshaller[Problem], contexts: Seq[(String, String)]): Route = {
+    logger.info("Suspending purpose {} version {}", purposeId, versionId)
+    val result: Future[StatusReply[PersistentPurpose]] =
+      suspendPurposeVersionById(purposeId, versionId, stateChangeDetails)
     onSuccess(result) {
-      case statusReply if statusReply.isSuccess => suspendPurpose200(statusReply.getValue)
+      case statusReply if statusReply.isSuccess => suspendPurposeVersion204
       case statusReply if statusReply.isError =>
-        logger.error("Error in suspending purpose {}", purposeId, statusReply.getError)
-        suspendPurpose404(problemOf(StatusCodes.NotFound, SuspendPurposeNotFound))
+        logger.error("Error in suspending purpose {} version {}", purposeId, versionId, statusReply.getError)
+        suspendPurposeVersion404(problemOf(StatusCodes.NotFound, SuspendPurposeNotFound))
     }
   }
 
-  override def archivePurpose(purposeId: String, stateChangeDetails: StateChangeDetails)(implicit
-    toEntityMarshallerPurpose: ToEntityMarshaller[Purpose],
-    toEntityMarshallerProblem: ToEntityMarshaller[Problem],
-    contexts: Seq[(String, String)]
-  ): Route = {
-    logger.info("Archiving purpose {}", purposeId)
-    val result: Future[StatusReply[Purpose]] = archivePurposeById(purposeId, stateChangeDetails)
+  override def archivePurposeVersion(
+    purposeId: String,
+    versionId: String,
+    stateChangeDetails: StateChangeDetails
+  )(implicit toEntityMarshallerProblem: ToEntityMarshaller[Problem], contexts: Seq[(String, String)]): Route = {
+    logger.info("Archiving purpose {} version {}", purposeId, versionId)
+    val result: Future[StatusReply[PersistentPurpose]] =
+      archivePurposeVersionById(purposeId, versionId, stateChangeDetails)
     onSuccess(result) {
-      case statusReply if statusReply.isSuccess => archivePurpose200(statusReply.getValue)
+      case statusReply if statusReply.isSuccess => archivePurposeVersion204
       case statusReply if statusReply.isError =>
-        logger.error("Error in archiving purpose {}", purposeId, statusReply.getError)
-        archivePurpose404(problemOf(StatusCodes.NotFound, ArchivePurposeNotFound))
+        logger.error("Error in archiving purpose {} version {}", purposeId, versionId, statusReply.getError)
+        archivePurposeVersion404(problemOf(StatusCodes.NotFound, ArchivePurposeNotFound))
     }
   }
 
-  /** Code: 200, Message: A list of Purpose, DataType: Seq[Purpose]
-    */
   override def getPurposes(consumerId: Option[String], eserviceId: Option[String], states: String)(implicit
     toEntityMarshallerPurposearray: ToEntityMarshaller[Seq[Purpose]],
     toEntityMarshallerProblem: ToEntityMarshaller[Problem],
@@ -165,12 +179,13 @@ class PurposeApiServiceImpl(
     )
 
     val result = for {
-      statesEnum <- parseArrayParameters(states).traverse(PurposeState.fromValue)
+      statesEnum <- parseArrayParameters(states).traverse(PurposeVersionState.fromValue)
       generator = createListPurposesGenerator(consumerId = consumerId, eserviceId = eserviceId, states = statesEnum)(
         _,
         _
       )
-      purposes = commanders.flatMap(ref => slices(ref, sliceSize)(generator))
+      persistentPurposes = commanders.flatMap(ref => slices(ref, sliceSize)(generator))
+      purposes           = persistentPurposes.map(PersistentPurpose.toAPI)
     } yield purposes
 
     result match {
@@ -188,43 +203,65 @@ class PurposeApiServiceImpl(
 
   }
 
-  private def createPurpose(purpose: PersistentPurpose): Future[StatusReply[Purpose]] = {
+  private def createPurpose(purpose: PersistentPurpose): Future[StatusReply[PersistentPurpose]] = {
     val commander: EntityRef[Command] =
       sharding.entityRefFor(
         PurposePersistentBehavior.TypeKey,
         AkkaUtils.getShard(purpose.id.toString, settings.numberOfShards)
       )
 
-    commander.ask(ref => AddPurpose(purpose, ref))
+    commander.ask(ref => CreatePurpose(purpose, ref))
   }
 
-  private def activatePurposeById(purposeId: String, stateChangeDetails: StateChangeDetails) = {
+  private def createPurposeVersion(
+    purposeId: String,
+    purposeVersion: PersistentPurposeVersion
+  ): Future[StatusReply[PersistentPurposeVersion]] = {
     val commander: EntityRef[Command] =
       sharding.entityRefFor(PurposePersistentBehavior.TypeKey, AkkaUtils.getShard(purposeId, settings.numberOfShards))
 
-    commander.ask(ref => ActivatePurpose(purposeId, stateChangeDetails, ref))
+    commander.ask(ref => CreatePurposeVersion(purposeId, purposeVersion, ref))
   }
 
-  private def suspendPurposeById(purposeId: String, stateChangeDetails: StateChangeDetails) = {
+  private def activatePurposeVersionById(
+    purposeId: String,
+    versionId: String,
+    stateChangeDetails: StateChangeDetails
+  ): Future[StatusReply[PersistentPurpose]] = {
     val commander: EntityRef[Command] =
       sharding.entityRefFor(PurposePersistentBehavior.TypeKey, AkkaUtils.getShard(purposeId, settings.numberOfShards))
 
-    commander.ask(ref => SuspendPurpose(purposeId, stateChangeDetails, ref))
+    commander.ask(ref => ActivatePurposeVersion(purposeId, versionId, stateChangeDetails, ref))
   }
 
-  private def archivePurposeById(purposeId: String, stateChangeDetails: StateChangeDetails) = {
+  private def suspendPurposeVersionById(
+    purposeId: String,
+    versionId: String,
+    stateChangeDetails: StateChangeDetails
+  ): Future[StatusReply[PersistentPurpose]] = {
     val commander: EntityRef[Command] =
       sharding.entityRefFor(PurposePersistentBehavior.TypeKey, AkkaUtils.getShard(purposeId, settings.numberOfShards))
 
-    commander.ask(ref => ArchivePurpose(purposeId, stateChangeDetails, ref))
+    commander.ask(ref => SuspendPurposeVersion(purposeId, versionId, stateChangeDetails, ref))
+  }
+
+  private def archivePurposeVersionById(
+    purposeId: String,
+    versionId: String,
+    stateChangeDetails: StateChangeDetails
+  ): Future[StatusReply[PersistentPurpose]] = {
+    val commander: EntityRef[Command] =
+      sharding.entityRefFor(PurposePersistentBehavior.TypeKey, AkkaUtils.getShard(purposeId, settings.numberOfShards))
+
+    commander.ask(ref => ArchivePurposeVersion(purposeId, versionId, stateChangeDetails, ref))
   }
 
   private def createListPurposesGenerator(
     consumerId: Option[String],
     eserviceId: Option[String],
-    states: List[PurposeState]
-  )(from: Int, to: Int): ActorRef[Seq[Purpose]] => ListPurposes =
-    (ref: ActorRef[Seq[Purpose]]) =>
-      ListPurposes(from, to, consumerId, eserviceId, states.map(PersistentPurposeState.fromApi), ref)
+    states: List[PurposeVersionState]
+  )(from: Int, to: Int): ActorRef[Seq[PersistentPurpose]] => ListPurposes =
+    (ref: ActorRef[Seq[PersistentPurpose]]) =>
+      ListPurposes(from, to, consumerId, eserviceId, states.map(PersistentPurposeVersionState.fromApi), ref)
 
 }

@@ -12,7 +12,9 @@ import it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence.seria
 }
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence.serializer.v1.protobufUtils.{
   toPersistentPurpose,
-  toProtobufPurpose
+  toPersistentPurposeVersion,
+  toProtobufPurpose,
+  toProtobufPurposeVersion
 }
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence.serializer.v1.state.{PurposesV1, StateV1}
 
@@ -49,11 +51,14 @@ package object v1 {
 
   implicit def purposeVersionCreatedV1PersistEventDeserializer
     : PersistEventDeserializer[PurposeVersionCreatedV1, PurposeVersionCreated] =
-    event => toPersistentPurpose(event.purpose).map(PurposeVersionCreated)
+    event =>
+      for {
+        version <- toPersistentPurposeVersion(event.version)
+      } yield PurposeVersionCreated(event.purposeId, version)
 
   implicit def purposeVersionCreatedV1PersistEventSerializer
     : PersistEventSerializer[PurposeVersionCreated, PurposeVersionCreatedV1] =
-    event => toProtobufPurpose(event.purpose).map(ag => PurposeVersionCreatedV1.of(ag))
+    event => Right(PurposeVersionCreatedV1.of(event.purposeId, toProtobufPurposeVersion(event.version)))
 
   implicit def purposeActivatedV1PersistEventSerializer
     : PersistEventSerializer[PurposeVersionActivated, PurposeVersionActivatedV1] =

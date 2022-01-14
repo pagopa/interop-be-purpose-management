@@ -8,9 +8,10 @@ import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior, RetentionCriteria}
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.{
   PersistentPurpose,
+  PersistentPurposeVersion,
   PersistentPurposeVersionState
 }
-import it.pagopa.pdnd.interop.uservice.purposemanagement.model.{ChangedBy, Purpose, StateChangeDetails}
+import it.pagopa.pdnd.interop.uservice.purposemanagement.model.{ChangedBy, StateChangeDetails}
 
 import java.time.temporal.ChronoUnit
 import scala.concurrent.duration.{DurationInt, DurationLong}
@@ -29,19 +30,31 @@ object PurposePersistentBehavior {
       case CreatePurpose(newPurpose, replyTo) =>
         val purpose: Option[PersistentPurpose] = state.purposes.get(newPurpose.id.toString)
         purpose
-          .map { es =>
-            replyTo ! StatusReply.Error[Purpose](s"Purpose ${es.id.toString} already exists")
-            Effect.none[PurposeCreated, State]
-          }
-          .getOrElse {
+          .fold {
             Effect
               .persist(PurposeCreated(newPurpose))
-              .thenRun((_: State) => replyTo ! StatusReply.Success(PersistentPurpose.toAPI(newPurpose)))
+              .thenRun((_: State) => replyTo ! StatusReply.Success(newPurpose))
+          } { p =>
+            replyTo ! StatusReply.Error[PersistentPurpose](s"Purpose ${p.id.toString} already exists")
+            Effect.none[PurposeCreated, State]
+          }
+
+      case CreatePurposeVersion(purposeId, newVersion, replyTo) =>
+        val purpose: Option[PersistentPurpose] = state.purposes.get(purposeId)
+
+        purpose
+          .fold {
+            replyTo ! StatusReply.Error[PersistentPurposeVersion](s"Purpose $purposeId not found")
+            Effect.none[PurposeVersionCreated, State]
+          } { _ =>
+            Effect
+              .persist(PurposeVersionCreated(purposeId, newVersion))
+              .thenRun((_: State) => replyTo ! StatusReply.Success(newVersion))
           }
 
       case GetPurpose(purposeId, replyTo) =>
         val purpose: Option[PersistentPurpose] = state.purposes.get(purposeId)
-        replyTo ! StatusReply.Success[Option[Purpose]](purpose.map(PersistentPurpose.toAPI))
+        replyTo ! StatusReply.Success[Option[PersistentPurpose]](purpose)
         Effect.none[Event, State]
 
       case ActivatePurposeVersion(purposeId, versionId, stateChangeDetails, replyTo) =>
@@ -98,10 +111,11 @@ object PurposePersistentBehavior {
 
   val eventHandler: (State, Event) => State = (state, event) =>
     event match {
-      case PurposeCreated(purpose)          => state.add(purpose)
-      case PurposeVersionActivated(purpose) => state.updatePurpose(purpose)
-      case PurposeVersionSuspended(purpose) => state.updatePurpose(purpose)
-      case PurposeVersionArchived(purpose)  => state.updatePurpose(purpose)
+      case PurposeCreated(purpose)                   => state.addPurpose(purpose)
+      case PurposeVersionCreated(purposeId, version) => state.addPurposeVersion(purposeId, version)
+      case PurposeVersionActivated(purpose)          => state.updatePurpose(purpose)
+      case PurposeVersionSuspended(purpose)          => state.updatePurpose(purpose)
+      case PurposeVersionArchived(purpose)           => state.updatePurpose(purpose)
     }
 
   val TypeKey: EntityTypeKey[Command] =

@@ -12,19 +12,14 @@ import it.pagopa.pdnd.interop.commons.utils.AkkaUtils.Authenticator
 import it.pagopa.pdnd.interop.uservice.purposemanagement._
 import it.pagopa.pdnd.interop.uservice.purposemanagement.api.PurposeApi
 import it.pagopa.pdnd.interop.uservice.purposemanagement.api.impl.{PurposeApiMarshallerImpl, PurposeApiServiceImpl}
-import it.pagopa.pdnd.interop.uservice.purposemanagement.model.{
-  Purpose,
-  PurposeSeed,
-  PurposeVersion,
-  PurposeVersionSeed,
-  PurposeVersionState
-}
+import it.pagopa.pdnd.interop.uservice.purposemanagement.error.PurposeManagementErrors.CreatePurposeVersionBadRequest
+import it.pagopa.pdnd.interop.uservice.purposemanagement.model._
 import it.pagopa.pdnd.interop.uservice.purposemanagement.server.Controller
 import it.pagopa.pdnd.interop.uservice.purposemanagement.server.impl.Main
 import org.scalatest.wordspec.AnyWordSpecLike
 
 import java.util.UUID
-import scala.concurrent.duration.{Duration, DurationInt}
+import scala.concurrent.duration.DurationInt
 import scala.concurrent.{Await, ExecutionContextExecutor, Future}
 
 /** Local integration test.
@@ -94,8 +89,6 @@ class PurposeApiServiceSpec
 
       val response: Future[Purpose] = createPurpose(purposeId, purposeSeed)
 
-      val bodyResponse: Purpose = Await.result(response, Duration.Inf)
-
       val expected = Purpose(
         id = purposeId,
         eserviceId = purposeSeed.eserviceId,
@@ -107,7 +100,7 @@ class PurposeApiServiceSpec
         updatedAt = None
       )
 
-      bodyResponse shouldBe expected
+      response.futureValue shouldBe expected
     }
 
     "Creation of a new purpose version" must {
@@ -128,41 +121,28 @@ class PurposeApiServiceSpec
             result <- createPurposeVersion(purposeId, versionId, versionSeed)
           } yield result
 
-        val bodyResponse: PurposeVersion = Await.result(response, Duration.Inf)
-
         val expected =
           PurposeVersion(id = versionId, state = versionSeed.state, createdAt = timestamp, expectedApprovalDate = None)
 
-        bodyResponse shouldBe expected
+        response.futureValue shouldBe expected
       }
 
-//      "fail if purpose does not exist" in {
-//        val purposeId  = UUID.randomUUID()
-//        val eServiceId = UUID.randomUUID()
-//        val consumerId = UUID.randomUUID()
-//
-//        val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId)
-//
-//        (() => mockUUIDSupplier.get).expects().returning(purposeId).once()
-//        (() => mockDateTimeSupplier.get).expects().returning(timestamp).once()
-//
-//        val response: Future[Purpose] = createPurpose(purposeSeed)
-//
-//        val bodyResponse: Purpose = Await.result(response, Duration.Inf)
-//
-//        val expected = Purpose(
-//          id = purposeId,
-//          eserviceId = purposeSeed.eserviceId,
-//          consumerId = purposeSeed.consumerId,
-//          versions = Seq.empty,
-//          suspendedByConsumer = None,
-//          suspendedByProducer = None,
-//          createdAt = timestamp,
-//          updatedAt = None
-//        )
-//
-//        bodyResponse shouldBe expected
-//      }
+      "fail if purpose does not exist" in {
+        val purposeId = UUID.randomUUID()
+        val versionId = UUID.randomUUID()
+
+        val versionSeed = PurposeVersionSeed(state = PurposeVersionState.ACTIVE)
+
+        (() => mockUUIDSupplier.get).expects().returning(versionId).once()
+        (() => mockDateTimeSupplier.get).expects().returning(timestamp).once()
+
+        val response: Future[Problem] = makeFailingRequest(s"purposes/$purposeId/versions", versionSeed)
+
+        val result = response.futureValue
+        result.status shouldBe 400
+        result.errors shouldBe Seq(problemErrorFromError(CreatePurposeVersionBadRequest))
+
+      }
     }
   }
 

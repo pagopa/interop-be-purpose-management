@@ -11,6 +11,7 @@ import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import it.pagopa.pdnd.interop.uservice.purposemanagement.api.impl._
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.{
+  Problem,
   Purpose,
   PurposeSeed,
   PurposeVersion,
@@ -52,6 +53,9 @@ package object purposemanagement extends MockFactory {
 
   implicit def fromEntityUnmarshallerPurpose: FromEntityUnmarshaller[Purpose] =
     sprayJsonUnmarshaller[Purpose]
+
+  implicit def fromEntityUnmarshallerProblem: FromEntityUnmarshaller[Problem] =
+    sprayJsonUnmarshaller[Problem]
 
   implicit def fromEntityUnmarshallerPurposeVersion: FromEntityUnmarshaller[PurposeVersion] =
     sprayJsonUnmarshaller[PurposeVersion]

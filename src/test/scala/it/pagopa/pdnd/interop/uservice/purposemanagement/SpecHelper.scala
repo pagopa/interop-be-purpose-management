@@ -2,10 +2,8 @@ package it.pagopa.pdnd.interop.uservice.purposemanagement
 
 import akka.actor
 import akka.http.scaladsl.marshalling.{Marshal, Marshaller}
-import akka.http.scaladsl.model.{HttpMethods, MessageEntity}
+import akka.http.scaladsl.model.{HttpMethod, HttpMethods, MessageEntity}
 import akka.http.scaladsl.unmarshalling.Unmarshal
-import it.pagopa.pdnd.interop.commons.utils.errors.ComponentError
-import it.pagopa.pdnd.interop.uservice.purposemanagement.api.impl.serviceErrorCodePrefix
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model._
 
 import java.util.UUID
@@ -35,28 +33,26 @@ trait SpecHelper {
       purpose <- Unmarshal(makeRequest(data, s"purposes/$purposeId/versions", HttpMethods.POST)).to[PurposeVersion]
     } yield purpose
 
-  def makeFailingRequest[T](url: String, data: T)(implicit
+  def makeFailingRequest[T](url: String, verb: HttpMethod, data: T)(implicit
     ec: ExecutionContext,
     actorSystem: actor.ActorSystem,
     marshaller: Marshaller[T, MessageEntity]
   ): Future[Problem] =
     for {
       body    <- Marshal(data).to[MessageEntity].map(_.dataBytes)
-      purpose <- Unmarshal(makeRequest(body, url, HttpMethods.POST)).to[Problem]
+      purpose <- Unmarshal(makeRequest(body, url, verb)).to[Problem]
     } yield purpose
 
-  def problemErrorFromError(error: ComponentError): ProblemError =
-    ProblemError(code = s"$serviceErrorCodePrefix-${error.code}", detail = error.msg)
+  def makeFailingRequest(url: String, verb: HttpMethod)(implicit
+    ec: ExecutionContext,
+    actorSystem: actor.ActorSystem
+  ): Future[Problem] = makeFailingRequest(url, verb, "")
 
-//  def getPurpose(id: String)(implicit ec: ExecutionContext, actorSystem: actor.ActorSystem): Future[Purpose] = {
-//
-//    val response = makeRequest(emptyData, s"purpose/$id", HttpMethods.GET)
-//    val result = for {
-//      purpose <- Unmarshal(response).to[Purpose]
-//    } yield purpose
-//    result
-//  }
-//
+  def getPurpose(id: UUID)(implicit ec: ExecutionContext, actorSystem: actor.ActorSystem): Future[Purpose] = {
+    val response = makeRequest(emptyData, s"purposes/${id.toString}", HttpMethods.GET)
+    Unmarshal(response).to[Purpose]
+  }
+
 //  def activatePurpose(
 //    purpose: Purpose
 //  )(implicit ec: ExecutionContext, actorSystem: actor.ActorSystem): Future[Purpose] = for {

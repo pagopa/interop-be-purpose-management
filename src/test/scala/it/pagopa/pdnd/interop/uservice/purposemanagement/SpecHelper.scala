@@ -53,6 +53,11 @@ trait SpecHelper {
     Unmarshal(response).to[Purpose]
   }
 
+  def getPurposes()(implicit ec: ExecutionContext, actorSystem: actor.ActorSystem): Future[Seq[Purpose]] = {
+    val response = makeRequest(emptyData, s"purposes", HttpMethods.GET)
+    Unmarshal(response).to[Seq[Purpose]]
+  }
+
 //  def activatePurpose(
 //    purpose: Purpose
 //  )(implicit ec: ExecutionContext, actorSystem: actor.ActorSystem): Future[Purpose] = for {

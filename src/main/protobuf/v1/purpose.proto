@@ -13,8 +13,10 @@ message PurposeV1 {
   optional bool suspendedByConsumer = 5;
   optional bool suspendedByProducer = 6;
   repeated PurposeVersionV1 versions = 7;
-  required int64 createdAt = 8;
-  optional int64 updatedAt = 9;
+  required string title = 8;
+  optional string description = 9;
+  required int64 createdAt = 10;
+  optional int64 updatedAt = 11;
 }
 
 message PurposeVersionV1 {

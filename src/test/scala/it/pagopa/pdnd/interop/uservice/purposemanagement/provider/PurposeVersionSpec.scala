@@ -17,7 +17,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
       val eServiceId = UUID.randomUUID()
       val consumerId = UUID.randomUUID()
 
-      val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId)
+      val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
       val versionSeed = PurposeVersionSeed(state = PurposeVersionState.ACTIVE)
 
       val response: Future[PurposeVersion] =
@@ -57,7 +57,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
       val eServiceId = UUID.randomUUID()
       val consumerId = UUID.randomUUID()
 
-      val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId)
+      val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
       val versionSeed = PurposeVersionSeed(state = PurposeVersionState.DRAFT)
 
       val response: Future[Option[String]] =
@@ -93,7 +93,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
       val eServiceId = UUID.randomUUID()
       val consumerId = UUID.randomUUID()
 
-      val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId)
+      val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
       val versionSeed = PurposeVersionSeed(state = PurposeVersionState.DRAFT)
 
       val response: Future[Option[String]] =
@@ -129,7 +129,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
       val eServiceId = UUID.randomUUID()
       val consumerId = UUID.randomUUID()
 
-      val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId)
+      val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
       val versionSeed = PurposeVersionSeed(state = PurposeVersionState.DRAFT)
 
       val response: Future[Option[String]] =

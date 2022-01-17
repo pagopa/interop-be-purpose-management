@@ -14,39 +14,45 @@ final case class PersistentPurpose(
   versions: Seq[PersistentPurposeVersion],
   suspendedByConsumer: Option[Boolean],
   suspendedByProducer: Option[Boolean],
+  title: String,
+  description: Option[String],
   createdAt: OffsetDateTime,
   updatedAt: Option[OffsetDateTime]
 )
 
 object PersistentPurpose {
   def fromAPI(
-    purpose: PurposeSeed,
+    seed: PurposeSeed,
     uuidSupplier: UUIDSupplier,
     dateTimeSupplier: OffsetDateTimeSupplier
   ): PersistentPurpose =
     PersistentPurpose(
       id = uuidSupplier.get,
-      eserviceId = purpose.eserviceId,
-      consumerId = purpose.consumerId,
+      eserviceId = seed.eserviceId,
+      consumerId = seed.consumerId,
       versions = Seq.empty,
       suspendedByConsumer = None,
       suspendedByProducer = None,
+      title = seed.title,
+      description = seed.description,
       createdAt = dateTimeSupplier.get,
       updatedAt = None
     )
 
   def fromAPIWithActiveState(
-    purpose: PurposeSeed,
+    seed: PurposeSeed,
     uuidSupplier: UUIDSupplier,
     dateTimeSupplier: OffsetDateTimeSupplier
   ): PersistentPurpose =
     PersistentPurpose(
       id = uuidSupplier.get,
-      eserviceId = purpose.eserviceId,
-      consumerId = purpose.consumerId,
+      eserviceId = seed.eserviceId,
+      consumerId = seed.consumerId,
       versions = Seq.empty,
       suspendedByConsumer = None,
       suspendedByProducer = None,
+      title = seed.title,
+      description = seed.description,
       createdAt = dateTimeSupplier.get,
       updatedAt = None
     )
@@ -59,6 +65,8 @@ object PersistentPurpose {
       versions = persistentPurpose.versions.map(PersistentPurposeVersion.toAPI),
       suspendedByConsumer = persistentPurpose.suspendedByConsumer,
       suspendedByProducer = persistentPurpose.suspendedByProducer,
+      title = persistentPurpose.title,
+      description = persistentPurpose.description,
       createdAt = persistentPurpose.createdAt,
       updatedAt = persistentPurpose.updatedAt
     )

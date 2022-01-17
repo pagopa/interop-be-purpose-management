@@ -32,6 +32,8 @@ object protobufUtils {
       versions = versions,
       suspendedByConsumer = protobufPurpose.suspendedByConsumer,
       suspendedByProducer = protobufPurpose.suspendedByProducer,
+      title = protobufPurpose.title,
+      description = protobufPurpose.description,
       createdAt = createdAt,
       updatedAt = updatedAt
     )
@@ -47,6 +49,8 @@ object protobufUtils {
         versions = persistentPurpose.versions.map(toProtobufPurposeVersion),
         suspendedByConsumer = persistentPurpose.suspendedByConsumer,
         suspendedByProducer = persistentPurpose.suspendedByProducer,
+        title = persistentPurpose.title,
+        description = persistentPurpose.description,
         createdAt = persistentPurpose.createdAt.toMillis,
         updatedAt = persistentPurpose.updatedAt.map(_.toMillis)
       )

@@ -320,9 +320,14 @@ components:
         consumerId:
           type: string
           format: uuid
+        title:
+          type: string
+        description:
+          type: string
       required:
         - eserviceId
         - consumerId
+        - title
     PurposeVersionSeed:
       type: object
       description: contains the expected payload for purpose version persistence.
@@ -351,6 +356,10 @@ components:
           type: boolean
         suspendedByProducer:
           type: boolean
+        title:
+          type: string
+        description:
+          type: string
         createdAt:
           type: string
           format: date-time
@@ -362,6 +371,7 @@ components:
         - eserviceId
         - consumerId
         - versions
+        - title
         - createdAt
       description: business representation of an purpose
     Purposes:

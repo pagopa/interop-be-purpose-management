@@ -16,7 +16,7 @@ class PurposeSpec extends BaseIntegrationSpec {
       val eServiceId = UUID.randomUUID()
       val consumerId = UUID.randomUUID()
 
-      val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId)
+      val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
 
       val response: Future[Purpose] = createPurpose(purposeId, purposeSeed)
 
@@ -27,6 +27,8 @@ class PurposeSpec extends BaseIntegrationSpec {
         versions = Seq.empty,
         suspendedByConsumer = None,
         suspendedByProducer = None,
+        title = purposeSeed.title,
+        description = purposeSeed.description,
         createdAt = timestamp,
         updatedAt = None
       )
@@ -44,7 +46,7 @@ class PurposeSpec extends BaseIntegrationSpec {
       val eServiceId = UUID.randomUUID()
       val consumerId = UUID.randomUUID()
 
-      val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId)
+      val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
       val versionSeed = PurposeVersionSeed(state = PurposeVersionState.ACTIVE)
 
       val response: Future[Purpose] =
@@ -63,6 +65,8 @@ class PurposeSpec extends BaseIntegrationSpec {
         ),
         suspendedByConsumer = None,
         suspendedByProducer = None,
+        title = purposeSeed.title,
+        description = purposeSeed.description,
         createdAt = timestamp,
         updatedAt = None
       )
@@ -92,8 +96,8 @@ class PurposeSpec extends BaseIntegrationSpec {
       val eServiceId2 = UUID.randomUUID()
       val consumerId2 = UUID.randomUUID()
 
-      val purposeSeed1 = PurposeSeed(eserviceId = eServiceId1, consumerId = consumerId1)
-      val purposeSeed2 = PurposeSeed(eserviceId = eServiceId2, consumerId = consumerId2)
+      val purposeSeed1 = PurposeSeed(eserviceId = eServiceId1, consumerId = consumerId1, title = "Purpose")
+      val purposeSeed2 = PurposeSeed(eserviceId = eServiceId2, consumerId = consumerId2, title = "Purpose")
       val versionSeed  = PurposeVersionSeed(state = PurposeVersionState.ACTIVE)
 
       val response: Future[Seq[Purpose]] =
@@ -120,6 +124,8 @@ class PurposeSpec extends BaseIntegrationSpec {
             ),
             suspendedByConsumer = None,
             suspendedByProducer = None,
+            title = purposeSeed1.title,
+            description = purposeSeed1.description,
             createdAt = timestamp,
             updatedAt = None
           ),
@@ -130,6 +136,8 @@ class PurposeSpec extends BaseIntegrationSpec {
             versions = Seq.empty,
             suspendedByConsumer = None,
             suspendedByProducer = None,
+            title = purposeSeed2.title,
+            description = purposeSeed2.description,
             createdAt = timestamp,
             updatedAt = None
           )
@@ -147,8 +155,8 @@ class PurposeSpec extends BaseIntegrationSpec {
       val eServiceId2 = UUID.randomUUID()
       val consumerId2 = UUID.randomUUID()
 
-      val purposeSeed1 = PurposeSeed(eserviceId = eServiceId1, consumerId = consumerId1)
-      val purposeSeed2 = PurposeSeed(eserviceId = eServiceId2, consumerId = consumerId2)
+      val purposeSeed1 = PurposeSeed(eserviceId = eServiceId1, consumerId = consumerId1, title = "Purpose")
+      val purposeSeed2 = PurposeSeed(eserviceId = eServiceId2, consumerId = consumerId2, title = "Purpose")
       val versionSeed  = PurposeVersionSeed(state = PurposeVersionState.ACTIVE)
 
       val response: Future[Seq[Purpose]] =
@@ -175,6 +183,8 @@ class PurposeSpec extends BaseIntegrationSpec {
             ),
             suspendedByConsumer = None,
             suspendedByProducer = None,
+            title = purposeSeed1.title,
+            description = purposeSeed1.description,
             createdAt = timestamp,
             updatedAt = None
           )
@@ -192,8 +202,8 @@ class PurposeSpec extends BaseIntegrationSpec {
       val eServiceId2 = UUID.randomUUID()
       val consumerId2 = UUID.randomUUID()
 
-      val purposeSeed1 = PurposeSeed(eserviceId = eServiceId1, consumerId = consumerId1)
-      val purposeSeed2 = PurposeSeed(eserviceId = eServiceId2, consumerId = consumerId2)
+      val purposeSeed1 = PurposeSeed(eserviceId = eServiceId1, consumerId = consumerId1, title = "Purpose")
+      val purposeSeed2 = PurposeSeed(eserviceId = eServiceId2, consumerId = consumerId2, title = "Purpose")
       val versionSeed  = PurposeVersionSeed(state = PurposeVersionState.ACTIVE)
 
       val response: Future[Seq[Purpose]] =
@@ -213,6 +223,8 @@ class PurposeSpec extends BaseIntegrationSpec {
             versions = Seq.empty,
             suspendedByConsumer = None,
             suspendedByProducer = None,
+            title = purposeSeed2.title,
+            description = purposeSeed2.description,
             createdAt = timestamp,
             updatedAt = None
           )
@@ -232,9 +244,9 @@ class PurposeSpec extends BaseIntegrationSpec {
       val eServiceId   = UUID.randomUUID()
       val consumerId   = UUID.randomUUID()
 
-      val purposeSeed1   = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId)
-      val purposeSeed2   = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId)
-      val purposeSeed3   = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId)
+      val purposeSeed1   = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
+      val purposeSeed2   = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
+      val purposeSeed3   = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
       val versionSeed1_1 = PurposeVersionSeed(state = PurposeVersionState.ACTIVE)
       val versionSeed1_2 = PurposeVersionSeed(state = PurposeVersionState.DRAFT)
       val versionSeed2_1 = PurposeVersionSeed(state = PurposeVersionState.SUSPENDED)
@@ -278,6 +290,8 @@ class PurposeSpec extends BaseIntegrationSpec {
             ),
             suspendedByConsumer = None,
             suspendedByProducer = None,
+            title = purposeSeed1.title,
+            description = purposeSeed1.description,
             createdAt = timestamp,
             updatedAt = None
           ),
@@ -295,6 +309,8 @@ class PurposeSpec extends BaseIntegrationSpec {
             ),
             suspendedByConsumer = None,
             suspendedByProducer = None,
+            title = purposeSeed2.title,
+            description = purposeSeed2.description,
             createdAt = timestamp,
             updatedAt = None
           )
@@ -313,6 +329,8 @@ class PurposeSpec extends BaseIntegrationSpec {
             versions,
             b.`suspendedByConsumer`,
             b.`suspendedByProducer`,
+            b.`title`,
+            b.`description`,
             b.`createdAt`,
             b.`updatedAt`
           ) =>

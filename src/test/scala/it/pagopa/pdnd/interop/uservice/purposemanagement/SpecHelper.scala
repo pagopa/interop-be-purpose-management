@@ -60,7 +60,7 @@ trait SpecHelper {
   )(implicit ec: ExecutionContext, actorSystem: actor.ActorSystem): Future[Seq[Purpose]] = {
     val eServiceParam = eServiceId.fold("")(id => s"eserviceId=${id.toString}")
     val consumerParam = consumerId.fold("")(id => s"consumerId=${id.toString}")
-    val stateParam    = states.fold("states=")((a, s) => s"$a,${s.toString}")
+    val stateParam    = states.mkString("states=", ",", "")
 
     val params   = Seq(eServiceParam, consumerParam, stateParam).mkString("?", "&", "")
     val response = makeRequest(emptyData, s"purposes$params", HttpMethods.GET)

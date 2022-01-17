@@ -180,7 +180,7 @@ class PurposeSpec extends BaseIntegrationSpec {
           )
         )
 
-      response.futureValue should contain allElementsOf expected
+      response.futureValue should contain theSameElementsAs expected
     }
 
     "succeed filtering by Consumer" in {
@@ -218,7 +218,7 @@ class PurposeSpec extends BaseIntegrationSpec {
           )
         )
 
-      response.futureValue should contain allElementsOf expected
+      response.futureValue should contain theSameElementsAs expected
     }
 
     "succeed filtering by Version State" in {
@@ -242,14 +242,18 @@ class PurposeSpec extends BaseIntegrationSpec {
 
       val response: Future[Seq[Purpose]] =
         for {
-          _        <- createPurpose(purposeId1, purposeSeed1)
-          _        <- createPurposeVersion(purposeId1, versionId1_1, versionSeed1_1)
-          _        <- createPurposeVersion(purposeId1, versionId1_2, versionSeed1_2)
-          _        <- createPurpose(purposeId2, purposeSeed2)
-          _        <- createPurposeVersion(purposeId2, versionId2_1, versionSeed2_1)
-          _        <- createPurpose(purposeId3, purposeSeed3)
-          _        <- createPurposeVersion(purposeId3, versionId3_1, versionSeed3_1)
-          response <- getPurposes(states = Seq(PurposeVersionState.ACTIVE, PurposeVersionState.SUSPENDED))
+          _ <- createPurpose(purposeId1, purposeSeed1)
+          _ <- createPurposeVersion(purposeId1, versionId1_1, versionSeed1_1)
+          _ <- createPurposeVersion(purposeId1, versionId1_2, versionSeed1_2)
+          _ <- createPurpose(purposeId2, purposeSeed2)
+          _ <- createPurposeVersion(purposeId2, versionId2_1, versionSeed2_1)
+          _ <- createPurpose(purposeId3, purposeSeed3)
+          _ <- createPurposeVersion(purposeId3, versionId3_1, versionSeed3_1)
+          response <- getPurposes(
+            eServiceId = Some(eServiceId),
+            consumerId = Some(consumerId),
+            states = Seq(PurposeVersionState.ACTIVE, PurposeVersionState.SUSPENDED)
+          )
         } yield response
 
       val expected =
@@ -296,8 +300,23 @@ class PurposeSpec extends BaseIntegrationSpec {
           )
         )
 
-      response.futureValue should contain allElementsOf expected
+      response.futureValue.map(p => purposesAreTheSame(p, expected.find(_.id == p.id).get)) should not contain false
     }
   }
 
+  def purposesAreTheSame(a: Purpose, b: Purpose): Boolean =
+    a match {
+      case Purpose(
+            b.`id`,
+            b.`eserviceId`,
+            b.`consumerId`,
+            versions,
+            b.`suspendedByConsumer`,
+            b.`suspendedByProducer`,
+            b.`createdAt`,
+            b.`updatedAt`
+          ) =>
+        versions.size == b.versions.size && versions.toSet == b.versions.toSet
+      case _ => false
+    }
 }

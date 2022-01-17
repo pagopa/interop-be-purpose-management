@@ -90,12 +90,14 @@ object PurposePersistentBehavior {
               .thenRun((_: State) => replyTo ! StatusReply.Success(updatedPurpose))
           }
 
-      case ListPurposes(from, to, consumerId, eserviceId, purposeState, replyTo) =>
+      case ListPurposes(from, to, consumerId, eserviceId, purposeStates, replyTo) =>
         val purposes: Seq[PersistentPurpose] = state.purposes
           .slice(from, to)
           .filter(purpose => consumerId.forall(_ == purpose._2.consumerId.toString))
           .filter(purpose => eserviceId.forall(_ == purpose._2.eserviceId.toString))
-          .filter(purpose => purposeState.forall(state => purpose._2.versions.exists(_.state == state)))
+          .filter(purpose =>
+            purposeStates.isEmpty || purposeStates.intersect(purpose._2.versions.map(_.state)).nonEmpty
+          )
           .values
           .toSeq
 

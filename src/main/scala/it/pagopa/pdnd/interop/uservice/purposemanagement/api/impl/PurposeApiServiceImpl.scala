@@ -188,6 +188,26 @@ class PurposeApiServiceImpl(
       purposes           = persistentPurposes.map(PersistentPurpose.toAPI)
     } yield purposes
 
+//    val statesEnum = parseArrayParameters(states).traverse(PurposeVersionState.fromValue)
+
+//    val result = for {
+//      states <- statesEnum
+//    } yield states.flatMap { state =>
+//      for {
+//        commander <- commanders
+//        generator = createListPurposesGenerator(consumerId = consumerId, eserviceId = eserviceId, states = state)(_, _)
+//        persistentPurpose <- slices(commander, sliceSize)(generator)
+//      } yield PersistentPurpose.toAPI(persistentPurpose)
+//    }
+
+//    val result = statesEnum.map { state =>
+//      for {
+//        commander <- commanders
+//        generator = createListPurposesGenerator(consumerId = consumerId, eserviceId = eserviceId, states = state)(_, _)
+//        persistentPurpose <- slices(commander, sliceSize)(generator)
+//      } yield PersistentPurpose.toAPI(persistentPurpose)
+//    }
+
     result match {
       case Right(purposes) => getPurposes200(purposes)
       case Left(error) =>

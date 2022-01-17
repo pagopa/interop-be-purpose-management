@@ -1,30 +1,19 @@
 package it.pagopa.pdnd.interop.uservice
 
 import akka.NotUsed
-import akka.actor.ActorSystem
-import akka.http.scaladsl.Http
 import akka.http.scaladsl.marshalling.ToEntityMarshaller
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.{Authorization, OAuth2BearerToken}
 import akka.http.scaladsl.unmarshalling.FromEntityUnmarshaller
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
-import it.pagopa.pdnd.interop.uservice.purposemanagement.api.impl._
-import it.pagopa.pdnd.interop.uservice.purposemanagement.model.{
-  Problem,
-  Purpose,
-  PurposeSeed,
-  PurposeVersion,
-  PurposeVersionSeed,
-  StateChangeDetails
-}
 import it.pagopa.pdnd.interop.commons.utils.service.UUIDSupplier
+import it.pagopa.pdnd.interop.uservice.purposemanagement.api.impl._
+import it.pagopa.pdnd.interop.uservice.purposemanagement.model._
 import it.pagopa.pdnd.interop.uservice.purposemanagement.service.OffsetDateTimeSupplier
 import org.scalamock.scalatest.MockFactory
 
 import java.time.{OffsetDateTime, ZoneOffset}
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
 
 package object purposemanagement extends MockFactory {
 
@@ -60,19 +49,4 @@ package object purposemanagement extends MockFactory {
   implicit def fromEntityUnmarshallerPurposeVersion: FromEntityUnmarshaller[PurposeVersion] =
     sprayJsonUnmarshaller[PurposeVersion]
 
-  def makeRequest(data: Source[ByteString, Any], path: String, verb: HttpMethod)(implicit
-    actorSystem: ActorSystem
-  ): HttpResponse = {
-    Await.result(
-      Http().singleRequest(
-        HttpRequest(
-          uri = s"$url/$path",
-          method = verb,
-          entity = HttpEntity(ContentTypes.`application/json`, data),
-          headers = authorization
-        )
-      ),
-      Duration.Inf
-    )
-  }
 }

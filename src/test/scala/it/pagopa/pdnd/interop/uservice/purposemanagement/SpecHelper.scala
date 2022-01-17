@@ -1,13 +1,26 @@
 package it.pagopa.pdnd.interop.uservice.purposemanagement
 
 import akka.actor
+import akka.actor.ActorSystem
+import akka.http.scaladsl.Http
 import akka.http.scaladsl.marshalling.{Marshal, Marshaller}
-import akka.http.scaladsl.model.{HttpMethod, HttpMethods, MessageEntity}
+import akka.http.scaladsl.model.{
+  ContentTypes,
+  HttpEntity,
+  HttpMethod,
+  HttpMethods,
+  HttpRequest,
+  HttpResponse,
+  MessageEntity
+}
 import akka.http.scaladsl.unmarshalling.Unmarshal
+import akka.stream.scaladsl.Source
+import akka.util.ByteString
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model._
 
 import java.util.UUID
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 trait SpecHelper {
 
@@ -96,4 +109,19 @@ trait SpecHelper {
       .to[Option[String]]
   } yield result
 
+  def makeRequest(data: Source[ByteString, Any], path: String, verb: HttpMethod)(implicit
+    actorSystem: ActorSystem
+  ): HttpResponse = {
+    Await.result(
+      Http().singleRequest(
+        HttpRequest(
+          uri = s"$url/$path",
+          method = verb,
+          entity = HttpEntity(ContentTypes.`application/json`, data),
+          headers = authorization
+        )
+      ),
+      Duration.Inf
+    )
+  }
 }

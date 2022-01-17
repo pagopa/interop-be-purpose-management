@@ -166,7 +166,7 @@ class PurposeApiServiceImpl(
     }
   }
 
-  override def getPurposes(consumerId: Option[String], eserviceId: Option[String], states: String)(implicit
+  override def getPurposes(eserviceId: Option[String], consumerId: Option[String], states: String)(implicit
     toEntityMarshallerPurposearray: ToEntityMarshaller[Seq[Purpose]],
     toEntityMarshallerProblem: ToEntityMarshaller[Problem],
     contexts: Seq[(String, String)]

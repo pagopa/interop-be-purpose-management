@@ -53,8 +53,17 @@ trait SpecHelper {
     Unmarshal(response).to[Purpose]
   }
 
-  def getPurposes()(implicit ec: ExecutionContext, actorSystem: actor.ActorSystem): Future[Seq[Purpose]] = {
-    val response = makeRequest(emptyData, s"purposes", HttpMethods.GET)
+  def getPurposes(
+    eServiceId: Option[UUID] = None,
+    consumerId: Option[UUID] = None,
+    states: Seq[PurposeVersionState] = Seq.empty
+  )(implicit ec: ExecutionContext, actorSystem: actor.ActorSystem): Future[Seq[Purpose]] = {
+    val eServiceParam = eServiceId.fold("")(id => s"eserviceId=${id.toString}")
+    val consumerParam = consumerId.fold("")(id => s"consumerId=${id.toString}")
+    val stateParam    = states.fold("states=")((a, s) => s"$a,${s.toString}")
+
+    val params   = Seq(eServiceParam, consumerParam, stateParam).mkString("?", "&", "")
+    val response = makeRequest(emptyData, s"purposes$params", HttpMethods.GET)
     Unmarshal(response).to[Seq[Purpose]]
   }
 

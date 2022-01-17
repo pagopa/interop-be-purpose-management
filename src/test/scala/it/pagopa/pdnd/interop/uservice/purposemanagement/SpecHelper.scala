@@ -73,6 +73,18 @@ trait SpecHelper {
   ): Future[Option[String]] =
     changeVersionState(purposeId, versionId, changedBy, "activate")
 
+  def suspendVersion(purposeId: UUID, versionId: UUID, changedBy: ChangedBy)(implicit
+    ec: ExecutionContext,
+    actorSystem: actor.ActorSystem
+  ): Future[Option[String]] =
+    changeVersionState(purposeId, versionId, changedBy, "suspend")
+
+  def archiveVersion(purposeId: UUID, versionId: UUID, changedBy: ChangedBy)(implicit
+    ec: ExecutionContext,
+    actorSystem: actor.ActorSystem
+  ): Future[Option[String]] =
+    changeVersionState(purposeId, versionId, changedBy, "archive")
+
   def changeVersionState(purposeId: UUID, versionId: UUID, changedBy: ChangedBy, statePath: String)(implicit
     ec: ExecutionContext,
     actorSystem: actor.ActorSystem

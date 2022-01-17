@@ -86,4 +86,76 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
     }
   }
 
+  "Suspension of purpose" must {
+    "succeed" in {
+      val purposeId  = UUID.randomUUID()
+      val versionId  = UUID.randomUUID()
+      val eServiceId = UUID.randomUUID()
+      val consumerId = UUID.randomUUID()
+
+      val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId)
+      val versionSeed = PurposeVersionSeed(state = PurposeVersionState.DRAFT)
+
+      val response: Future[Option[String]] =
+        for {
+          _      <- createPurpose(purposeId, purposeSeed)
+          _      <- createPurposeVersion(purposeId, versionId, versionSeed)
+          result <- suspendVersion(purposeId, versionId, ChangedBy.CONSUMER)
+        } yield result
+
+      response.futureValue shouldBe Some("")
+    }
+
+    "fail if not exist" in {
+      val purposeId = UUID.randomUUID()
+      val versionId = UUID.randomUUID()
+
+      val response: Future[Problem] = makeFailingRequest(
+        s"purposes/$purposeId/versions/$versionId/suspend",
+        HttpMethods.POST,
+        StateChangeDetails(changedBy = Some(ChangedBy.CONSUMER))
+      )
+
+      val result = response.futureValue
+      result.status shouldBe 404
+      result.errors.map(_.code) shouldBe Seq("011-0007")
+    }
+  }
+
+  "Archive of purpose" must {
+    "succeed" in {
+      val purposeId  = UUID.randomUUID()
+      val versionId  = UUID.randomUUID()
+      val eServiceId = UUID.randomUUID()
+      val consumerId = UUID.randomUUID()
+
+      val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId)
+      val versionSeed = PurposeVersionSeed(state = PurposeVersionState.DRAFT)
+
+      val response: Future[Option[String]] =
+        for {
+          _      <- createPurpose(purposeId, purposeSeed)
+          _      <- createPurposeVersion(purposeId, versionId, versionSeed)
+          result <- archiveVersion(purposeId, versionId, ChangedBy.CONSUMER)
+        } yield result
+
+      response.futureValue shouldBe Some("")
+    }
+
+    "fail if not exist" in {
+      val purposeId = UUID.randomUUID()
+      val versionId = UUID.randomUUID()
+
+      val response: Future[Problem] = makeFailingRequest(
+        s"purposes/$purposeId/versions/$versionId/archive",
+        HttpMethods.POST,
+        StateChangeDetails(changedBy = Some(ChangedBy.CONSUMER))
+      )
+
+      val result = response.futureValue
+      result.status shouldBe 404
+      result.errors.map(_.code) shouldBe Seq("011-0008")
+    }
+  }
+
 }

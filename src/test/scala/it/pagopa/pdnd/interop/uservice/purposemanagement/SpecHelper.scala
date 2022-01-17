@@ -67,23 +67,21 @@ trait SpecHelper {
     Unmarshal(response).to[Seq[Purpose]]
   }
 
-//  def activatePurpose(
-//    purpose: Purpose
-//  )(implicit ec: ExecutionContext, actorSystem: actor.ActorSystem): Future[Purpose] = for {
-//    data <- Marshal(StateChangeDetails(changedBy = Some(ChangedBy.CONSUMER)))
-//      .to[MessageEntity]
-//      .map(_.dataBytes)
-//    activated <- Unmarshal(makeRequest(data, s"purposes/${purpose.id.toString}/activate", HttpMethods.POST))
-//      .to[Purpose]
-//  } yield activated
-//
-//  def suspendPurpose(purpose: Purpose)(implicit ec: ExecutionContext, actorSystem: actor.ActorSystem): Future[Purpose] =
-//    for {
-//      data <- Marshal(StateChangeDetails(changedBy = Some(ChangedBy.CONSUMER)))
-//        .to[MessageEntity]
-//        .map(_.dataBytes)
-//      suspended <- Unmarshal(makeRequest(data, s"purposes/${purpose.id.toString}/suspend", HttpMethods.POST))
-//        .to[Purpose]
-//    } yield suspended
+  def activateVersion(purposeId: UUID, versionId: UUID, changedBy: ChangedBy)(implicit
+    ec: ExecutionContext,
+    actorSystem: actor.ActorSystem
+  ): Future[Option[String]] =
+    changeVersionState(purposeId, versionId, changedBy, "activate")
+
+  def changeVersionState(purposeId: UUID, versionId: UUID, changedBy: ChangedBy, statePath: String)(implicit
+    ec: ExecutionContext,
+    actorSystem: actor.ActorSystem
+  ): Future[Option[String]] = for {
+    data <- Marshal(StateChangeDetails(changedBy = Some(changedBy)))
+      .to[MessageEntity]
+      .map(_.dataBytes)
+    result <- Unmarshal(makeRequest(data, s"purposes/$purposeId/versions/$versionId/$statePath", HttpMethods.POST))
+      .to[Option[String]]
+  } yield result
 
 }

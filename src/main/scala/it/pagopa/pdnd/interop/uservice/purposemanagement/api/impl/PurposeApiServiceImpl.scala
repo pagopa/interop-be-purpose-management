@@ -122,7 +122,9 @@ class PurposeApiServiceImpl(
     versionId: String,
     stateChangeDetails: StateChangeDetails
   )(implicit toEntityMarshallerProblem: ToEntityMarshaller[Problem], contexts: Seq[(String, String)]): Route = {
-    // TODO This could deactivate old purpose
+    // TODO This should
+    //  deactivate old purpose
+    //  fail if purpose in not in expected state
     logger.info("Activating purpose {} version {}", purposeId, versionId)
     val result: Future[StatusReply[PersistentPurpose]] =
       activatePurposeVersionById(purposeId, versionId, stateChangeDetails)
@@ -187,26 +189,6 @@ class PurposeApiServiceImpl(
       persistentPurposes = commanders.flatMap(ref => slices(ref, sliceSize)(generator))
       purposes           = persistentPurposes.map(PersistentPurpose.toAPI)
     } yield purposes
-
-//    val statesEnum = parseArrayParameters(states).traverse(PurposeVersionState.fromValue)
-
-//    val result = for {
-//      states <- statesEnum
-//    } yield states.flatMap { state =>
-//      for {
-//        commander <- commanders
-//        generator = createListPurposesGenerator(consumerId = consumerId, eserviceId = eserviceId, states = state)(_, _)
-//        persistentPurpose <- slices(commander, sliceSize)(generator)
-//      } yield PersistentPurpose.toAPI(persistentPurpose)
-//    }
-
-//    val result = statesEnum.map { state =>
-//      for {
-//        commander <- commanders
-//        generator = createListPurposesGenerator(consumerId = consumerId, eserviceId = eserviceId, states = state)(_, _)
-//        persistentPurpose <- slices(commander, sliceSize)(generator)
-//      } yield PersistentPurpose.toAPI(persistentPurpose)
-//    }
 
     result match {
       case Right(purposes) => getPurposes200(purposes)

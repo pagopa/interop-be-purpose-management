@@ -10,7 +10,7 @@ import akka.util.ByteString
 import it.pagopa.pdnd.interop.commons.utils.service.UUIDSupplier
 import it.pagopa.pdnd.interop.uservice.purposemanagement.api.impl._
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model._
-import it.pagopa.pdnd.interop.uservice.purposemanagement.service.OffsetDateTimeSupplier
+import it.pagopa.pdnd.interop.uservice.purposemanagement.service.{OffsetDateTimeSupplier, PurposeFileManager}
 import org.scalamock.scalatest.MockFactory
 
 import java.time.{OffsetDateTime, ZoneOffset}
@@ -25,6 +25,7 @@ package object purposemanagement extends MockFactory {
 
   val mockUUIDSupplier: UUIDSupplier               = mock[UUIDSupplier]
   val mockDateTimeSupplier: OffsetDateTimeSupplier = mock[OffsetDateTimeSupplier]
+  val mockFileManager: PurposeFileManager          = mock[PurposeFileManager]
 
   val emptyData: Source[ByteString, NotUsed] = Source.empty[ByteString]
 

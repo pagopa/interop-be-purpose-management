@@ -14,6 +14,8 @@ import akka.management.scaladsl.AkkaManagement
 import akka.persistence.typed.PersistenceId
 import akka.projection.ProjectionBehavior
 import akka.{actor => classic}
+import it.pagopa.pdnd.interop.commons.files.StorageConfiguration
+import it.pagopa.pdnd.interop.commons.files.service.FileManager
 import it.pagopa.pdnd.interop.commons.jwt.service.JWTReader
 import it.pagopa.pdnd.interop.commons.jwt.service.impl.DefaultJWTReader
 import it.pagopa.pdnd.interop.commons.jwt.{JWTConfiguration, KID, PublicKeysHolder, SerializedKey}
@@ -34,24 +36,29 @@ import it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence.{
   PurposePersistentProjection
 }
 import it.pagopa.pdnd.interop.uservice.purposemanagement.server.Controller
-import it.pagopa.pdnd.interop.uservice.purposemanagement.service.OffsetDateTimeSupplier
-import it.pagopa.pdnd.interop.uservice.purposemanagement.service.impl.OffsetDateTimeSupplierImp
+import it.pagopa.pdnd.interop.uservice.purposemanagement.service.impl.{
+  OffsetDateTimeSupplierImp,
+  PurposeFileManagerImpl
+}
+import it.pagopa.pdnd.interop.uservice.purposemanagement.service.{OffsetDateTimeSupplier, PurposeFileManager}
 import kamon.Kamon
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
+import scala.concurrent.ExecutionContextExecutor
 import scala.util.Try
 
 object Main extends App {
 
-  val dependenciesLoaded: Try[JWTReader] = for {
-    keyset <- JWTConfiguration.jwtReader.loadKeyset()
+  val dependenciesLoaded: Try[(FileManager, JWTReader)] = for {
+    fileManager <- FileManager.getConcreteImplementation(StorageConfiguration.runtimeFileManager)
+    keyset      <- JWTConfiguration.jwtReader.loadKeyset()
     jwtValidator = new DefaultJWTReader with PublicKeysHolder {
       var publicKeyset: Map[KID, SerializedKey] = keyset
     }
-  } yield jwtValidator
+  } yield (fileManager, jwtValidator)
 
-  val jwtValidator =
+  val (runtimeFileManager, jwtValidator) =
     dependenciesLoaded.get //THIS IS THE END OF THE WORLD. Exceptions are welcomed here.
 
   Kamon.init()
@@ -68,7 +75,8 @@ object Main extends App {
     val _ = ActorSystem[Nothing](
       Behaviors.setup[Nothing] { context =>
         import akka.actor.typed.scaladsl.adapter._
-        implicit val classicSystem: classic.ActorSystem = context.system.toClassic
+        implicit val classicSystem: classic.ActorSystem         = context.system.toClassic
+        implicit val executionContext: ExecutionContextExecutor = context.system.executionContext
 
         val cluster = Cluster(context.system)
 
@@ -105,9 +113,17 @@ object Main extends App {
 
         val uuidSupplier: UUIDSupplier               = new UUIDSupplierImpl
         val dateTimeSupplier: OffsetDateTimeSupplier = OffsetDateTimeSupplierImp
+        val fileManager: PurposeFileManager          = PurposeFileManagerImpl(runtimeFileManager)
 
         val purposeApi = new PurposeApi(
-          new PurposeApiServiceImpl(context.system, sharding, purposePersistenceEntity, uuidSupplier, dateTimeSupplier),
+          PurposeApiServiceImpl(
+            context.system,
+            sharding,
+            purposePersistenceEntity,
+            fileManager,
+            uuidSupplier,
+            dateTimeSupplier
+          ),
           PurposeApiMarshallerImpl,
           jwtValidator.OAuth2JWTValidatorAsContexts
         )

@@ -8,13 +8,16 @@ import it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence.seria
   PurposeVersionActivatedV1,
   PurposeVersionArchivedV1,
   PurposeVersionCreatedV1,
-  PurposeVersionSuspendedV1
+  PurposeVersionSuspendedV1,
+  RiskAnalysisAddedV1
 }
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence.serializer.v1.protobufUtils.{
   toPersistentPurpose,
   toPersistentPurposeVersion,
+  toPersistentPurposeVersionDocument,
   toProtobufPurpose,
-  toProtobufPurposeVersion
+  toProtobufPurposeVersion,
+  toProtobufPurposeVersionDocument
 }
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence.serializer.v1.state.{PurposesV1, StateV1}
 
@@ -83,5 +86,17 @@ package object v1 {
   implicit def purposeDeactivatedV1PersistEventDeserializer
     : PersistEventDeserializer[PurposeVersionArchivedV1, PurposeVersionArchived] =
     event => toPersistentPurpose(event.purpose).map(PurposeVersionArchived)
+
+  implicit def riskAnalysisAddedV1PersistEventDeserializer
+    : PersistEventDeserializer[RiskAnalysisAddedV1, RiskAnalysisAdded] =
+    event =>
+      for {
+        riskAnalysis <- toPersistentPurposeVersionDocument(event.riskAnalysis)
+      } yield RiskAnalysisAdded(event.purposeId, event.versionId, riskAnalysis)
+
+  implicit def riskAnalysisAddedV1PersistEventSerializer
+    : PersistEventSerializer[RiskAnalysisAdded, RiskAnalysisAddedV1] =
+    event =>
+      Right(RiskAnalysisAddedV1.of(event.purposeId, event.versionId, toProtobufPurposeVersionDocument(event.document)))
 
 }

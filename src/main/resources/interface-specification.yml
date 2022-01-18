@@ -244,6 +244,57 @@ paths:
       tags:
         - purpose
       description: suspends the purpose version by id
+  /purposes/{purposeId}/versions/{versionId}/documents:
+    parameters:
+      - name: purposeId
+        in: path
+        description: the purpose id
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: versionId
+        in: path
+        description: the version id
+        required: true
+        schema:
+          type: string
+          format: uuid
+    post:
+      summary: Add risk analysis document
+      operationId: createVersionDocument
+      requestBody:
+        description: Risk Analysis document
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - doc
+              properties:
+                name: # TODO This is here just because otherwise code generation breaks :)
+                  type: string
+                doc:
+                  type: string
+                  format: binary
+        required: true
+      responses:
+        "204":
+          description: Risk Analysis Document created
+        "400":
+          description: Invalid input
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        "404":
+          description: Not found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+      tags:
+        - purpose
   /purposes/{purposeId}/versions/{versionId}/archive:
     parameters:
       - name: purposeId
@@ -392,11 +443,31 @@ components:
         expectedApprovalDate:
           type: string
           format: date-time
+        riskAnalysis:
+          $ref: '#/components/schemas/PurposeVersionDocument'
       required:
         - id
         - state
         - createdAt
       description: business representation of an purpose version
+    PurposeVersionDocument:
+      type: object
+      required:
+        - id
+        - contentType
+        - path
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        contentType:
+          type: string
+        path:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
     Problem:
       properties:
         type:

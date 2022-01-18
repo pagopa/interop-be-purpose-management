@@ -15,15 +15,16 @@ message PurposeV1 {
   repeated PurposeVersionV1 versions = 7;
   required string title = 8;
   optional string description = 9;
-  required int64 createdAt = 10;
-  optional int64 updatedAt = 11;
+  required int64 createdAt = 11;
+  optional int64 updatedAt = 12;
 }
 
 message PurposeVersionV1 {
   required string id = 1;
   required PurposeStateV1 state = 2;
-  required int64 createdAt = 3;
-  optional int64 expectedApprovalDate = 4;
+  optional PurposeVersionDocumentV1 riskAnalysis = 3;
+  required int64 createdAt = 4;
+  optional int64 expectedApprovalDate = 5;
 }
 
 enum PurposeStateV1 {
@@ -32,4 +33,11 @@ enum PurposeStateV1 {
   SUSPENDED = 3;
   WAITING_FOR_APPROVAL = 4;
   ARCHIVED = 5;
+}
+
+message PurposeVersionDocumentV1 {
+  required string id = 1;
+  required string contentType = 2;
+  required string path = 3;
+  required int64 createdAt = 4;
 }

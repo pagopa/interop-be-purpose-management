@@ -11,6 +11,7 @@ final case class PersistentPurposeVersion(
   id: UUID,
   state: PersistentPurposeVersionState,
   expectedApprovalDate: Option[OffsetDateTime],
+  riskAnalysis: Option[PersistentPurposeVersionDocument],
   createdAt: OffsetDateTime
 )
 
@@ -24,6 +25,7 @@ object PersistentPurposeVersion {
       id = uuidSupplier.get,
       state = PersistentPurposeVersionState.fromApi(seed.state),
       createdAt = dateTimeSupplier.get,
+      riskAnalysis = None,
       expectedApprovalDate = None
     )
 
@@ -31,6 +33,7 @@ object PersistentPurposeVersion {
     PurposeVersion(
       id = persistentPurposeVersion.id,
       state = persistentPurposeVersion.state.toApi,
+      riskAnalysis = None,
       createdAt = persistentPurposeVersion.createdAt,
       expectedApprovalDate = persistentPurposeVersion.expectedApprovalDate
     )

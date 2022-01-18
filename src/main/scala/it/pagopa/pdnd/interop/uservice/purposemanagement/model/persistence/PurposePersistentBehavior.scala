@@ -104,6 +104,21 @@ object PurposePersistentBehavior {
         replyTo ! purposes
         Effect.none[Event, State]
 
+      case AddRiskAnalysis(purposeId, versionId, document, replyTo) =>
+        val version: Option[PersistentPurposeVersion] =
+          state.purposes.get(purposeId).flatMap(_.versions.find(_.id.toString == versionId))
+
+        version
+          .map { _ =>
+            Effect
+              .persist(RiskAnalysisAdded(purposeId, versionId, document))
+              .thenRun((_: State) => replyTo ! StatusReply.Success(()))
+          }
+          .getOrElse {
+            replyTo ! StatusReply.Error[Unit](s"Purpose $purposeId or version $versionId not found")
+            Effect.none[RiskAnalysisAdded, State]
+          }
+
       case Idle =>
         shard ! ClusterSharding.Passivate(context.self)
         context.log.info(s"Passivate shard: ${shard.path.name}")
@@ -113,11 +128,12 @@ object PurposePersistentBehavior {
 
   val eventHandler: (State, Event) => State = (state, event) =>
     event match {
-      case PurposeCreated(purpose)                   => state.addPurpose(purpose)
-      case PurposeVersionCreated(purposeId, version) => state.addPurposeVersion(purposeId, version)
-      case PurposeVersionActivated(purpose)          => state.updatePurpose(purpose)
-      case PurposeVersionSuspended(purpose)          => state.updatePurpose(purpose)
-      case PurposeVersionArchived(purpose)           => state.updatePurpose(purpose)
+      case PurposeCreated(purpose)                           => state.addPurpose(purpose)
+      case PurposeVersionCreated(purposeId, version)         => state.addPurposeVersion(purposeId, version)
+      case PurposeVersionActivated(purpose)                  => state.updatePurpose(purpose)
+      case PurposeVersionSuspended(purpose)                  => state.updatePurpose(purpose)
+      case PurposeVersionArchived(purpose)                   => state.updatePurpose(purpose)
+      case RiskAnalysisAdded(purposeId, versionId, document) => state.addRiskAnalysis(purposeId, versionId, document)
     }
 
   val TypeKey: EntityTypeKey[Command] =

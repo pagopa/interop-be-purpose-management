@@ -5,11 +5,13 @@ import it.pagopa.pdnd.interop.commons.utils.TypeConversions.{LongOps, OffsetDate
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence.serializer.v1.purpose.{
   PurposeStateV1,
   PurposeV1,
+  PurposeVersionDocumentV1,
   PurposeVersionV1
 }
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.{
   PersistentPurpose,
   PersistentPurposeVersion,
+  PersistentPurposeVersionDocument,
   PersistentPurposeVersionState
 }
 
@@ -65,9 +67,11 @@ object protobufUtils {
       id                   <- protobufPurposeVersion.id.toUUID
       createdAt            <- protobufPurposeVersion.createdAt.toOffsetDateTime
       expectedApprovalDate <- protobufPurposeVersion.expectedApprovalDate.traverse(_.toOffsetDateTime)
+      riskAnalysisDoc      <- protobufPurposeVersion.riskAnalysis.traverse(toPersistentPurposeVersionDocument).toTry
     } yield PersistentPurposeVersion(
       id = id,
       state = state,
+      riskAnalysis = riskAnalysisDoc,
       createdAt = createdAt,
       expectedApprovalDate = expectedApprovalDate
     )
@@ -102,4 +106,29 @@ object protobufUtils {
         Failure(new RuntimeException(s"Protobuf PurposeStatus deserialization failed. Unrecognized value: $value"))
     }
 
+  def toPersistentPurposeVersionDocument(
+    protobufDocument: PurposeVersionDocumentV1
+  ): Either[Throwable, PersistentPurposeVersionDocument] = {
+    val purpose = for {
+      id        <- protobufDocument.id.toUUID
+      createdAt <- protobufDocument.createdAt.toOffsetDateTime
+    } yield PersistentPurposeVersionDocument(
+      id = id,
+      contentType = protobufDocument.contentType,
+      path = protobufDocument.path,
+      createdAt = createdAt
+    )
+    purpose.toEither
+  }
+
+  def toProtobufPurposeVersionDocument(
+    persistentDocument: PersistentPurposeVersionDocument
+  ): PurposeVersionDocumentV1 = {
+    PurposeVersionDocumentV1(
+      id = persistentDocument.id.toString,
+      contentType = persistentDocument.contentType,
+      path = persistentDocument.path,
+      createdAt = persistentDocument.createdAt.toMillis
+    )
+  }
 }

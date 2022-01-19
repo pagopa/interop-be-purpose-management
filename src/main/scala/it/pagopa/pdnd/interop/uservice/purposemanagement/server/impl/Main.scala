@@ -14,8 +14,6 @@ import akka.management.scaladsl.AkkaManagement
 import akka.persistence.typed.PersistenceId
 import akka.projection.ProjectionBehavior
 import akka.{actor => classic}
-import it.pagopa.pdnd.interop.commons.files.StorageConfiguration
-import it.pagopa.pdnd.interop.commons.files.service.FileManager
 import it.pagopa.pdnd.interop.commons.jwt.service.JWTReader
 import it.pagopa.pdnd.interop.commons.jwt.service.impl.DefaultJWTReader
 import it.pagopa.pdnd.interop.commons.jwt.{JWTConfiguration, KID, PublicKeysHolder, SerializedKey}
@@ -36,8 +34,8 @@ import it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence.{
   PurposePersistentProjection
 }
 import it.pagopa.pdnd.interop.uservice.purposemanagement.server.Controller
-import it.pagopa.pdnd.interop.uservice.purposemanagement.service.impl.OffsetDateTimeSupplierImp
 import it.pagopa.pdnd.interop.uservice.purposemanagement.service.OffsetDateTimeSupplier
+import it.pagopa.pdnd.interop.uservice.purposemanagement.service.impl.OffsetDateTimeSupplierImp
 import kamon.Kamon
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
@@ -47,7 +45,7 @@ import scala.util.Try
 object Main extends App {
 
   val dependenciesLoaded: Try[JWTReader] = for {
-    keyset      <- JWTConfiguration.jwtReader.loadKeyset()
+    keyset <- JWTConfiguration.jwtReader.loadKeyset()
     jwtValidator = new DefaultJWTReader with PublicKeysHolder {
       var publicKeyset: Map[KID, SerializedKey] = keyset
     }
@@ -109,13 +107,7 @@ object Main extends App {
         val dateTimeSupplier: OffsetDateTimeSupplier = OffsetDateTimeSupplierImp
 
         val purposeApi = new PurposeApi(
-          PurposeApiServiceImpl(
-            context.system,
-            sharding,
-            purposePersistenceEntity,
-            uuidSupplier,
-            dateTimeSupplier
-          ),
+          PurposeApiServiceImpl(context.system, sharding, purposePersistenceEntity, uuidSupplier, dateTimeSupplier),
           PurposeApiMarshallerImpl,
           jwtValidator.OAuth2JWTValidatorAsContexts
         )

@@ -52,7 +52,6 @@ abstract class BaseIntegrationSpec
         system,
         sharding,
         persistentEntity,
-        mockFileManager,
         mockUUIDSupplier,
         mockDateTimeSupplier
       ),

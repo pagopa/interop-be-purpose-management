@@ -1,10 +1,6 @@
 package it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence
 
-import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.{
-  PersistentPurpose,
-  PersistentPurposeVersion,
-  PersistentPurposeVersionDocument
-}
+import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.{PersistentPurpose, PersistentPurposeVersion}
 
 final case class State(purposes: Map[String, PersistentPurpose]) extends Persistable {
   def addPurpose(purpose: PersistentPurpose): State =

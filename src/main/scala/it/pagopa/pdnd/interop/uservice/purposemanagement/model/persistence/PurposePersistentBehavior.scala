@@ -113,11 +113,11 @@ object PurposePersistentBehavior {
 
   val eventHandler: (State, Event) => State = (state, event) =>
     event match {
-      case PurposeCreated(purpose)                           => state.addPurpose(purpose)
-      case PurposeVersionCreated(purposeId, version)         => state.addPurposeVersion(purposeId, version)
-      case PurposeVersionActivated(purpose)                  => state.updatePurpose(purpose)
-      case PurposeVersionSuspended(purpose)                  => state.updatePurpose(purpose)
-      case PurposeVersionArchived(purpose)                   => state.updatePurpose(purpose)
+      case PurposeCreated(purpose)                   => state.addPurpose(purpose)
+      case PurposeVersionCreated(purposeId, version) => state.addPurposeVersion(purposeId, version)
+      case PurposeVersionActivated(purpose)          => state.updatePurpose(purpose)
+      case PurposeVersionSuspended(purpose)          => state.updatePurpose(purpose)
+      case PurposeVersionArchived(purpose)           => state.updatePurpose(purpose)
     }
 
   val TypeKey: EntityTypeKey[Command] =

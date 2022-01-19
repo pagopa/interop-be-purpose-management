@@ -48,13 +48,7 @@ abstract class BaseIntegrationSpec
     sharding.init(persistentEntity)
 
     val purposeApi = new PurposeApi(
-      PurposeApiServiceImpl(
-        system,
-        sharding,
-        persistentEntity,
-        mockUUIDSupplier,
-        mockDateTimeSupplier
-      ),
+      PurposeApiServiceImpl(system, sharding, persistentEntity, mockUUIDSupplier, mockDateTimeSupplier),
       PurposeApiMarshallerImpl,
       wrappingDirective
     )

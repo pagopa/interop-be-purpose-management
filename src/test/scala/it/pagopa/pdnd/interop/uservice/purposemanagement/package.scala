@@ -1,0 +1,52 @@
+package it.pagopa.pdnd.interop.uservice
+
+import akka.NotUsed
+import akka.http.scaladsl.marshalling.ToEntityMarshaller
+import akka.http.scaladsl.model._
+import akka.http.scaladsl.model.headers.{Authorization, OAuth2BearerToken}
+import akka.http.scaladsl.unmarshalling.FromEntityUnmarshaller
+import akka.stream.scaladsl.Source
+import akka.util.ByteString
+import it.pagopa.pdnd.interop.commons.utils.service.UUIDSupplier
+import it.pagopa.pdnd.interop.uservice.purposemanagement.api.impl._
+import it.pagopa.pdnd.interop.uservice.purposemanagement.model._
+import it.pagopa.pdnd.interop.uservice.purposemanagement.service.OffsetDateTimeSupplier
+import org.scalamock.scalatest.MockFactory
+
+import java.time.{OffsetDateTime, ZoneOffset}
+
+package object purposemanagement extends MockFactory {
+
+  final lazy val url: String =
+    s"http://localhost:18088/pdnd-interop-uservice-purpose-management/${buildinfo.BuildInfo.interfaceVersion}"
+  final val authorization: Seq[Authorization] = Seq(headers.Authorization(OAuth2BearerToken("token")))
+
+  final val timestamp = OffsetDateTime.of(2022, 12, 31, 11, 22, 33, 44, ZoneOffset.UTC)
+
+  val mockUUIDSupplier: UUIDSupplier               = mock[UUIDSupplier]
+  val mockDateTimeSupplier: OffsetDateTimeSupplier = mock[OffsetDateTimeSupplier]
+
+  val emptyData: Source[ByteString, NotUsed] = Source.empty[ByteString]
+
+  implicit def toEntityMarshallerPurposeSeed: ToEntityMarshaller[PurposeSeed] =
+    sprayJsonMarshaller[PurposeSeed]
+
+  implicit def toEntityMarshallerPurposeVersionSeed: ToEntityMarshaller[PurposeVersionSeed] =
+    sprayJsonMarshaller[PurposeVersionSeed]
+
+  implicit def toEntityMarshallerStateChangeDetailsSeed: ToEntityMarshaller[StateChangeDetails] =
+    sprayJsonMarshaller[StateChangeDetails]
+
+  implicit def fromEntityUnmarshallerPurposes: FromEntityUnmarshaller[Seq[Purpose]] =
+    sprayJsonUnmarshaller[Seq[Purpose]]
+
+  implicit def fromEntityUnmarshallerPurpose: FromEntityUnmarshaller[Purpose] =
+    sprayJsonUnmarshaller[Purpose]
+
+  implicit def fromEntityUnmarshallerProblem: FromEntityUnmarshaller[Problem] =
+    sprayJsonUnmarshaller[Problem]
+
+  implicit def fromEntityUnmarshallerPurposeVersion: FromEntityUnmarshaller[PurposeVersion] =
+    sprayJsonUnmarshaller[PurposeVersion]
+
+}

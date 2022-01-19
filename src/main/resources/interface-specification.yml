@@ -1,0 +1,449 @@
+openapi: 3.0.3
+info:
+  title: Purpose Management Micro Service
+  description: defines the persistence operations for the purpose
+  version: '{{version}}'
+  contact:
+    name: API Support
+    url: 'http://www.example.com/support'
+    email: support@example.com
+  termsOfService: 'http://swagger.io/terms/'
+  x-api-id: an x-api-id
+  x-summary: an x-summary
+servers:
+  - url: '/pdnd-interop-uservice-purpose-management/{{version}}'
+    description: This service is purpose manager
+security:
+  - bearerAuth: [ ]
+tags:
+  - name: purpose
+    description: Everything about your Purposes
+    externalDocs:
+      description: Find out more
+      url: 'http://swagger.io'
+paths:
+  /purposes:
+    post:
+      tags:
+        - purpose
+      summary: Create a new purpose
+      operationId: createPurpose
+      requestBody:
+        description: A Purpose seed
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurposeSeed'
+        required: true
+      responses:
+        '200':
+          description: Purpose created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Purpose'
+        '400':
+          description: Invalid input
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '409':
+          description: Purpose already exists
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    get:
+      tags:
+        - purpose
+      summary: Retrieve a list of purposes
+      operationId: getPurposes
+      parameters:
+        - in: query
+          name: eserviceId
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: consumerId
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: states
+          description: comma separated sequence of states to filter the response with
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/PurposeVersionState'
+            default: [ ]
+          explode: false
+      responses:
+        '200':
+          description: A list of Purpose
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Purposes'
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /purposes/{id}:
+    parameters:
+      - name: id
+        in: path
+        description: the purpose id
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags:
+        - purpose
+      summary: Get an purpose
+      operationId: getPurpose
+      responses:
+        '200':
+          description: Purpose retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Purpose'
+        '400':
+          description: Bad request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: Purpose not found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /purposes/{purposeId}/versions:
+    parameters:
+      - name: purposeId
+        in: path
+        required:
+          true
+        schema:
+          type: string
+          format: uuid
+    post:
+      tags:
+        - purpose
+      summary: Create a new purpose version
+      operationId: createPurposeVersion
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurposeVersionSeed'
+        required: true
+      responses:
+        '200':
+          description: Purpose Version created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurposeVersion'
+        '400':
+          description: Invalid input
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /purposes/{purposeId}/versions/{versionId}/activate:
+    parameters:
+      - name: purposeId
+        in: path
+        required:
+          true
+        schema:
+          type: string
+          format: uuid
+      - name: versionId
+        in: path
+        required:
+          true
+        schema:
+          type: string
+          format: uuid
+    post:
+      summary: Activate Purpose Version
+      operationId: activatePurposeVersion
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StateChangeDetails'
+        required: true
+      responses:
+        '204':
+          description: Purpose Version Activated
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: Purpose not found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+      description: activates the purpose version by id
+      tags:
+        - purpose
+  /purposes/{purposeId}/versions/{versionId}/suspend:
+    parameters:
+      - name: purposeId
+        in: path
+        required:
+          true
+        schema:
+          type: string
+          format: uuid
+      - name: versionId
+        in: path
+        required:
+          true
+        schema:
+          type: string
+          format: uuid
+    post:
+      summary: Suspend Purpose Version
+      operationId: suspendPurposeVersion
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StateChangeDetails'
+        required: true
+      responses:
+        '204':
+          description: Purpose Version Suspended
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: Purpose Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+      tags:
+        - purpose
+      description: suspends the purpose version by id
+  /purposes/{purposeId}/versions/{versionId}/archive:
+    parameters:
+      - name: purposeId
+        in: path
+        required:
+          true
+        schema:
+          type: string
+          format: uuid
+      - name: versionId
+        in: path
+        required:
+          true
+        schema:
+          type: string
+          format: uuid
+    post:
+      summary: Archive Purpose Version
+      operationId: archivePurposeVersion
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StateChangeDetails'
+        required: true
+      responses:
+        '204':
+          description: Purpose Version Archived
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: Purpose Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+      tags:
+        - purpose
+      description: archives the purpose version by id
+components:
+  schemas:
+    StateChangeDetails:
+      type: object
+      description: tracks the owner of the change.
+      properties:
+        changedBy:
+          $ref: '#/components/schemas/ChangedBy'
+    ChangedBy:
+      type: string
+      description: Role who made the change
+      enum:
+        - PRODUCER
+        - CONSUMER
+    PurposeVersionState:
+      type: string
+      description: Purpose State
+      enum:
+        - ACTIVE
+        - DRAFT
+        - SUSPENDED
+        - WAITING_FOR_APPROVAL
+        - ARCHIVED
+    PurposeSeed:
+      type: object
+      description: contains the expected payload for purpose persistence.
+      properties:
+        eserviceId:
+          type: string
+          format: uuid
+        consumerId:
+          type: string
+          format: uuid
+      required:
+        - eserviceId
+        - consumerId
+    PurposeVersionSeed:
+      type: object
+      description: contains the expected payload for purpose version persistence.
+      properties:
+        state:
+          $ref: '#/components/schemas/PurposeVersionState'
+      required:
+        - state
+    Purpose:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        eserviceId:
+          type: string
+          format: uuid
+        consumerId:
+          type: string
+          format: uuid
+        versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PurposeVersion'
+        suspendedByConsumer:
+          type: boolean
+        suspendedByProducer:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - eserviceId
+        - consumerId
+        - versions
+        - createdAt
+      description: business representation of an purpose
+    Purposes:
+      type: array
+      items:
+        $ref: '#/components/schemas/Purpose'
+    PurposeVersion:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        state:
+          $ref: '#/components/schemas/PurposeVersionState'
+        createdAt:
+          type: string
+          format: date-time
+        expectedApprovalDate:
+          type: string
+          format: date-time
+      required:
+        - id
+        - state
+        - createdAt
+      description: business representation of an purpose version
+    Problem:
+      properties:
+        type:
+          description: URI reference of type definition
+          type: string
+        status:
+          description: The HTTP status code generated by the origin server for this occurrence of the problem.
+          example: 503
+          exclusiveMaximum: true
+          format: int32
+          maximum: 600
+          minimum: 100
+          type: integer
+        title:
+          description: A short, summary of the problem type. Written in english and readable
+          example: Service Unavailable
+          maxLength: 64
+          pattern: '^[ -~]{0,64}$'
+          type: string
+        detail:
+          description: A human readable explanation of the problem.
+          example: Request took too long to complete.
+          maxLength: 4096
+          pattern: '^.{0,1024}$'
+          type: string
+        errors:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ProblemError'
+      additionalProperties: false
+      required:
+        - type
+        - status
+        - title
+        - errors
+    ProblemError:
+      properties:
+        code:
+          description: Internal code of the error
+          example: 123-4567
+          minLength: 8
+          maxLength: 8
+          pattern: '^[0-9]{3}-[0-9]{4}$'
+          type: string
+        detail:
+          description: A human readable explanation specific to this occurrence of the problem.
+          example: Parameter not valid
+          maxLength: 4096
+          pattern: '^.{0,1024}$'
+          type: string
+      required:
+        - code
+        - detail
+  securitySchemes:
+    bearerAuth:
+      type: http
+      description: 'A bearer token in the format of a JWS and conformed to the specifications included in [RFC8725](https://tools.ietf.org/html/RFC8725).'
+      scheme: bearer
+      bearerFormat: JWT d'Interoperabilità di AgID (default)

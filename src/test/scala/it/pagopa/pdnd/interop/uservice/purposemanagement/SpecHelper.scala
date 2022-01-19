@@ -4,20 +4,13 @@ import akka.actor
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.marshalling.{Marshal, Marshaller}
-import akka.http.scaladsl.model.{
-  ContentTypes,
-  HttpEntity,
-  HttpMethod,
-  HttpMethods,
-  HttpRequest,
-  HttpResponse,
-  MessageEntity
-}
+import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model._
 
+import java.io.File
 import java.util.UUID
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext, Future}
@@ -41,10 +34,43 @@ trait SpecHelper {
   ): Future[PurposeVersion] =
     for {
       data <- Marshal(seed).to[MessageEntity].map(_.dataBytes)
-      _ = (() => mockUUIDSupplier.get).expects().returning(versionId).once()
-      _ = (() => mockDateTimeSupplier.get).expects().returning(timestamp).once()
+      creationsCount = if (seed.riskAnalysis.isDefined) 2 else 1
+      _              = (() => mockUUIDSupplier.get).expects().returning(versionId).repeated(creationsCount)
+      _              = (() => mockDateTimeSupplier.get).expects().returning(timestamp).repeated(creationsCount)
       purpose <- Unmarshal(makeRequest(data, s"purposes/$purposeId/versions", HttpMethods.POST)).to[PurposeVersion]
     } yield purpose
+
+  def addRiskAnalysis(purposeId: UUID, versionId: UUID, document: File)(implicit
+    ec: ExecutionContext,
+    actorSystem: actor.ActorSystem
+  ): Future[Option[String]] = {
+//    val fileFormPart = Multipart.FormData
+//      .BodyPart(
+//        document.getName,
+//        HttpEntity(MediaTypes.`application/octet-stream`, document.length(), FileIO.fromPath(document.toPath))
+//      )
+
+    val fileFormPart =
+      Multipart.FormData.BodyPart.fromFile(document.getName, MediaTypes.`application/octet-stream`, document)
+
+    val entity =
+      Multipart.FormData(fileFormPart).toEntity
+
+    val result = Await.result(
+      Http().singleRequest(
+        HttpRequest(
+          uri = s"$url/purposes/$purposeId/versions/$versionId/documents",
+          method = HttpMethods.POST,
+          entity = entity,
+          headers = authorization
+        )
+      ),
+      Duration.Inf
+    )
+
+    Unmarshal(result).to[Option[String]]
+
+  }
 
   def makeFailingRequest[T](url: String, verb: HttpMethod, data: T)(implicit
     ec: ExecutionContext,

@@ -7,31 +7,26 @@ import akka.http.scaladsl.marshalling.ToEntityMarshaller
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives.{onComplete, onSuccess}
 import akka.http.scaladsl.server.Route
-import akka.http.scaladsl.server.directives.FileInfo
 import akka.pattern.StatusReply
 import cats.implicits.toTraverseOps
 import com.typesafe.scalalogging.Logger
 import it.pagopa.pdnd.interop.commons.logging.{CanLogContextFields, ContextFieldsToLog}
 import it.pagopa.pdnd.interop.commons.utils.AkkaUtils
-import it.pagopa.pdnd.interop.commons.utils.TypeConversions._
 import it.pagopa.pdnd.interop.commons.utils.OpenapiUtils.parseArrayParameters
 import it.pagopa.pdnd.interop.commons.utils.service.UUIDSupplier
 import it.pagopa.pdnd.interop.uservice.purposemanagement.api.PurposeApiService
 import it.pagopa.pdnd.interop.uservice.purposemanagement.common.system._
-import it.pagopa.pdnd.interop.uservice.purposemanagement.error.InternalErrors._
 import it.pagopa.pdnd.interop.uservice.purposemanagement.error.PurposeManagementErrors._
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model._
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence._
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.{
   PersistentPurpose,
   PersistentPurposeVersion,
-  PersistentPurposeVersionDocument,
   PersistentPurposeVersionState
 }
 import it.pagopa.pdnd.interop.uservice.purposemanagement.service.{OffsetDateTimeSupplier, PurposeFileManager}
 import org.slf4j.LoggerFactory
 
-import java.io.File
 import scala.concurrent._
 import scala.util.{Failure, Success}
 
@@ -42,8 +37,7 @@ final case class PurposeApiServiceImpl(
   fileManager: PurposeFileManager,
   uuidSupplier: UUIDSupplier,
   dateTimeSupplier: OffsetDateTimeSupplier
-)(implicit ec: ExecutionContext)
-    extends PurposeApiService {
+) extends PurposeApiService {
 
   private val logger = Logger.takingImplicit[ContextFieldsToLog](LoggerFactory.getLogger(this.getClass))
 
@@ -58,7 +52,7 @@ final case class PurposeApiServiceImpl(
     contexts: Seq[(String, String)]
   ): Route = {
     logger.info("Adding a purpose for consumer {} to e-service {}", purposeSeed.consumerId, purposeSeed.eserviceId)
-    val purpose: PersistentPurpose                     = PersistentPurpose.fromAPI(purposeSeed, uuidSupplier, dateTimeSupplier)
+    val purpose: PersistentPurpose                     = PersistentPurpose.fromSeed(purposeSeed, uuidSupplier, dateTimeSupplier)
     val result: Future[StatusReply[PersistentPurpose]] = createPurpose(purpose)
     onComplete(result) {
       case Success(statusReply) if statusReply.isSuccess =>
@@ -110,7 +104,7 @@ final case class PurposeApiServiceImpl(
     // TODO It could return 409 if state conflicts
     logger.info("Adding a version to purpose {}", purposeId)
     val purposeVersion: PersistentPurposeVersion =
-      PersistentPurposeVersion.fromAPI(purposeVersionSeed, uuidSupplier, dateTimeSupplier)
+      PersistentPurposeVersion.fromSeed(purposeVersionSeed, uuidSupplier, dateTimeSupplier)
     val result: Future[StatusReply[PersistentPurposeVersion]] = createPurposeVersion(purposeId, purposeVersion)
     onComplete(result) {
       case Success(statusReply) if statusReply.isSuccess =>
@@ -212,66 +206,6 @@ final case class PurposeApiServiceImpl(
 
   }
 
-  override def createVersionDocument(purposeId: String, versionId: String, doc: (FileInfo, File), name: Option[String])(
-    implicit
-    toEntityMarshallerProblem: ToEntityMarshaller[Problem],
-    contexts: Seq[(String, String)]
-  ): Route = {
-    logger.info("Creating document for purpose {} and version {}", purposeId, versionId)
-
-    val shard: String                 = AkkaUtils.getShard(purposeId, settings.numberOfShards)
-    val commander: EntityRef[Command] = sharding.entityRefFor(PurposePersistentBehavior.TypeKey, shard)
-
-    val result: Future[StatusReply[Unit]] = for {
-      purpose  <- retrievePurpose(commander, purposeId)
-      _        <- isPurposeVersionInDraft(purpose, versionId)
-      document <- fileManager.store(id = uuidSupplier.get, timestamp = dateTimeSupplier.get, fileParts = doc)
-      result <- commander.ask(ref =>
-        AddRiskAnalysis(purposeId, versionId, PersistentPurposeVersionDocument.fromApi(document), ref)
-      )
-    } yield result
-
-    onComplete(result) {
-      case Success(r) if r.isSuccess =>
-        createVersionDocument204
-      case Success(r) =>
-        logger.error("Failure on creation of document for purpose {} and version {}", purposeId, versionId, r.getError)
-        createVersionDocument400(problemOf(StatusCodes.BadRequest, DocumentCreationFailed(purposeId, versionId)))
-      case Failure(ex: PurposeNotFound) =>
-        logger.error("Error on creation of document for purpose {} and version {}", purposeId, versionId, ex)
-        createVersionDocument404(problemOf(StatusCodes.NotFound, DocumentCreationPurposeNotFound(purposeId)))
-      case Failure(ex: PurposeVersionNotFound) =>
-        logger.error("Failure on creation of document for purpose {} and version {}", purposeId, versionId, ex)
-        createVersionDocument404(problemOf(StatusCodes.NotFound, DocumentCreationVersionNotFound(purposeId, versionId)))
-      case Failure(ex: PurposeVersionNotInDraft) =>
-        logger.error("Failure on creation of document for purpose {} and version {}", purposeId, versionId, ex)
-        createVersionDocument400(
-          problemOf(StatusCodes.NotFound, DocumentCreationVersionNotInDraft(purposeId, versionId))
-        )
-      case Failure(exception) =>
-        logger.error("Failure on creation of document for purpose {} and version {}", purposeId, versionId, exception)
-        createVersionDocument400(problemOf(StatusCodes.BadRequest, DocumentCreationFailed(purposeId, versionId)))
-    }
-  }
-
-  private def isPurposeVersionInDraft(purpose: PersistentPurpose, versionId: String): Future[Unit] =
-    purpose.versions
-      .find(_.id.toString == versionId)
-      .fold(Future.failed[Unit](PurposeVersionNotFound(purpose.id.toString, versionId)))(v =>
-        v.state match {
-          case PersistentPurposeVersionState.Draft => Future.successful(())
-          case _                                   => Future.failed[Unit](PurposeVersionNotInDraft(purpose.id.toString, versionId))
-        }
-      )
-
-  private def retrievePurpose(commander: EntityRef[Command], purposeId: String): Future[PersistentPurpose] = {
-    for {
-      statusReply <- commander.ask(ref => GetPurpose(purposeId, ref))
-      retrieved   <- statusReply.toTry.toFuture
-      result      <- retrieved.toFuture(PurposeNotFound(purposeId))
-    } yield result
-  }
-
   private def createPurpose(purpose: PersistentPurpose): Future[StatusReply[PersistentPurpose]] = {
     val commander: EntityRef[Command] =
       sharding.entityRefFor(
@@ -331,6 +265,6 @@ final case class PurposeApiServiceImpl(
     states: List[PurposeVersionState]
   )(from: Int, to: Int): ActorRef[Seq[PersistentPurpose]] => ListPurposes =
     (ref: ActorRef[Seq[PersistentPurpose]]) =>
-      ListPurposes(from, to, consumerId, eserviceId, states.map(PersistentPurposeVersionState.fromApi), ref)
+      ListPurposes(from, to, consumerId, eserviceId, states.map(PersistentPurposeVersionState.fromSeed), ref)
 
 }

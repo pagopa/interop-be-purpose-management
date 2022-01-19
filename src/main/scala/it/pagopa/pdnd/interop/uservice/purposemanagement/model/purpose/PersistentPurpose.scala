@@ -21,25 +21,7 @@ final case class PersistentPurpose(
 )
 
 object PersistentPurpose {
-  def fromAPI(
-    seed: PurposeSeed,
-    uuidSupplier: UUIDSupplier,
-    dateTimeSupplier: OffsetDateTimeSupplier
-  ): PersistentPurpose =
-    PersistentPurpose(
-      id = uuidSupplier.get,
-      eserviceId = seed.eserviceId,
-      consumerId = seed.consumerId,
-      versions = Seq.empty,
-      suspendedByConsumer = None,
-      suspendedByProducer = None,
-      title = seed.title,
-      description = seed.description,
-      createdAt = dateTimeSupplier.get,
-      updatedAt = None
-    )
-
-  def fromAPIWithActiveState(
+  def fromSeed(
     seed: PurposeSeed,
     uuidSupplier: UUIDSupplier,
     dateTimeSupplier: OffsetDateTimeSupplier

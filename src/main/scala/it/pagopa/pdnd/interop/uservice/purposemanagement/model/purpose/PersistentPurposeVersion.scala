@@ -16,16 +16,17 @@ final case class PersistentPurposeVersion(
 )
 
 object PersistentPurposeVersion {
-  def fromAPI(
+  def fromSeed(
     seed: PurposeVersionSeed,
     uuidSupplier: UUIDSupplier,
     dateTimeSupplier: OffsetDateTimeSupplier
   ): PersistentPurposeVersion =
     PersistentPurposeVersion(
       id = uuidSupplier.get,
-      state = PersistentPurposeVersionState.fromApi(seed.state),
+      state = PersistentPurposeVersionState.fromSeed(seed.state),
       createdAt = dateTimeSupplier.get,
-      riskAnalysis = None,
+      riskAnalysis =
+        seed.riskAnalysis.map(PersistentPurposeVersionDocument.fromSeed(_, uuidSupplier, dateTimeSupplier)),
       expectedApprovalDate = None
     )
 

@@ -11,7 +11,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
 
   "Creation of a new purpose version" must {
 
-    "succeed if purpose exists" in {
+    "succeed" in {
       val purposeId  = UUID.randomUUID()
       val versionId  = UUID.randomUUID()
       val eServiceId = UUID.randomUUID()
@@ -19,6 +19,28 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
 
       val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
       val versionSeed = PurposeVersionSeed(state = PurposeVersionState.ACTIVE)
+
+      val response: Future[PurposeVersion] =
+        for {
+          _      <- createPurpose(purposeId, purposeSeed)
+          result <- createPurposeVersion(purposeId, versionId, versionSeed)
+        } yield result
+
+      val expected =
+        PurposeVersion(id = versionId, state = versionSeed.state, createdAt = timestamp, expectedApprovalDate = None)
+
+      response.futureValue shouldBe expected
+    }
+
+    "succeed with risk analysis" in {
+      val purposeId  = UUID.randomUUID()
+      val versionId  = UUID.randomUUID()
+      val eServiceId = UUID.randomUUID()
+      val consumerId = UUID.randomUUID()
+
+      val purposeSeed      = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
+      val riskAnalysisSeed = PurposeVersionDocumentSeed(contentType = "a-content-type", path = "a/store/path")
+      val versionSeed      = PurposeVersionSeed(state = PurposeVersionState.ACTIVE, riskAnalysis = Some(riskAnalysisSeed))
 
       val response: Future[PurposeVersion] =
         for {

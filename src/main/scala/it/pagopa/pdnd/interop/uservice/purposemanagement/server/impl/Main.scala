@@ -45,7 +45,6 @@ import kamon.Kamon
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
-import scala.concurrent.ExecutionContextExecutor
 import scala.util.Try
 
 object Main extends App {
@@ -75,8 +74,7 @@ object Main extends App {
     val _ = ActorSystem[Nothing](
       Behaviors.setup[Nothing] { context =>
         import akka.actor.typed.scaladsl.adapter._
-        implicit val classicSystem: classic.ActorSystem         = context.system.toClassic
-        implicit val executionContext: ExecutionContextExecutor = context.system.executionContext
+        implicit val classicSystem: classic.ActorSystem = context.system.toClassic
 
         val cluster = Cluster(context.system)
 

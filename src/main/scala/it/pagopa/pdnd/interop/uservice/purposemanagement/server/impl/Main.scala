@@ -36,11 +36,8 @@ import it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence.{
   PurposePersistentProjection
 }
 import it.pagopa.pdnd.interop.uservice.purposemanagement.server.Controller
-import it.pagopa.pdnd.interop.uservice.purposemanagement.service.impl.{
-  OffsetDateTimeSupplierImp,
-  PurposeFileManagerImpl
-}
-import it.pagopa.pdnd.interop.uservice.purposemanagement.service.{OffsetDateTimeSupplier, PurposeFileManager}
+import it.pagopa.pdnd.interop.uservice.purposemanagement.service.impl.OffsetDateTimeSupplierImp
+import it.pagopa.pdnd.interop.uservice.purposemanagement.service.OffsetDateTimeSupplier
 import kamon.Kamon
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
@@ -49,15 +46,14 @@ import scala.util.Try
 
 object Main extends App {
 
-  val dependenciesLoaded: Try[(FileManager, JWTReader)] = for {
-    fileManager <- FileManager.getConcreteImplementation(StorageConfiguration.runtimeFileManager)
+  val dependenciesLoaded: Try[JWTReader] = for {
     keyset      <- JWTConfiguration.jwtReader.loadKeyset()
     jwtValidator = new DefaultJWTReader with PublicKeysHolder {
       var publicKeyset: Map[KID, SerializedKey] = keyset
     }
-  } yield (fileManager, jwtValidator)
+  } yield jwtValidator
 
-  val (runtimeFileManager, jwtValidator) =
+  val jwtValidator =
     dependenciesLoaded.get //THIS IS THE END OF THE WORLD. Exceptions are welcomed here.
 
   Kamon.init()
@@ -111,14 +107,12 @@ object Main extends App {
 
         val uuidSupplier: UUIDSupplier               = new UUIDSupplierImpl
         val dateTimeSupplier: OffsetDateTimeSupplier = OffsetDateTimeSupplierImp
-        val fileManager: PurposeFileManager          = PurposeFileManagerImpl(runtimeFileManager)
 
         val purposeApi = new PurposeApi(
           PurposeApiServiceImpl(
             context.system,
             sharding,
             purposePersistenceEntity,
-            fileManager,
             uuidSupplier,
             dateTimeSupplier
           ),

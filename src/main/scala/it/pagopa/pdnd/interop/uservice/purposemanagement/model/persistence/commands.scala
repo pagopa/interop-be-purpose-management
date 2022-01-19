@@ -6,7 +6,6 @@ import it.pagopa.pdnd.interop.uservice.purposemanagement.model.StateChangeDetail
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.{
   PersistentPurpose,
   PersistentPurposeVersion,
-  PersistentPurposeVersionDocument,
   PersistentPurposeVersionState
 }
 
@@ -48,11 +47,4 @@ final case class ListPurposes(
   eserviceId: Option[String],
   state: List[PersistentPurposeVersionState],
   replyTo: ActorRef[Seq[PersistentPurpose]]
-) extends Command
-
-final case class AddRiskAnalysis(
-  purposeId: String,
-  versionId: String,
-  document: PersistentPurposeVersionDocument,
-  replyTo: ActorRef[StatusReply[Unit]]
 ) extends Command

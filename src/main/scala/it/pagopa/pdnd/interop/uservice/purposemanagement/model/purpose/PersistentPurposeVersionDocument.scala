@@ -1,7 +1,7 @@
 package it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose
 
 import it.pagopa.pdnd.interop.commons.utils.service.UUIDSupplier
-import it.pagopa.pdnd.interop.uservice.purposemanagement.model.PurposeVersionDocumentSeed
+import it.pagopa.pdnd.interop.uservice.purposemanagement.model.{PurposeVersionDocument, PurposeVersionDocumentSeed}
 import it.pagopa.pdnd.interop.uservice.purposemanagement.service.OffsetDateTimeSupplier
 
 import java.time.OffsetDateTime
@@ -28,4 +28,11 @@ object PersistentPurposeVersionDocument {
       createdAt = dateTimeSupplier.get
     )
 
+  def toAPI(document: PersistentPurposeVersionDocument): PurposeVersionDocument =
+    PurposeVersionDocument(
+      id = document.id,
+      contentType = document.contentType,
+      path = document.path,
+      createdAt = document.createdAt
+    )
 }

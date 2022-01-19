@@ -1,7 +1,7 @@
 package it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose
 
 import it.pagopa.pdnd.interop.commons.utils.service.UUIDSupplier
-import it.pagopa.pdnd.interop.uservice.purposemanagement.model.{PurposeVersion, PurposeVersionSeed}
+import it.pagopa.pdnd.interop.uservice.purposemanagement.model.{PurposeVersion, PurposeVersionDocument, PurposeVersionSeed}
 import it.pagopa.pdnd.interop.uservice.purposemanagement.service.OffsetDateTimeSupplier
 
 import java.time.OffsetDateTime
@@ -34,7 +34,7 @@ object PersistentPurposeVersion {
     PurposeVersion(
       id = persistentPurposeVersion.id,
       state = persistentPurposeVersion.state.toApi,
-      riskAnalysis = None,
+      riskAnalysis = persistentPurposeVersion.riskAnalysis.map(PersistentPurposeVersionDocument.toAPI),
       createdAt = persistentPurposeVersion.createdAt,
       expectedApprovalDate = persistentPurposeVersion.expectedApprovalDate
     )

@@ -40,38 +40,6 @@ trait SpecHelper {
       purpose <- Unmarshal(makeRequest(data, s"purposes/$purposeId/versions", HttpMethods.POST)).to[PurposeVersion]
     } yield purpose
 
-  def addRiskAnalysis(purposeId: UUID, versionId: UUID, document: File)(implicit
-    ec: ExecutionContext,
-    actorSystem: actor.ActorSystem
-  ): Future[Option[String]] = {
-//    val fileFormPart = Multipart.FormData
-//      .BodyPart(
-//        document.getName,
-//        HttpEntity(MediaTypes.`application/octet-stream`, document.length(), FileIO.fromPath(document.toPath))
-//      )
-
-    val fileFormPart =
-      Multipart.FormData.BodyPart.fromFile(document.getName, MediaTypes.`application/octet-stream`, document)
-
-    val entity =
-      Multipart.FormData(fileFormPart).toEntity
-
-    val result = Await.result(
-      Http().singleRequest(
-        HttpRequest(
-          uri = s"$url/purposes/$purposeId/versions/$versionId/documents",
-          method = HttpMethods.POST,
-          entity = entity,
-          headers = authorization
-        )
-      ),
-      Duration.Inf
-    )
-
-    Unmarshal(result).to[Option[String]]
-
-  }
-
   def makeFailingRequest[T](url: String, verb: HttpMethod, data: T)(implicit
     ec: ExecutionContext,
     actorSystem: actor.ActorSystem,

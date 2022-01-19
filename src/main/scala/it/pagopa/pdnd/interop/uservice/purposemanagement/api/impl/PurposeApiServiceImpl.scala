@@ -24,7 +24,7 @@ import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.{
   PersistentPurposeVersion,
   PersistentPurposeVersionState
 }
-import it.pagopa.pdnd.interop.uservice.purposemanagement.service.{OffsetDateTimeSupplier, PurposeFileManager}
+import it.pagopa.pdnd.interop.uservice.purposemanagement.service.OffsetDateTimeSupplier
 import org.slf4j.LoggerFactory
 
 import scala.concurrent._
@@ -34,7 +34,6 @@ final case class PurposeApiServiceImpl(
   system: ActorSystem[_],
   sharding: ClusterSharding,
   entity: Entity[Command, ShardingEnvelope[Command]],
-  fileManager: PurposeFileManager,
   uuidSupplier: UUIDSupplier,
   dateTimeSupplier: OffsetDateTimeSupplier
 ) extends PurposeApiService {

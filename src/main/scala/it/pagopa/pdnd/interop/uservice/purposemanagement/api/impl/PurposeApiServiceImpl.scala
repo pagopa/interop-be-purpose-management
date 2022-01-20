@@ -60,7 +60,7 @@ final case class PurposeApiServiceImpl(
     val result: Future[StatusReply[PersistentPurpose]] = createPurpose(purpose)
     onComplete(result) {
       case Success(statusReply) if statusReply.isSuccess =>
-        createPurpose200(PersistentPurpose.toAPI(statusReply.getValue))
+        createPurpose201(PersistentPurpose.toAPI(statusReply.getValue))
       case Success(statusReply) =>
         logger.error(
           "Error while adding a purpose for consumer {} to e-service {}",
@@ -112,7 +112,7 @@ final case class PurposeApiServiceImpl(
     val result: Future[StatusReply[PersistentPurposeVersion]] = createPurposeVersion(purposeId, purposeVersion)
     onComplete(result) {
       case Success(statusReply) if statusReply.isSuccess =>
-        createPurposeVersion200(PersistentPurposeVersion.toAPI(statusReply.getValue))
+        createPurposeVersion201(PersistentPurposeVersion.toAPI(statusReply.getValue))
       case Success(statusReply) =>
         logger.error("Error while adding a version to purpose {}", purposeId, statusReply.getError)
         createPurposeVersion400(problemOf(StatusCodes.BadRequest, CreatePurposeVersionBadRequest))

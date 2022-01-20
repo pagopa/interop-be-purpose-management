@@ -6,7 +6,10 @@ import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityTypeKey}
 import akka.pattern.StatusReply
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior, RetentionCriteria}
-import it.pagopa.pdnd.interop.uservice.purposemanagement.error.InternalErrors.PurposeVersionNotInDraft
+import it.pagopa.pdnd.interop.uservice.purposemanagement.error.InternalErrors.{
+  PurposeVersionNotFound,
+  PurposeVersionNotInDraft
+}
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.{
   PersistentPurpose,
   PersistentPurposeVersion,
@@ -61,7 +64,7 @@ object PurposePersistentBehavior {
 
         version
           .fold {
-            replyTo ! StatusReply.Error[PersistentPurposeVersion](s"Version $versionId of purpose $purposeId not found")
+            replyTo ! StatusReply.Error[PersistentPurposeVersion](PurposeVersionNotFound(purposeId, versionId))
             Effect.none[PurposeVersionUpdated, State]
           } { v =>
             isDraftVersion(purposeId, v) match {
@@ -71,10 +74,9 @@ object PurposePersistentBehavior {
                   .persist(PurposeVersionUpdated(purposeId, updatedVersion))
                   .thenRun((_: State) => replyTo ! StatusReply.Success(updatedVersion))
               case Left(ex) =>
-                replyTo ! StatusReply.Error[PersistentPurposeVersion](ex.getMessage)
+                replyTo ! StatusReply.Error[PersistentPurposeVersion](ex)
                 Effect.none[PurposeVersionUpdated, State]
             }
-
           }
 
       case GetPurpose(purposeId, replyTo) =>

@@ -198,6 +198,12 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
   /purposes/{purposeId}/versions/{versionId}/activate:
     parameters:
       - name: purposeId

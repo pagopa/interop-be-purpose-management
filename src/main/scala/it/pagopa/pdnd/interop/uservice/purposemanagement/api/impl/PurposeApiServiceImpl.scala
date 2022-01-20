@@ -16,6 +16,10 @@ import it.pagopa.pdnd.interop.commons.utils.OpenapiUtils.parseArrayParameters
 import it.pagopa.pdnd.interop.commons.utils.service.UUIDSupplier
 import it.pagopa.pdnd.interop.uservice.purposemanagement.api.PurposeApiService
 import it.pagopa.pdnd.interop.uservice.purposemanagement.common.system._
+import it.pagopa.pdnd.interop.uservice.purposemanagement.error.InternalErrors.{
+  PurposeVersionNotFound,
+  PurposeVersionNotInDraft
+}
 import it.pagopa.pdnd.interop.uservice.purposemanagement.error.PurposeManagementErrors._
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model._
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.decoupling.PurposeVersionUpdate
@@ -226,10 +230,21 @@ final case class PurposeApiServiceImpl(
         updatePurposeVersion200(PersistentPurposeVersion.toAPI(statusReply.getValue))
       case Success(statusReply) =>
         logger.error("Error while updating version {} of purpose {}", versionId, purposeId, statusReply.getError)
-        updatePurposeVersion400(problemOf(StatusCodes.BadRequest, UpdatePurposeVersionBadRequest))
+        statusReply.getError match {
+          case _: PurposeVersionNotFound =>
+            updatePurposeVersion404(problemOf(StatusCodes.NotFound, UpdatePurposeVersionNotFound(purposeId, versionId)))
+          case _: PurposeVersionNotInDraft =>
+            updatePurposeVersion400(
+              problemOf(StatusCodes.BadRequest, UpdatePurposeVersionNotInDraft(purposeId, versionId))
+            )
+          case _ =>
+            updatePurposeVersion400(
+              problemOf(StatusCodes.BadRequest, UpdatePurposeVersionBadRequest(purposeId, versionId))
+            )
+        }
       case Failure(ex) =>
         logger.error("Error while updating version {} of purpose {}", versionId, purposeId, ex)
-        updatePurposeVersion400(problemOf(StatusCodes.BadRequest, UpdatePurposeVersionBadRequest))
+        updatePurposeVersion400(problemOf(StatusCodes.BadRequest, UpdatePurposeVersionBadRequest(purposeId, versionId)))
     }
   }
 

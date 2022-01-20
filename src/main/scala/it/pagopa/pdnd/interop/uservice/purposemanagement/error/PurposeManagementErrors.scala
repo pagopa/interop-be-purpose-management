@@ -16,7 +16,7 @@ object PurposeManagementErrors {
   case object SuspendPurposeNotFound  extends ComponentError("0007", "Purpose to suspend not found")
   case object ArchivePurposeNotFound  extends ComponentError("0008", "Purpose to archive not found")
 
-  case object GetPurposesBadRequest extends ComponentError("0009", "Error while getting purposes - bad request")
+  case object GetPurposesBadRequest extends ComponentError("0009", "Error while getting purposes - Bad Request")
 
   case class DocumentCreationPurposeNotFound(purposeId: String)
       extends ComponentError("0010", s"Error on document creation - Purpose $purposeId not found")
@@ -30,7 +30,14 @@ object PurposeManagementErrors {
   case class DocumentCreationFailed(purposeId: String, versionId: String)
       extends ComponentError("0013", s"Error on document creation - Version $versionId of Purpose $purposeId")
 
-  case object UpdatePurposeVersionBadRequest
-      extends ComponentError("0014", "Error while updating purpose version - bad request")
+  case class UpdatePurposeVersionNotFound(purposeId: String, versionId: String)
+      extends ComponentError("0014", s"Error on version update - Version $versionId of purpose $purposeId not found")
+  case class UpdatePurposeVersionNotInDraft(purposeId: String, versionId: String)
+      extends ComponentError(
+        "0015",
+        s"Error on version update - Version $versionId of purpose $purposeId is not in Draft state"
+      )
+  case class UpdatePurposeVersionBadRequest(purposeId: String, versionId: String)
+      extends ComponentError("0016", s"Error while updating version $versionId of purpose $purposeId - Bad Request")
 
 }

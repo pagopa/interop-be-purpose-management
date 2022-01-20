@@ -143,7 +143,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
         makeFailingRequest(s"purposes/$purposeId/versions/$versionId", HttpMethods.POST, updateContent)
 
       val result = response.futureValue
-      result.status shouldBe 400
+      result.status shouldBe 404
       result.errors.map(_.code) shouldBe Seq("011-0014")
     }
 
@@ -176,7 +176,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
 
       val result = response.futureValue
       result.status shouldBe 400
-      result.errors.map(_.code) shouldBe Seq("011-0014")
+      result.errors.map(_.code) shouldBe Seq("011-0015")
     }
 
   }

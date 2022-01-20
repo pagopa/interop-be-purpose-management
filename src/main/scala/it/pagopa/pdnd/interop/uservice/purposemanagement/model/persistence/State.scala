@@ -9,7 +9,8 @@ final case class State(purposes: Map[String, PersistentPurpose]) extends Persist
   def addPurposeVersion(purposeId: String, version: PersistentPurposeVersion): State =
     purposes.get(purposeId) match {
       case Some(purpose) =>
-        val updatedPurpose = purpose.copy(versions = version +: purpose.versions)
+        val updatedVersions = purpose.versions.filter(_.id != version.id) :+ version
+        val updatedPurpose  = purpose.copy(versions = updatedVersions)
         copy(purposes = purposes + (purpose.id.toString -> updatedPurpose))
       case None => this
     }

@@ -54,6 +54,17 @@ package object v1 {
     : PersistEventSerializer[PurposeVersionCreated, PurposeVersionCreatedV1] =
     event => Right(PurposeVersionCreatedV1.of(event.purposeId, toProtobufPurposeVersion(event.version)))
 
+  implicit def purposeVersionUpdatedV1PersistEventDeserializer
+    : PersistEventDeserializer[PurposeVersionUpdatedV1, PurposeVersionUpdated] =
+    event =>
+      for {
+        version <- toPersistentPurposeVersion(event.version)
+      } yield PurposeVersionUpdated(event.purposeId, version)
+
+  implicit def purposeVersionUpdatedV1PersistEventSerializer
+    : PersistEventSerializer[PurposeVersionUpdated, PurposeVersionUpdatedV1] =
+    event => Right(PurposeVersionUpdatedV1.of(event.purposeId, toProtobufPurposeVersion(event.version)))
+
   implicit def purposeActivatedV1PersistEventSerializer
     : PersistEventSerializer[PurposeVersionActivated, PurposeVersionActivatedV1] =
     event => toProtobufPurpose(event.purpose).map(ag => PurposeVersionActivatedV1.of(ag))

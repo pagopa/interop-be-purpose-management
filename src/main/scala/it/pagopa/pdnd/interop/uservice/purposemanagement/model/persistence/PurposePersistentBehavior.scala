@@ -6,6 +6,7 @@ import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityTypeKey}
 import akka.pattern.StatusReply
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior, RetentionCriteria}
+import it.pagopa.pdnd.interop.uservice.purposemanagement.error.InternalErrors.PurposeVersionNotInDraft
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.{
   PersistentPurpose,
   PersistentPurposeVersion,
@@ -50,6 +51,30 @@ object PurposePersistentBehavior {
             Effect
               .persist(PurposeVersionCreated(purposeId, newVersion))
               .thenRun((_: State) => replyTo ! StatusReply.Success(newVersion))
+          }
+
+      case UpdatePurposeVersion(purposeId, versionId, update, replyTo) =>
+        val version: Option[PersistentPurposeVersion] = for {
+          purpose <- state.purposes.get(purposeId)
+          version <- purpose.versions.find(_.id.toString == versionId)
+        } yield version
+
+        version
+          .fold {
+            replyTo ! StatusReply.Error[PersistentPurposeVersion](s"Version $versionId of purpose $purposeId not found")
+            Effect.none[PurposeVersionUpdated, State]
+          } { v =>
+            isDraftVersion(purposeId, v) match {
+              case Right(_) =>
+                val updatedVersion = v.update(update)
+                Effect
+                  .persist(PurposeVersionUpdated(purposeId, updatedVersion))
+                  .thenRun((_: State) => replyTo ! StatusReply.Success(v))
+              case Left(ex) =>
+                replyTo ! StatusReply.Error[PersistentPurposeVersion](ex.getMessage)
+                Effect.none[PurposeVersionUpdated, State]
+            }
+
           }
 
       case GetPurpose(purposeId, replyTo) =>
@@ -115,6 +140,7 @@ object PurposePersistentBehavior {
     event match {
       case PurposeCreated(purpose)                   => state.addPurpose(purpose)
       case PurposeVersionCreated(purposeId, version) => state.addPurposeVersion(purposeId, version)
+      case PurposeVersionUpdated(purposeId, version) => state.addPurposeVersion(purposeId, version)
       case PurposeVersionActivated(purpose)          => state.updatePurpose(purpose)
       case PurposeVersionSuspended(purpose)          => state.updatePurpose(purpose)
       case PurposeVersionArchived(purpose)           => state.updatePurpose(purpose)
@@ -170,6 +196,13 @@ object PurposePersistentBehavior {
         case None => purpose.copy(versions = updatedVersions)
       }
     }
-
   }
+
+  def isDraftVersion(purposeId: String, version: PersistentPurposeVersion): Either[Throwable, Unit] =
+    version.state match {
+      case PersistentPurposeVersionState.Draft =>
+        Right(())
+      case _ =>
+        Left(PurposeVersionNotInDraft(purposeId, version.id.toString))
+    }
 }

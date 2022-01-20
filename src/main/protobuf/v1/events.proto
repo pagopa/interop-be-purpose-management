@@ -16,6 +16,11 @@ message PurposeVersionCreatedV1 {
   required PurposeVersionV1 version = 2;
 }
 
+message PurposeVersionUpdatedV1 {
+  required string purposeId = 1;
+  required PurposeVersionV1 version = 2;
+}
+
 message PurposeVersionActivatedV1 {
   required PurposeV1 purpose = 1;
 }

@@ -17,12 +17,13 @@ import it.pagopa.pdnd.interop.commons.utils.errors.ComponentError
 
 package object impl extends SprayJsonSupport with DefaultJsonProtocol {
 
-  implicit val purposeSeedFormat: RootJsonFormat[PurposeSeed] = jsonFormat4(PurposeSeed)
-  implicit val versionDocumentSeedFormat: RootJsonFormat[PurposeVersionDocumentSeed] =
-    jsonFormat2(PurposeVersionDocumentSeed)
-  implicit val purposeVersionSeedFormat: RootJsonFormat[PurposeVersionSeed] = jsonFormat2(PurposeVersionSeed)
-  implicit val documentFormat: RootJsonFormat[PurposeVersionDocument]       = jsonFormat4(PurposeVersionDocument)
-  implicit val purposeVersionFormat: RootJsonFormat[PurposeVersion]         = jsonFormat5(PurposeVersion)
+  implicit val purposeSeedFormat: RootJsonFormat[PurposeSeed]                = jsonFormat4(PurposeSeed)
+  implicit val versionDocumentFormat: RootJsonFormat[PurposeVersionDocument] = jsonFormat4(PurposeVersionDocument)
+  implicit val purposeVersionSeedFormat: RootJsonFormat[PurposeVersionSeed]  = jsonFormat2(PurposeVersionSeed)
+  implicit val purposeVersionUpdateFormat: RootJsonFormat[PurposeVersionUpdateContent] = jsonFormat1(
+    PurposeVersionUpdateContent
+  )
+  implicit val purposeVersionFormat: RootJsonFormat[PurposeVersion]         = jsonFormat6(PurposeVersion)
   implicit val purposeFormat: RootJsonFormat[Purpose]                       = jsonFormat10(Purpose)
   implicit val stateChangeDetailsFormat: RootJsonFormat[StateChangeDetails] = jsonFormat1(StateChangeDetails)
   implicit val problemErrorFormat: RootJsonFormat[ProblemError]             = jsonFormat2(ProblemError)

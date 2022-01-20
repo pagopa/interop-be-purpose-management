@@ -24,7 +24,8 @@ message PurposeVersionV1 {
   required PurposeStateV1 state = 2;
   optional PurposeVersionDocumentV1 riskAnalysis = 3;
   required int64 createdAt = 4;
-  optional int64 expectedApprovalDate = 5;
+  optional int64 updatedAt = 5;
+  optional int64 expectedApprovalDate = 6;
 }
 
 enum PurposeStateV1 {

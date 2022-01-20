@@ -39,14 +39,19 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
       val eServiceId     = UUID.randomUUID()
       val consumerId     = UUID.randomUUID()
 
-      val purposeSeed      = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
-      val riskAnalysisSeed = PurposeVersionDocumentSeed(contentType = "a-content-type", path = "a/store/path")
-      val versionSeed      = PurposeVersionSeed(state = PurposeVersionState.ACTIVE, riskAnalysis = Some(riskAnalysisSeed))
+      val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
+      val riskAnalysisDoc = PurposeVersionDocument(
+        id = riskAnalysisId,
+        contentType = "a-content-type",
+        path = "a/store/path",
+        createdAt = timestamp
+      )
+      val versionSeed = PurposeVersionSeed(state = PurposeVersionState.ACTIVE, riskAnalysis = Some(riskAnalysisDoc))
 
       val response: Future[PurposeVersion] =
         for {
           _      <- createPurpose(purposeId, purposeSeed)
-          result <- createPurposeVersion(purposeId, versionId, versionSeed, Some(riskAnalysisId))
+          result <- createPurposeVersion(purposeId, versionId, versionSeed)
         } yield result
 
       val expected =
@@ -55,14 +60,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
           state = versionSeed.state,
           createdAt = timestamp,
           expectedApprovalDate = None,
-          riskAnalysis = Some(
-            PurposeVersionDocument(
-              id = riskAnalysisId,
-              contentType = riskAnalysisSeed.contentType,
-              path = riskAnalysisSeed.path,
-              createdAt = timestamp
-            )
-          )
+          riskAnalysis = Some(riskAnalysisDoc)
         )
 
       response.futureValue shouldBe expected

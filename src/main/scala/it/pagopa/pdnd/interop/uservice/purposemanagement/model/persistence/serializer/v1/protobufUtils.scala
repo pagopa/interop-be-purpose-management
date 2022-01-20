@@ -66,6 +66,7 @@ object protobufUtils {
       state                <- fromProtobufPurposeState(protobufPurposeVersion.state)
       id                   <- protobufPurposeVersion.id.toUUID
       createdAt            <- protobufPurposeVersion.createdAt.toOffsetDateTime
+      updatedAt            <- protobufPurposeVersion.updatedAt.traverse(_.toOffsetDateTime)
       expectedApprovalDate <- protobufPurposeVersion.expectedApprovalDate.traverse(_.toOffsetDateTime)
       riskAnalysisDoc      <- protobufPurposeVersion.riskAnalysis.traverse(toPersistentPurposeVersionDocument).toTry
     } yield PersistentPurposeVersion(
@@ -73,6 +74,7 @@ object protobufUtils {
       state = state,
       riskAnalysis = riskAnalysisDoc,
       createdAt = createdAt,
+      updatedAt = updatedAt,
       expectedApprovalDate = expectedApprovalDate
     )
     purpose.toEither
@@ -83,6 +85,7 @@ object protobufUtils {
       id = persistentPurposeVersion.id.toString,
       state = toProtobufPurposeState(persistentPurposeVersion.state),
       createdAt = persistentPurposeVersion.createdAt.toMillis,
+      updatedAt = persistentPurposeVersion.updatedAt.map(_.toMillis),
       expectedApprovalDate = persistentPurposeVersion.expectedApprovalDate.map(_.toMillis)
     )
 

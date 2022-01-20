@@ -30,4 +30,7 @@ object PurposeManagementErrors {
   case class DocumentCreationFailed(purposeId: String, versionId: String)
       extends ComponentError("0013", s"Error on document creation - Version $versionId of Purpose $purposeId")
 
+  case object UpdatePurposeVersionBadRequest
+      extends ComponentError("0014", "Error while updating purpose version - bad request")
+
 }

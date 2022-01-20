@@ -158,6 +158,46 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
+  /purposes/{purposeId}/versions/{versionId}:
+    parameters:
+      - name: purposeId
+        in: path
+        required:
+          true
+        schema:
+          type: string
+          format: uuid
+      - name: versionId
+        in: path
+        required:
+          true
+        schema:
+          type: string
+          format: uuid
+    post:
+      tags:
+        - purpose
+      summary: Update a purpose version
+      operationId: updatePurposeVersion
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurposeVersionUpdateContent'
+        required: true
+      responses:
+        '200':
+          description: Purpose Version updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurposeVersion'
+        '400':
+          description: Invalid input
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
   /purposes/{purposeId}/versions/{versionId}/activate:
     parameters:
       - name: purposeId
@@ -335,20 +375,15 @@ components:
         state:
           $ref: '#/components/schemas/PurposeVersionState'
         riskAnalysis:
-          $ref: '#/components/schemas/PurposeVersionDocumentSeed'
+          $ref: '#/components/schemas/PurposeVersionDocument'
       required:
         - state
-    PurposeVersionDocumentSeed:
+    PurposeVersionUpdateContent:
       type: object
-      description: contains the expected payload for purpose version document persistence.
+      description: contains the expected payload for purpose version update.
       properties:
-        contentType:
-          type: string
-        path:
-          type: string
-      required:
-        - contentType
-        - path
+        riskAnalysis:
+          $ref: '#/components/schemas/PurposeVersionDocument'
     Purpose:
       type: object
       properties:
@@ -400,6 +435,9 @@ components:
         state:
           $ref: '#/components/schemas/PurposeVersionState'
         createdAt:
+          type: string
+          format: date-time
+        updatedAt:
           type: string
           format: date-time
         expectedApprovalDate:

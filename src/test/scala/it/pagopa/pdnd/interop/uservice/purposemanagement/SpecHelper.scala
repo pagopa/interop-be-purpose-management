@@ -27,20 +27,14 @@ trait SpecHelper {
       purpose <- Unmarshal(makeRequest(data, "purposes", HttpMethods.POST)).to[Purpose]
     } yield purpose
 
-  def createPurposeVersion(
-    purposeId: UUID,
-    versionId: UUID,
-    seed: PurposeVersionSeed,
-    riskAnalysisId: Option[UUID] = None
-  )(implicit ec: ExecutionContext, actorSystem: actor.ActorSystem): Future[PurposeVersion] =
+  def createPurposeVersion(purposeId: UUID, versionId: UUID, seed: PurposeVersionSeed)(implicit
+    ec: ExecutionContext,
+    actorSystem: actor.ActorSystem
+  ): Future[PurposeVersion] =
     for {
       data <- Marshal(seed).to[MessageEntity].map(_.dataBytes)
       _ = (() => mockUUIDSupplier.get).expects().returning(versionId).once()
       _ = (() => mockDateTimeSupplier.get).expects().returning(timestamp).once()
-      _ = if (seed.riskAnalysis.isDefined) {
-        (() => mockUUIDSupplier.get).expects().returning(riskAnalysisId.get).once()
-        (() => mockDateTimeSupplier.get).expects().returning(timestamp).once()
-      } else ()
       purpose <- Unmarshal(makeRequest(data, s"purposes/$purposeId/versions", HttpMethods.POST)).to[PurposeVersion]
     } yield purpose
 

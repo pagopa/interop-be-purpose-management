@@ -9,3 +9,4 @@ final case class PurposeVersionCreated(purposeId: String, version: PersistentPur
 final case class PurposeVersionActivated(purpose: PersistentPurpose)                         extends Event
 final case class PurposeVersionSuspended(purpose: PersistentPurpose)                         extends Event
 final case class PurposeVersionArchived(purpose: PersistentPurpose)                          extends Event
+final case class PurposeVersionUpdated(purposeId: String, version: PersistentPurposeVersion) extends Event

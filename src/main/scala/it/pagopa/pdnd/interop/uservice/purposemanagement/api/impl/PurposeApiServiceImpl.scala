@@ -18,6 +18,7 @@ import it.pagopa.pdnd.interop.uservice.purposemanagement.api.PurposeApiService
 import it.pagopa.pdnd.interop.uservice.purposemanagement.common.system._
 import it.pagopa.pdnd.interop.uservice.purposemanagement.error.PurposeManagementErrors._
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model._
+import it.pagopa.pdnd.interop.uservice.purposemanagement.model.decoupling.PurposeVersionUpdate
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence._
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.{
   PersistentPurpose,
@@ -203,6 +204,33 @@ final case class PurposeApiServiceImpl(
         getPurposes400(problemOf(StatusCodes.BadRequest, GetPurposesBadRequest))
     }
 
+  }
+
+  override def updatePurposeVersion(purposeId: String, versionId: String, updateContent: PurposeVersionUpdateContent)(
+    implicit
+    toEntityMarshallerPurposeVersion: ToEntityMarshaller[PurposeVersion],
+    toEntityMarshallerProblem: ToEntityMarshaller[Problem],
+    contexts: Seq[(String, String)]
+  ): Route = {
+    logger.info("Updating version {} of purpose {}", versionId, purposeId)
+
+    val commander: EntityRef[Command] =
+      sharding.entityRefFor(PurposePersistentBehavior.TypeKey, AkkaUtils.getShard(purposeId, settings.numberOfShards))
+
+    val update = PurposeVersionUpdate.fromApi(updateContent, dateTimeSupplier)
+    val result: Future[StatusReply[PersistentPurposeVersion]] =
+      commander.ask(ref => UpdatePurposeVersion(purposeId, versionId, update, ref))
+
+    onComplete(result) {
+      case Success(statusReply) if statusReply.isSuccess =>
+        updatePurposeVersion200(PersistentPurposeVersion.toAPI(statusReply.getValue))
+      case Success(statusReply) =>
+        logger.error("Error while updating version {} of purpose {}", versionId, purposeId, statusReply.getError)
+        updatePurposeVersion400(problemOf(StatusCodes.BadRequest, UpdatePurposeVersionBadRequest))
+      case Failure(ex) =>
+        logger.error("Error while updating version {} of purpose {}", versionId, purposeId, ex)
+        updatePurposeVersion400(problemOf(StatusCodes.BadRequest, UpdatePurposeVersionBadRequest))
+    }
   }
 
   private def createPurpose(purpose: PersistentPurpose): Future[StatusReply[PersistentPurpose]] = {

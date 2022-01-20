@@ -69,7 +69,7 @@ object PurposePersistentBehavior {
                 val updatedVersion = v.update(update)
                 Effect
                   .persist(PurposeVersionUpdated(purposeId, updatedVersion))
-                  .thenRun((_: State) => replyTo ! StatusReply.Success(v))
+                  .thenRun((_: State) => replyTo ! StatusReply.Success(updatedVersion))
               case Left(ex) =>
                 replyTo ! StatusReply.Error[PersistentPurposeVersion](ex.getMessage)
                 Effect.none[PurposeVersionUpdated, State]

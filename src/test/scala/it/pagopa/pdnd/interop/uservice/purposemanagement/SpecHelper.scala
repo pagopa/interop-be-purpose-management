@@ -38,6 +38,17 @@ trait SpecHelper {
       purpose <- Unmarshal(makeRequest(data, s"purposes/$purposeId/versions", HttpMethods.POST)).to[PurposeVersion]
     } yield purpose
 
+  def updatePurposeVersion(purposeId: UUID, versionId: UUID, seed: PurposeVersionUpdateContent)(implicit
+    ec: ExecutionContext,
+    actorSystem: actor.ActorSystem
+  ): Future[PurposeVersion] =
+    for {
+      data <- Marshal(seed).to[MessageEntity].map(_.dataBytes)
+      _ = (() => mockDateTimeSupplier.get).expects().returning(timestamp).once()
+      purpose <- Unmarshal(makeRequest(data, s"purposes/$purposeId/versions/$versionId", HttpMethods.POST))
+        .to[PurposeVersion]
+    } yield purpose
+
   def makeFailingRequest[T](url: String, verb: HttpMethod, data: T)(implicit
     ec: ExecutionContext,
     actorSystem: actor.ActorSystem,

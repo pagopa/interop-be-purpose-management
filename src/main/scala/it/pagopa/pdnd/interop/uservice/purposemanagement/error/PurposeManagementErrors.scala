@@ -71,28 +71,28 @@ object PurposeManagementErrors {
         s"Error waiting for approval for Version $versionId for Purpose $purposeId - Bad Request"
       )
 
-  case object GetPurposesBadRequest extends ComponentError("0009", "Error while getting purposes - Bad Request")
+  case object GetPurposesBadRequest extends ComponentError("0024", "Error while getting purposes - Bad Request")
 
   case class DocumentCreationPurposeNotFound(purposeId: String)
-      extends ComponentError("0010", s"Error on document creation - Purpose $purposeId not found")
+      extends ComponentError("0025", s"Error on document creation - Purpose $purposeId not found")
   case class DocumentCreationVersionNotFound(purposeId: String, versionId: String)
-      extends ComponentError("0011", s"Error on document creation - Version $versionId of Purpose $purposeId not found")
+      extends ComponentError("0026", s"Error on document creation - Version $versionId of Purpose $purposeId not found")
   case class DocumentCreationVersionNotInDraft(purposeId: String, versionId: String)
       extends ComponentError(
-        "0012",
+        "0027",
         s"Error on document creation - Version $versionId of Purpose $purposeId is not in DRAFT"
       )
   case class DocumentCreationFailed(purposeId: String, versionId: String)
-      extends ComponentError("0013", s"Error on document creation - Version $versionId of Purpose $purposeId")
+      extends ComponentError("0028", s"Error on document creation - Version $versionId of Purpose $purposeId")
 
   case class UpdatePurposeVersionNotFound(purposeId: String, versionId: String)
-      extends ComponentError("0014", s"Error on version update - Version $versionId of purpose $purposeId not found")
+      extends ComponentError("0029", s"Error on version update - Version $versionId of purpose $purposeId not found")
   case class UpdatePurposeVersionNotInDraft(purposeId: String, versionId: String)
       extends ComponentError(
-        "0015",
+        "0030",
         s"Error on version update - Version $versionId of purpose $purposeId is not in Draft state"
       )
   case class UpdatePurposeVersionBadRequest(purposeId: String, versionId: String)
-      extends ComponentError("0016", s"Error while updating version $versionId of purpose $purposeId - Bad Request")
+      extends ComponentError("0031", s"Error while updating version $versionId of purpose $purposeId - Bad Request")
 
 }

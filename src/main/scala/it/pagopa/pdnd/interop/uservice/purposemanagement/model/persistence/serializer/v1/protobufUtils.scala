@@ -86,7 +86,8 @@ object protobufUtils {
       state = toProtobufPurposeState(persistentPurposeVersion.state),
       createdAt = persistentPurposeVersion.createdAt.toMillis,
       updatedAt = persistentPurposeVersion.updatedAt.map(_.toMillis),
-      expectedApprovalDate = persistentPurposeVersion.expectedApprovalDate.map(_.toMillis)
+      expectedApprovalDate = persistentPurposeVersion.expectedApprovalDate.map(_.toMillis),
+      riskAnalysis = persistentPurposeVersion.riskAnalysis.map(toProtobufPurposeVersionDocument)
     )
 
   def toProtobufPurposeState(status: PersistentPurposeVersionState): PurposeStateV1 =

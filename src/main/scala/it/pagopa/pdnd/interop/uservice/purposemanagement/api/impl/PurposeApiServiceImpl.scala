@@ -17,8 +17,11 @@ import it.pagopa.pdnd.interop.commons.utils.service.UUIDSupplier
 import it.pagopa.pdnd.interop.uservice.purposemanagement.api.PurposeApiService
 import it.pagopa.pdnd.interop.uservice.purposemanagement.common.system._
 import it.pagopa.pdnd.interop.uservice.purposemanagement.error.InternalErrors.{
+  PurposeNotFound,
+  PurposeVersionMissingRiskAnalysis,
   PurposeVersionNotFound,
-  PurposeVersionNotInDraft
+  PurposeVersionNotInDraft,
+  PurposeVersionNotInExpectedState
 }
 import it.pagopa.pdnd.interop.uservice.purposemanagement.error.PurposeManagementErrors._
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model._
@@ -127,17 +130,27 @@ final case class PurposeApiServiceImpl(
     versionId: String,
     stateChangeDetails: StateChangeDetails
   )(implicit toEntityMarshallerProblem: ToEntityMarshaller[Problem], contexts: Seq[(String, String)]): Route = {
-    // TODO This should
-    //  deactivate old purpose
-    //  fail if purpose in not in expected state
     logger.info("Activating purpose {} version {}", purposeId, versionId)
     val result: Future[StatusReply[PersistentPurpose]] =
       activatePurposeVersionById(purposeId, versionId, stateChangeDetails)
     onSuccess(result) {
       case statusReply if statusReply.isSuccess => activatePurposeVersion204
       case statusReply if statusReply.isError =>
-        logger.error("Error in activating purpose {} version {}", purposeId, versionId, statusReply.getError)
-        activatePurposeVersion404(problemOf(StatusCodes.NotFound, ActivatePurposeNotFound))
+        logger.error("Error activating purpose {} version {}", purposeId, versionId, statusReply.getError)
+        statusReply.getError match {
+          case PurposeNotFound(pId) =>
+            activatePurposeVersion404(problemOf(StatusCodes.NotFound, ActivatePurposeNotFound(pId)))
+          case PurposeVersionNotFound(pId, vId) =>
+            activatePurposeVersion404(problemOf(StatusCodes.NotFound, ActivatePurposeVersionNotFound(pId, vId)))
+          case PurposeVersionNotInExpectedState(pId, vId, s) =>
+            activatePurposeVersion400(problemOf(StatusCodes.BadRequest, ActivatePurposeUnexpectedState(pId, vId, s)))
+          case PurposeVersionMissingRiskAnalysis(pId, vId) =>
+            activatePurposeVersion400(problemOf(StatusCodes.BadRequest, ActivatePurposeMissingRiskAnalysis(pId, vId)))
+          case _ =>
+            activatePurposeVersion400(
+              problemOf(StatusCodes.BadRequest, ActivatePurposeBadRequest(purposeId, versionId))
+            )
+        }
     }
   }
 
@@ -152,8 +165,17 @@ final case class PurposeApiServiceImpl(
     onSuccess(result) {
       case statusReply if statusReply.isSuccess => suspendPurposeVersion204
       case statusReply if statusReply.isError =>
-        logger.error("Error in suspending purpose {} version {}", purposeId, versionId, statusReply.getError)
-        suspendPurposeVersion404(problemOf(StatusCodes.NotFound, SuspendPurposeNotFound))
+        logger.error("Error suspending purpose {} version {}", purposeId, versionId, statusReply.getError)
+        statusReply.getError match {
+          case PurposeNotFound(pId) =>
+            suspendPurposeVersion404(problemOf(StatusCodes.NotFound, SuspendPurposeNotFound(pId)))
+          case PurposeVersionNotFound(pId, vId) =>
+            suspendPurposeVersion404(problemOf(StatusCodes.NotFound, SuspendPurposeVersionNotFound(pId, vId)))
+          case PurposeVersionNotInExpectedState(pId, vId, s) =>
+            suspendPurposeVersion400(problemOf(StatusCodes.BadRequest, SuspendPurposeUnexpectedState(pId, vId, s)))
+          case _ =>
+            suspendPurposeVersion400(problemOf(StatusCodes.BadRequest, SuspendPurposeBadRequest(purposeId, versionId)))
+        }
     }
   }
 
@@ -168,8 +190,17 @@ final case class PurposeApiServiceImpl(
     onSuccess(result) {
       case statusReply if statusReply.isSuccess => archivePurposeVersion204
       case statusReply if statusReply.isError =>
-        logger.error("Error in archiving purpose {} version {}", purposeId, versionId, statusReply.getError)
-        archivePurposeVersion404(problemOf(StatusCodes.NotFound, ArchivePurposeNotFound))
+        logger.error("Error archiving purpose {} version {}", purposeId, versionId, statusReply.getError)
+        statusReply.getError match {
+          case PurposeNotFound(pId) =>
+            archivePurposeVersion404(problemOf(StatusCodes.NotFound, ArchivePurposeNotFound(pId)))
+          case PurposeVersionNotFound(pId, vId) =>
+            archivePurposeVersion404(problemOf(StatusCodes.NotFound, ArchivePurposeVersionNotFound(pId, vId)))
+          case PurposeVersionNotInExpectedState(pId, vId, s) =>
+            archivePurposeVersion400(problemOf(StatusCodes.BadRequest, ArchivePurposeUnexpectedState(pId, vId, s)))
+          case _ =>
+            archivePurposeVersion400(problemOf(StatusCodes.BadRequest, ArchivePurposeBadRequest(purposeId, versionId)))
+        }
     }
   }
 

@@ -423,12 +423,8 @@ components:
       type: object
       description: contains the expected payload for purpose version persistence.
       properties:
-        state:
-          $ref: '#/components/schemas/PurposeVersionState'
         riskAnalysis:
           $ref: '#/components/schemas/PurposeVersionDocument'
-      required:
-        - state
     PurposeVersionUpdateContent:
       type: object
       description: contains the expected payload for purpose version update.

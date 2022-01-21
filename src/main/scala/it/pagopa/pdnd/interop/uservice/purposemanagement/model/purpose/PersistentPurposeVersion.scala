@@ -73,7 +73,7 @@ object PersistentPurposeVersion {
   ): PersistentPurposeVersion =
     PersistentPurposeVersion(
       id = uuidSupplier.get,
-      state = PersistentPurposeVersionState.fromSeed(seed.state),
+      state = PersistentPurposeVersionState.Draft,
       createdAt = dateTimeSupplier.get,
       updatedAt = None,
       riskAnalysis = seed.riskAnalysis.map(PersistentPurposeVersionDocument.fromAPI),

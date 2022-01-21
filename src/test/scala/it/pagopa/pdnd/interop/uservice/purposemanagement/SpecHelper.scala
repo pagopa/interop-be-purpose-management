@@ -114,6 +114,7 @@ trait SpecHelper {
     data <- Marshal(StateChangeDetails(changedBy = Some(changedBy)))
       .to[MessageEntity]
       .map(_.dataBytes)
+    _ = (() => mockDateTimeSupplier.get).expects().returning(timestamp).once()
     result <- Unmarshal(makeRequest(data, s"purposes/$purposeId/versions/$versionId/$statePath", HttpMethods.POST))
       .to[Option[String]]
   } yield result

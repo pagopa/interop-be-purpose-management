@@ -62,9 +62,9 @@ object PersistentPurposeVersion {
     PersistentPurposeVersionState.Suspended,
     PersistentPurposeVersionState.WaitingForApproval
   )
-  val SUSPENDABLE_STATES           = Seq(PersistentPurposeVersionState.Active)
+  val SUSPENDABLE_STATES           = Seq(PersistentPurposeVersionState.Active, PersistentPurposeVersionState.Suspended)
   val WAITABLE_FOR_APPROVAL_STATES = Seq(PersistentPurposeVersionState.Draft)
-  val ARCHIVABLE_STATES            = Seq(PersistentPurposeVersionState.Active)
+  val ARCHIVABLE_STATES            = Seq(PersistentPurposeVersionState.Active, PersistentPurposeVersionState.Suspended)
 
   def fromSeed(
     seed: PurposeVersionSeed,

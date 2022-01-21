@@ -17,6 +17,7 @@ import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.{
   PersistentPurposeVersionState
 }
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.{ChangedBy, StateChangeDetails}
+import it.pagopa.pdnd.interop.uservice.purposemanagement.service.OffsetDateTimeSupplier
 
 import java.time.temporal.ChronoUnit
 import scala.concurrent.duration.{DurationInt, DurationLong}
@@ -26,7 +27,8 @@ object PurposePersistentBehavior {
 
   def commandHandler(
     shard: ActorRef[ClusterSharding.ShardCommand],
-    context: ActorContext[Command]
+    context: ActorContext[Command],
+    dateTimeSupplier: OffsetDateTimeSupplier
   ): (State, Command) => Effect[Event, State] = { (state, command) =>
     val idleTimeout =
       context.system.settings.config.getDuration("uservice-purpose-management.idle-timeout")
@@ -91,7 +93,7 @@ object PurposePersistentBehavior {
           replyTo,
           _.isActivable(purposeId),
           PurposeVersionActivated
-        )
+        )(dateTimeSupplier)
 
       case SuspendPurposeVersion(purposeId, versionId, stateChangeDetails, replyTo) =>
         changeState(
@@ -103,7 +105,7 @@ object PurposePersistentBehavior {
           replyTo,
           _.isSuspendable(purposeId),
           PurposeVersionSuspended
-        )
+        )(dateTimeSupplier)
 
       case WaitForApprovalPurposeVersion(purposeId, versionId, stateChangeDetails, replyTo) =>
         changeState(
@@ -115,7 +117,7 @@ object PurposePersistentBehavior {
           replyTo,
           _.canWaitForApproval(purposeId),
           PurposeVersionWaitingForApproval
-        )
+        )(dateTimeSupplier)
 
       case ArchivePurposeVersion(purposeId, versionId, stateChangeDetails, replyTo) =>
         changeState(
@@ -127,7 +129,7 @@ object PurposePersistentBehavior {
           replyTo,
           _.isArchivable(purposeId),
           PurposeVersionArchived
-        )
+        )(dateTimeSupplier)
 
       case ListPurposes(from, to, consumerId, eserviceId, purposeStates, replyTo) =>
         val purposes: Seq[PersistentPurpose] = state.purposes
@@ -164,7 +166,11 @@ object PurposePersistentBehavior {
   val TypeKey: EntityTypeKey[Command] =
     EntityTypeKey[Command]("uservice-purpose-management-persistence-purpose")
 
-  def apply(shard: ActorRef[ClusterSharding.ShardCommand], persistenceId: PersistenceId): Behavior[Command] = {
+  def apply(
+    shard: ActorRef[ClusterSharding.ShardCommand],
+    persistenceId: PersistenceId,
+    dateTimeSupplier: OffsetDateTimeSupplier
+  ): Behavior[Command] = {
     Behaviors.setup { context =>
       context.log.info(s"Starting Purpose Shard ${persistenceId.id}")
       val numberOfEvents =
@@ -173,7 +179,7 @@ object PurposePersistentBehavior {
       EventSourcedBehavior[Command, Event, State](
         persistenceId = persistenceId,
         emptyState = State.empty,
-        commandHandler = commandHandler(shard, context),
+        commandHandler = commandHandler(shard, context, dateTimeSupplier),
         eventHandler = eventHandler
       ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = numberOfEvents, keepNSnapshots = 1))
         .withTagger(_ => Set(persistenceId.id))
@@ -181,27 +187,56 @@ object PurposePersistentBehavior {
     }
   }
 
-  // TODO Test me
-  private def updatePurposeFromState(
+  def updatePurposeFromState(
     purpose: PersistentPurpose,
     version: PersistentPurposeVersion,
     newVersionState: PersistentPurposeVersionState,
     stateChangeDetails: StateChangeDetails
-  ): PersistentPurpose = {
+  )(dateTimeSupplier: OffsetDateTimeSupplier): PersistentPurpose = {
 
     def isSuspended = newVersionState == PersistentPurposeVersionState.Suspended
 
-    val updatedVersions = purpose.versions.filter(_.id != version.id) :+ version
+    val timestamp = dateTimeSupplier.get
 
     stateChangeDetails.changedBy match {
       case Some(changedBy) =>
         changedBy match {
           case ChangedBy.CONSUMER =>
-            purpose.copy(versions = updatedVersions, suspendedByConsumer = Some(isSuspended))
+            val newState        = calcNewVersionState(purpose.suspendedByProducer, Some(isSuspended), newVersionState)
+            val updatedVersion  = version.copy(state = newState, updatedAt = Some(timestamp))
+            val updatedVersions = purpose.versions.filter(_.id != version.id) :+ updatedVersion
+
+            purpose.copy(
+              versions = updatedVersions,
+              suspendedByConsumer = Some(isSuspended),
+              updatedAt = Some(timestamp)
+            )
           case ChangedBy.PRODUCER =>
-            purpose.copy(versions = updatedVersions, suspendedByProducer = Some(isSuspended))
+            val newState        = calcNewVersionState(Some(isSuspended), purpose.suspendedByConsumer, newVersionState)
+            val updatedVersion  = version.copy(state = newState, updatedAt = Some(timestamp))
+            val updatedVersions = purpose.versions.filter(_.id != version.id) :+ updatedVersion
+
+            purpose.copy(
+              versions = updatedVersions,
+              suspendedByProducer = Some(isSuspended),
+              updatedAt = Some(timestamp)
+            )
         }
-      case None => purpose.copy(versions = updatedVersions)
+      // TODO Delete me
+      case None => purpose //.copy(versions = updatedVersions)
+    }
+  }
+
+  def calcNewVersionState(
+    suspendedByProducer: Option[Boolean],
+    suspendedByConsumer: Option[Boolean],
+    newState: PersistentPurposeVersionState
+  ): PersistentPurposeVersionState = {
+    import PersistentPurposeVersionState._
+    (newState, suspendedByProducer, suspendedByConsumer) match {
+      case (Active, Some(true), _) => Suspended
+      case (Active, _, Some(true)) => Suspended
+      case _                       => newState
     }
   }
 
@@ -223,12 +258,12 @@ object PurposePersistentBehavior {
     replyTo: ActorRef[StatusReply[PersistentPurpose]],
     versionValidation: PersistentPurposeVersion => Either[Throwable, Unit],
     eventConstructor: PersistentPurpose => T
-  ): EffectBuilder[T, State] = {
+  )(dateTimeSupplier: OffsetDateTimeSupplier): EffectBuilder[T, State] = {
     val purpose = for {
       purpose <- state.purposes.get(purposeId).toRight(PurposeNotFound(purposeId))
       version <- purpose.versions.find(_.id.toString == versionId).toRight(PurposeVersionNotFound(purposeId, versionId))
       _       <- versionValidation(version)
-    } yield updatePurposeFromState(purpose, version, newState, stateChangeDetails)
+    } yield updatePurposeFromState(purpose, version, newState, stateChangeDetails)(dateTimeSupplier)
 
     purpose
       .fold(

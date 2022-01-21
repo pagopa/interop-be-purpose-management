@@ -384,6 +384,8 @@ components:
       properties:
         changedBy:
           $ref: '#/components/schemas/ChangedBy'
+#      required:
+#        - changedBy
     ChangedBy:
       type: string
       description: Role who made the change

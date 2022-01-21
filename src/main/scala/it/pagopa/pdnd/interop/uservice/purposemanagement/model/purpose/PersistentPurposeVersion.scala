@@ -42,6 +42,16 @@ final case class PersistentPurposeVersion(
   def isSuspendable(purposeId: String): Either[Throwable, Unit] =
     Either.cond(SUSPENDABLE_STATES.contains(state), (), PurposeVersionNotInExpectedState(purposeId, id.toString, state))
 
+  def canWaitForApproval(purposeId: String): Either[Throwable, Unit] =
+    for {
+      _ <- Either.cond(
+        WAITABLE_FOR_APPROVAL_STATES.contains(state),
+        (),
+        PurposeVersionNotInExpectedState(purposeId, id.toString, state)
+      )
+      _ <- Either.cond(riskAnalysis.isDefined, (), PurposeVersionMissingRiskAnalysis(purposeId, id.toString))
+    } yield ()
+
   def isArchivable(purposeId: String): Either[Throwable, Unit] =
     Either.cond(ARCHIVABLE_STATES.contains(state), (), PurposeVersionNotInExpectedState(purposeId, id.toString, state))
 }
@@ -52,8 +62,9 @@ object PersistentPurposeVersion {
     PersistentPurposeVersionState.Suspended,
     PersistentPurposeVersionState.WaitingForApproval
   )
-  val SUSPENDABLE_STATES = Seq(PersistentPurposeVersionState.Active)
-  val ARCHIVABLE_STATES  = Seq(PersistentPurposeVersionState.Active)
+  val SUSPENDABLE_STATES           = Seq(PersistentPurposeVersionState.Active)
+  val WAITABLE_FOR_APPROVAL_STATES = Seq(PersistentPurposeVersionState.Draft)
+  val ARCHIVABLE_STATES            = Seq(PersistentPurposeVersionState.Active)
 
   def fromSeed(
     seed: PurposeVersionSeed,

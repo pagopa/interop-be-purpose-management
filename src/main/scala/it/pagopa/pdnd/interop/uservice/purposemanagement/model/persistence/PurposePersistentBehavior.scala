@@ -105,6 +105,18 @@ object PurposePersistentBehavior {
           PurposeVersionSuspended
         )
 
+      case WaitForApprovalPurposeVersion(purposeId, versionId, stateChangeDetails, replyTo) =>
+        changeState(
+          state,
+          purposeId,
+          versionId,
+          stateChangeDetails,
+          PersistentPurposeVersionState.WaitingForApproval,
+          replyTo,
+          _.canWaitForApproval(purposeId),
+          PurposeVersionWaitingForApproval
+        )
+
       case ArchivePurposeVersion(purposeId, versionId, stateChangeDetails, replyTo) =>
         changeState(
           state,
@@ -145,6 +157,7 @@ object PurposePersistentBehavior {
       case PurposeVersionUpdated(purposeId, version) => state.addPurposeVersion(purposeId, version)
       case PurposeVersionActivated(purpose)          => state.updatePurpose(purpose)
       case PurposeVersionSuspended(purpose)          => state.updatePurpose(purpose)
+      case PurposeVersionWaitingForApproval(purpose) => state.updatePurpose(purpose)
       case PurposeVersionArchived(purpose)           => state.updatePurpose(purpose)
     }
 

@@ -95,6 +95,12 @@ trait SpecHelper {
   ): Future[Option[String]] =
     changeVersionState(purposeId, versionId, changedBy, "suspend")
 
+  def waitForApprovalVersion(purposeId: UUID, versionId: UUID, changedBy: ChangedBy)(implicit
+    ec: ExecutionContext,
+    actorSystem: actor.ActorSystem
+  ): Future[Option[String]] =
+    changeVersionState(purposeId, versionId, changedBy, "waitForApproval")
+
   def archiveVersion(purposeId: UUID, versionId: UUID, changedBy: ChangedBy)(implicit
     ec: ExecutionContext,
     actorSystem: actor.ActorSystem

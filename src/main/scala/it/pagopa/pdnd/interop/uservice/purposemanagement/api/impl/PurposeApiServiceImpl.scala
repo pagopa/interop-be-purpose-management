@@ -179,6 +179,41 @@ final case class PurposeApiServiceImpl(
     }
   }
 
+  override def waitForApprovalPurposeVersion(
+    purposeId: String,
+    versionId: String,
+    stateChangeDetails: StateChangeDetails
+  )(implicit toEntityMarshallerProblem: ToEntityMarshaller[Problem], contexts: Seq[(String, String)]): Route = {
+    logger.info("Wait for Approval purpose {} version {}", purposeId, versionId)
+    val result: Future[StatusReply[PersistentPurpose]] =
+      waitForApprovalPurposeVersionById(purposeId, versionId, stateChangeDetails)
+    onSuccess(result) {
+      case statusReply if statusReply.isSuccess => waitForApprovalPurposeVersion204
+      case statusReply if statusReply.isError =>
+        logger.error("Error waiting for approval purpose {} version {}", purposeId, versionId, statusReply.getError)
+        statusReply.getError match {
+          case PurposeNotFound(pId) =>
+            waitForApprovalPurposeVersion404(problemOf(StatusCodes.NotFound, WaitForApprovalPurposeNotFound(pId)))
+          case PurposeVersionNotFound(pId, vId) =>
+            waitForApprovalPurposeVersion404(
+              problemOf(StatusCodes.NotFound, WaitForApprovalPurposeVersionNotFound(pId, vId))
+            )
+          case PurposeVersionNotInExpectedState(pId, vId, s) =>
+            waitForApprovalPurposeVersion400(
+              problemOf(StatusCodes.BadRequest, WaitForApprovalPurposeUnexpectedState(pId, vId, s))
+            )
+          case PurposeVersionMissingRiskAnalysis(pId, vId) =>
+            waitForApprovalPurposeVersion400(
+              problemOf(StatusCodes.BadRequest, WaitForApprovalPurposeMissingRiskAnalysis(pId, vId))
+            )
+          case _ =>
+            waitForApprovalPurposeVersion400(
+              problemOf(StatusCodes.BadRequest, WaitForApprovalPurposeBadRequest(purposeId, versionId))
+            )
+        }
+    }
+  }
+
   override def archivePurposeVersion(
     purposeId: String,
     versionId: String,
@@ -319,6 +354,17 @@ final case class PurposeApiServiceImpl(
       sharding.entityRefFor(PurposePersistentBehavior.TypeKey, AkkaUtils.getShard(purposeId, settings.numberOfShards))
 
     commander.ask(ref => SuspendPurposeVersion(purposeId, versionId, stateChangeDetails, ref))
+  }
+
+  private def waitForApprovalPurposeVersionById(
+    purposeId: String,
+    versionId: String,
+    stateChangeDetails: StateChangeDetails
+  ): Future[StatusReply[PersistentPurpose]] = {
+    val commander: EntityRef[Command] =
+      sharding.entityRefFor(PurposePersistentBehavior.TypeKey, AkkaUtils.getShard(purposeId, settings.numberOfShards))
+
+    commander.ask(ref => WaitForApprovalPurposeVersion(purposeId, versionId, stateChangeDetails, ref))
   }
 
   private def archivePurposeVersionById(

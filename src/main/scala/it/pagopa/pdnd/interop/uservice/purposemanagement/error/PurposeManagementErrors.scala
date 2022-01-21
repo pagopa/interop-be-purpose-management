@@ -51,6 +51,26 @@ object PurposeManagementErrors {
   case class ArchivePurposeBadRequest(purposeId: String, versionId: String)
       extends ComponentError("0018", s"Error archiving Version $versionId for Purpose $purposeId - Bad Request")
 
+  case class WaitForApprovalPurposeNotFound(purposeId: String)
+      extends ComponentError("0019", s"Purpose $purposeId for version wait for approval not found")
+  case class WaitForApprovalPurposeVersionNotFound(purposeId: String, versionId: String)
+      extends ComponentError("0020", s"Version $versionId of purpose $purposeId not found")
+  case class WaitForApprovalPurposeUnexpectedState(
+    purposeId: String,
+    versionId: String,
+    state: PersistentPurposeVersionState
+  ) extends ComponentError(
+        "0021",
+        s"State cannot be changed for Version $versionId of purpose $purposeId - Invalid starting state $state"
+      )
+  case class WaitForApprovalPurposeMissingRiskAnalysis(purposeId: String, versionId: String)
+      extends ComponentError("0022", s"Missing Risk Analysis in Version $versionId of purpose $purposeId")
+  case class WaitForApprovalPurposeBadRequest(purposeId: String, versionId: String)
+      extends ComponentError(
+        "0023",
+        s"Error waiting for approval for Version $versionId for Purpose $purposeId - Bad Request"
+      )
+
   case object GetPurposesBadRequest extends ComponentError("0009", "Error while getting purposes - Bad Request")
 
   case class DocumentCreationPurposeNotFound(purposeId: String)

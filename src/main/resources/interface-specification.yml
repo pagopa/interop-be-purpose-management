@@ -290,6 +290,49 @@ paths:
       tags:
         - purpose
       description: suspends the purpose version by id
+  /purposes/{purposeId}/versions/{versionId}/waitForApproval:
+    parameters:
+      - name: purposeId
+        in: path
+        required:
+          true
+        schema:
+          type: string
+          format: uuid
+      - name: versionId
+        in: path
+        required:
+          true
+        schema:
+          type: string
+          format: uuid
+    post:
+      summary: Wait for Approval for Purpose Version
+      operationId: waitForApprovalPurposeVersion
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StateChangeDetails'
+        required: true
+      responses:
+        '204':
+          description: Purpose Version In Waiting for Approval
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: Purpose Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+      tags:
+        - purpose
+      description: waits for approval for the purpose version by id
   /purposes/{purposeId}/versions/{versionId}/archive:
     parameters:
       - name: purposeId

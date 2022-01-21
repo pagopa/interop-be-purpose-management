@@ -199,31 +199,18 @@ object PurposePersistentBehavior {
     val timestamp = dateTimeSupplier.get
 
     stateChangeDetails.changedBy match {
-      case Some(changedBy) =>
-        changedBy match {
-          case ChangedBy.CONSUMER =>
-            val newState        = calcNewVersionState(purpose.suspendedByProducer, Some(isSuspended), newVersionState)
-            val updatedVersion  = version.copy(state = newState, updatedAt = Some(timestamp))
-            val updatedVersions = purpose.versions.filter(_.id != version.id) :+ updatedVersion
+      case ChangedBy.CONSUMER =>
+        val newState        = calcNewVersionState(purpose.suspendedByProducer, Some(isSuspended), newVersionState)
+        val updatedVersion  = version.copy(state = newState, updatedAt = Some(timestamp))
+        val updatedVersions = purpose.versions.filter(_.id != version.id) :+ updatedVersion
 
-            purpose.copy(
-              versions = updatedVersions,
-              suspendedByConsumer = Some(isSuspended),
-              updatedAt = Some(timestamp)
-            )
-          case ChangedBy.PRODUCER =>
-            val newState        = calcNewVersionState(Some(isSuspended), purpose.suspendedByConsumer, newVersionState)
-            val updatedVersion  = version.copy(state = newState, updatedAt = Some(timestamp))
-            val updatedVersions = purpose.versions.filter(_.id != version.id) :+ updatedVersion
+        purpose.copy(versions = updatedVersions, suspendedByConsumer = Some(isSuspended), updatedAt = Some(timestamp))
+      case ChangedBy.PRODUCER =>
+        val newState        = calcNewVersionState(Some(isSuspended), purpose.suspendedByConsumer, newVersionState)
+        val updatedVersion  = version.copy(state = newState, updatedAt = Some(timestamp))
+        val updatedVersions = purpose.versions.filter(_.id != version.id) :+ updatedVersion
 
-            purpose.copy(
-              versions = updatedVersions,
-              suspendedByProducer = Some(isSuspended),
-              updatedAt = Some(timestamp)
-            )
-        }
-      // TODO Delete me
-      case None => purpose //.copy(versions = updatedVersions)
+        purpose.copy(versions = updatedVersions, suspendedByProducer = Some(isSuspended), updatedAt = Some(timestamp))
     }
   }
 

@@ -111,7 +111,7 @@ trait SpecHelper {
     ec: ExecutionContext,
     actorSystem: actor.ActorSystem
   ): Future[Option[String]] = for {
-    data <- Marshal(StateChangeDetails(changedBy = Some(changedBy)))
+    data <- Marshal(StateChangeDetails(changedBy = changedBy))
       .to[MessageEntity]
       .map(_.dataBytes)
     _ = (() => mockDateTimeSupplier.get).expects().returning(timestamp).once()

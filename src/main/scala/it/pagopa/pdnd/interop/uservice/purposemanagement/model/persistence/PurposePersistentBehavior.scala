@@ -116,7 +116,7 @@ object PurposePersistentBehavior {
           PersistentPurposeVersionState.WaitingForApproval,
           replyTo,
           _.canWaitForApproval(purposeId),
-          PurposeVersionWaitingForApproval
+          PurposeVersionWaitedForApproval
         )(dateTimeSupplier)
 
       case ArchivePurposeVersion(purposeId, versionId, stateChangeDetails, replyTo) =>
@@ -159,7 +159,7 @@ object PurposePersistentBehavior {
       case PurposeVersionUpdated(purposeId, version) => state.addPurposeVersion(purposeId, version)
       case PurposeVersionActivated(purpose)          => state.updatePurpose(purpose)
       case PurposeVersionSuspended(purpose)          => state.updatePurpose(purpose)
-      case PurposeVersionWaitingForApproval(purpose) => state.updatePurpose(purpose)
+      case PurposeVersionWaitedForApproval(purpose)  => state.updatePurpose(purpose)
       case PurposeVersionArchived(purpose)           => state.updatePurpose(purpose)
     }
 

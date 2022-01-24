@@ -27,8 +27,6 @@ final case class PersistentPurposeVersion(
       updatedAt = Some(update.timestamp)
     )
 
-//  def isActivable: Boolean = ACTIVABLE_STATES.contains(state) && riskAnalysis.isDefined
-
   def isActivable(purposeId: String): Either[Throwable, Unit] =
     for {
       _ <- Either.cond(

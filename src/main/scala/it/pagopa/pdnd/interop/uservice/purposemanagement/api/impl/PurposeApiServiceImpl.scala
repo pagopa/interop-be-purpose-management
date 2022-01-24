@@ -132,6 +132,37 @@ final case class PurposeApiServiceImpl(
     }
   }
 
+  override def deletePurposeVersion(purposeId: String, versionId: String)(implicit
+    toEntityMarshallerProblem: ToEntityMarshaller[Problem],
+    contexts: Seq[(String, String)]
+  ): Route = {
+    logger.info("Deleting version {} of purpose {}", versionId, purposeId)
+    val commander: EntityRef[Command] =
+      sharding.entityRefFor(PurposePersistentBehavior.TypeKey, AkkaUtils.getShard(purposeId, settings.numberOfShards))
+    val result: Future[StatusReply[Unit]] =
+      commander.ask(ref => DeletePurposeVersion(purposeId, versionId, ref))
+
+    onComplete(result) {
+      case Success(statusReply) if statusReply.isSuccess =>
+        deletePurposeVersion204
+      case Success(statusReply) =>
+        logger.error("Error while deleting version {} of purpose {}", versionId, purposeId, statusReply.getError)
+        statusReply.getError match {
+          case PurposeVersionNotFound(pId, vId) =>
+            deletePurposeVersion404(problemOf(StatusCodes.NotFound, DeletePurposeNotFound(pId, vId)))
+          case PurposeVersionNotInDraft(pId, vId) =>
+            deletePurposeVersion409(problemOf(StatusCodes.Conflict, DeletePurposeNotInDraft(pId, vId)))
+          case _ =>
+            deletePurposeVersion400(
+              problemOf(StatusCodes.BadRequest, DeletePurposeVersionBadRequest(purposeId, versionId))
+            )
+        }
+      case Failure(ex) =>
+        logger.error("Error while deleting version {} of purpose {}", versionId, purposeId, ex)
+        deletePurposeVersion400(problemOf(StatusCodes.BadRequest, CreatePurposeVersionBadRequest))
+    }
+  }
+
   override def activatePurposeVersion(
     purposeId: String,
     versionId: String,

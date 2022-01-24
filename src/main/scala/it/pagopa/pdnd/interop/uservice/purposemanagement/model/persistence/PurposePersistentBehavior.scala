@@ -72,6 +72,25 @@ object PurposePersistentBehavior {
             }
           }
 
+      case DeletePurposeVersion(purposeId, versionId, replyTo) =>
+        val version = state.getPurposeVersion(purposeId, versionId)
+
+        version
+          .fold {
+            replyTo ! StatusReply.Error[Unit](PurposeVersionNotFound(purposeId, versionId))
+            Effect.none[PurposeVersionDeleted, State]
+          } { v =>
+            v.state match {
+              case PersistentPurposeVersionState.Draft =>
+                Effect
+                  .persist(PurposeVersionDeleted(purposeId, versionId))
+                  .thenRun((_: State) => replyTo ! StatusReply.Success(()))
+              case _ =>
+                replyTo ! StatusReply.Error[Unit](PurposeVersionNotInDraft(purposeId, versionId))
+                Effect.none[PurposeVersionDeleted, State]
+            }
+          }
+
       case UpdatePurposeVersion(purposeId, versionId, update, replyTo) =>
         state
           .getPurposeVersion(purposeId, versionId)
@@ -180,13 +199,14 @@ object PurposePersistentBehavior {
 
   val eventHandler: (State, Event) => State = (state, event) =>
     event match {
-      case PurposeCreated(purpose)                   => state.addPurpose(purpose)
-      case PurposeVersionCreated(purposeId, version) => state.addPurposeVersion(purposeId, version)
-      case PurposeVersionUpdated(purposeId, version) => state.addPurposeVersion(purposeId, version)
-      case PurposeVersionActivated(purpose)          => state.updatePurpose(purpose)
-      case PurposeVersionSuspended(purpose)          => state.updatePurpose(purpose)
-      case PurposeVersionWaitedForApproval(purpose)  => state.updatePurpose(purpose)
-      case PurposeVersionArchived(purpose)           => state.updatePurpose(purpose)
+      case PurposeCreated(purpose)                     => state.addPurpose(purpose)
+      case PurposeVersionCreated(purposeId, version)   => state.addPurposeVersion(purposeId, version)
+      case PurposeVersionUpdated(purposeId, version)   => state.addPurposeVersion(purposeId, version)
+      case PurposeVersionDeleted(purposeId, versionId) => state.removePurposeVersion(purposeId, versionId)
+      case PurposeVersionActivated(purpose)            => state.updatePurpose(purpose)
+      case PurposeVersionSuspended(purpose)            => state.updatePurpose(purpose)
+      case PurposeVersionWaitedForApproval(purpose)    => state.updatePurpose(purpose)
+      case PurposeVersionArchived(purpose)             => state.updatePurpose(purpose)
     }
 
   val TypeKey: EntityTypeKey[Command] =

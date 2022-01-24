@@ -97,4 +97,12 @@ package object v1 {
     : PersistEventDeserializer[PurposeVersionArchivedV1, PurposeVersionArchived] =
     event => toPersistentPurpose(event.purpose).map(PurposeVersionArchived)
 
+  implicit def purposeDeletedV1PersistEventSerializer
+    : PersistEventSerializer[PurposeVersionDeleted, PurposeVersionDeletedV1] =
+    event => Right(PurposeVersionDeletedV1.of(event.purposeId, event.versionId))
+
+  implicit def purposeDeletedV1PersistEventDeserializer
+    : PersistEventDeserializer[PurposeVersionDeletedV1, PurposeVersionDeleted] =
+    event => Right(PurposeVersionDeleted(event.purposeId, event.versionId))
+
 }

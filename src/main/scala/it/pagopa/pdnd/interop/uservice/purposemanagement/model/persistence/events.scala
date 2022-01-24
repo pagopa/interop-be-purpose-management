@@ -11,3 +11,4 @@ final case class PurposeVersionSuspended(purpose: PersistentPurpose)            
 final case class PurposeVersionWaitedForApproval(purpose: PersistentPurpose)                 extends Event
 final case class PurposeVersionArchived(purpose: PersistentPurpose)                          extends Event
 final case class PurposeVersionUpdated(purposeId: String, version: PersistentPurposeVersion) extends Event
+final case class PurposeVersionDeleted(purposeId: String, versionId: String)                 extends Event

@@ -22,6 +22,8 @@ final case class CreatePurposeVersion(
   purposeVersion: PersistentPurposeVersion,
   replyTo: ActorRef[StatusReply[PersistentPurposeVersion]]
 ) extends Command
+final case class DeletePurposeVersion(purposeId: String, versionId: String, replyTo: ActorRef[StatusReply[Unit]])
+    extends Command
 final case class UpdatePurposeVersion(
   purposeId: String,
   versionId: String,

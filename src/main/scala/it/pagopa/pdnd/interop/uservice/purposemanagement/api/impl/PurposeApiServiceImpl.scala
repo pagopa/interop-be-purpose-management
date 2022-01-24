@@ -122,7 +122,7 @@ final case class PurposeApiServiceImpl(
           case PurposeNotFound(pId) =>
             createPurposeVersion404(problemOf(StatusCodes.NotFound, CreatePurposeVersionNotFound(pId)))
           case PurposeVersionStateConflict(pId, vId, s) =>
-            createPurposeVersion409(problemOf(StatusCodes.Conflict, CreatePurposeVersionDraftExists(pId, vId, s)))
+            createPurposeVersion409(problemOf(StatusCodes.Conflict, CreatePurposeVersionStateConflict(pId, vId, s)))
           case _ =>
             createPurposeVersion400(problemOf(StatusCodes.BadRequest, CreatePurposeVersionBadRequest))
         }

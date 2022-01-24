@@ -104,7 +104,7 @@ object PurposeManagementErrors {
   final case class UpdatePurposeVersionBadRequest(purposeId: String, versionId: String)
       extends ComponentError("0031", s"Error while updating version $versionId of purpose $purposeId - Bad Request")
 
-  final case class CreatePurposeVersionDraftExists(
+  final case class CreatePurposeVersionStateConflict(
     purposeId: String,
     versionId: String,
     state: PersistentPurposeVersionState

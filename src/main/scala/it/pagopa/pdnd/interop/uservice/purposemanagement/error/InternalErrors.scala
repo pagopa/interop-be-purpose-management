@@ -18,4 +18,7 @@ object InternalErrors {
   final case class PurposeVersionMissingRiskAnalysis(purposeId: String, versionId: String)
       extends Throwable(s"Missing Risk Analysis in Version $versionId of purpose $purposeId")
 
+  final case class PurposeVersionInDraftExists(purposeId: String)
+      extends Throwable(s"Version in status Draft already exists for Purpose $purposeId")
+
 }

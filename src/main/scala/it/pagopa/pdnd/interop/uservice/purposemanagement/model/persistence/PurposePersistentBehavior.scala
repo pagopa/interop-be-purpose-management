@@ -8,6 +8,7 @@ import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.{Effect, EffectBuilder, EventSourcedBehavior, RetentionCriteria}
 import it.pagopa.pdnd.interop.uservice.purposemanagement.error.InternalErrors.{
   PurposeNotFound,
+  PurposeVersionInDraftExists,
   PurposeVersionNotFound,
   PurposeVersionNotInDraft
 }
@@ -53,10 +54,18 @@ object PurposePersistentBehavior {
           .fold {
             replyTo ! StatusReply.Error[PersistentPurposeVersion](s"Purpose $purposeId not found")
             Effect.none[PurposeVersionCreated, State]
-          } { _ =>
-            Effect
-              .persist(PurposeVersionCreated(purposeId, newVersion))
-              .thenRun((_: State) => replyTo ! StatusReply.Success(newVersion))
+          } { p =>
+            if (
+              p.versions.exists(v =>
+                v.state == PersistentPurposeVersionState.Draft || v.state == PersistentPurposeVersionState.WaitingForApproval
+              )
+            ) {
+              replyTo ! StatusReply.Error[PersistentPurposeVersion](PurposeVersionInDraftExists(purposeId))
+              Effect.none[PurposeVersionCreated, State]
+            } else
+              Effect
+                .persist(PurposeVersionCreated(purposeId, newVersion))
+                .thenRun((_: State) => replyTo ! StatusReply.Success(newVersion))
           }
 
       case UpdatePurposeVersion(purposeId, versionId, update, replyTo) =>

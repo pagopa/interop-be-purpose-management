@@ -269,8 +269,8 @@ class PurposeSpec extends BaseIntegrationSpec {
         for {
           _ <- createPurpose(purposeId1, purposeSeed1)
           _ <- createPurposeVersion(purposeId1, versionId1_1, versionSeed1_1)
-          _ <- createPurposeVersion(purposeId1, versionId1_2, versionSeed1_2)
           _ <- activateVersion(purposeId1, versionId1_1, ChangedBy.CONSUMER)
+          _ <- createPurposeVersion(purposeId1, versionId1_2, versionSeed1_2)
           _ <- createPurpose(purposeId2, purposeSeed2)
           _ <- createPurposeVersion(purposeId2, versionId2_1, versionSeed2_1)
           _ <- activateVersion(purposeId2, versionId2_1, ChangedBy.CONSUMER)

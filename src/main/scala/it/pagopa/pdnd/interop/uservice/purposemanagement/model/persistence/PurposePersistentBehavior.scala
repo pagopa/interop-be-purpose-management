@@ -89,6 +89,8 @@ object PurposePersistentBehavior {
             v.state match {
               case PersistentPurposeVersionState.Active if v.id.toString != newActiveVersionId =>
                 v.copy(state = PersistentPurposeVersionState.Archived)
+              case PersistentPurposeVersionState.Suspended =>
+                v.copy(state = PersistentPurposeVersionState.Archived)
               case _ => v
             }
           }

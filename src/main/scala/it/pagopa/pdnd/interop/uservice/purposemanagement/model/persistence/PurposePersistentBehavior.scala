@@ -198,17 +198,20 @@ object PurposePersistentBehavior {
 
     val timestamp = dateTimeSupplier.get
 
+    def updateVersions(newState: PersistentPurposeVersionState): Seq[PersistentPurposeVersion] = {
+      val updatedVersion = version.copy(state = newState, updatedAt = Some(timestamp))
+      purpose.versions.filter(_.id != version.id) :+ updatedVersion
+    }
+
     stateChangeDetails.changedBy match {
       case ChangedBy.CONSUMER =>
         val newState        = calcNewVersionState(purpose.suspendedByProducer, Some(isSuspended), newVersionState)
-        val updatedVersion  = version.copy(state = newState, updatedAt = Some(timestamp))
-        val updatedVersions = purpose.versions.filter(_.id != version.id) :+ updatedVersion
+        val updatedVersions = updateVersions(newState)
 
         purpose.copy(versions = updatedVersions, suspendedByConsumer = Some(isSuspended), updatedAt = Some(timestamp))
       case ChangedBy.PRODUCER =>
         val newState        = calcNewVersionState(Some(isSuspended), purpose.suspendedByConsumer, newVersionState)
-        val updatedVersion  = version.copy(state = newState, updatedAt = Some(timestamp))
-        val updatedVersions = purpose.versions.filter(_.id != version.id) :+ updatedVersion
+        val updatedVersions = updateVersions(newState)
 
         purpose.copy(versions = updatedVersions, suspendedByProducer = Some(isSuspended), updatedAt = Some(timestamp))
     }
@@ -235,7 +238,6 @@ object PurposePersistentBehavior {
         Left(PurposeVersionNotInDraft(purposeId, version.id.toString))
     }
 
-  // TODO Test me
   def changeState[T <: Event](
     state: State,
     purposeId: String,
@@ -246,7 +248,7 @@ object PurposePersistentBehavior {
     versionValidation: PersistentPurposeVersion => Either[Throwable, Unit],
     eventConstructor: PersistentPurpose => T
   )(dateTimeSupplier: OffsetDateTimeSupplier): EffectBuilder[T, State] = {
-    val purpose = for {
+    val purpose: Either[Throwable, PersistentPurpose] = for {
       purpose <- state.purposes.get(purposeId).toRight(PurposeNotFound(purposeId))
       version <- purpose.versions.find(_.id.toString == versionId).toRight(PurposeVersionNotFound(purposeId, versionId))
       _       <- versionValidation(version)

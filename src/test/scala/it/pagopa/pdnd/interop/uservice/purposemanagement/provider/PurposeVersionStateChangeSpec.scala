@@ -37,6 +37,56 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
       response.futureValue shouldBe Some("")
     }
 
+    "succeed and archive old version" in {
+      val purposeId      = UUID.randomUUID()
+      val versionId1     = UUID.randomUUID()
+      val versionId2     = UUID.randomUUID()
+      val eServiceId     = UUID.randomUUID()
+      val consumerId     = UUID.randomUUID()
+      val riskAnalysisId = UUID.randomUUID()
+
+      val riskAnalysisDoc = PurposeVersionDocument(
+        id = riskAnalysisId,
+        contentType = "a-content-type",
+        path = "a/store/path",
+        createdAt = timestamp
+      )
+
+      val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
+      val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc))
+
+      val response: Future[Purpose] =
+        for {
+          _       <- createPurpose(purposeId, purposeSeed)
+          _       <- createPurposeVersion(purposeId, versionId1, versionSeed)
+          _       <- activateVersion(purposeId, versionId1, ChangedBy.CONSUMER)
+          _       <- createPurposeVersion(purposeId, versionId2, versionSeed)
+          _       <- activateVersion(purposeId, versionId2, ChangedBy.CONSUMER)
+          purpose <- getPurpose(purposeId)
+        } yield purpose
+
+      val expectedVersions = Seq(
+        PurposeVersion(
+          id = versionId1,
+          state = PurposeVersionState.ARCHIVED,
+          createdAt = timestamp,
+          updatedAt = Some(timestamp),
+          expectedApprovalDate = None,
+          riskAnalysis = Some(riskAnalysisDoc)
+        ),
+        PurposeVersion(
+          id = versionId2,
+          state = PurposeVersionState.ACTIVE,
+          createdAt = timestamp,
+          updatedAt = Some(timestamp),
+          expectedApprovalDate = None,
+          riskAnalysis = Some(riskAnalysisDoc)
+        )
+      )
+
+      response.futureValue.versions should contain theSameElementsAs expectedVersions
+    }
+
     "fail if not exist" in {
       val purposeId = UUID.randomUUID()
       val versionId = UUID.randomUUID()

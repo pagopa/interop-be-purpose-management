@@ -15,8 +15,8 @@ message PurposeV1 {
   repeated PurposeVersionV1 versions = 7;
   required string title = 8;
   optional string description = 9;
-  required int64 createdAt = 11;
-  optional int64 updatedAt = 12;
+  required int64 createdAt = 10;
+  optional int64 updatedAt = 11;
 }
 
 message PurposeVersionV1 {

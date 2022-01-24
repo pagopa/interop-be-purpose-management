@@ -19,7 +19,7 @@ object PersistentPurposeVersionState {
   case object Archived           extends PersistentPurposeVersionState
   case object WaitingForApproval extends PersistentPurposeVersionState
 
-  def fromApi(status: PurposeVersionState): PersistentPurposeVersionState = status match {
+  def fromSeed(status: PurposeVersionState): PersistentPurposeVersionState = status match {
     case PurposeVersionState.DRAFT                => Draft
     case PurposeVersionState.ACTIVE               => Active
     case PurposeVersionState.SUSPENDED            => Suspended

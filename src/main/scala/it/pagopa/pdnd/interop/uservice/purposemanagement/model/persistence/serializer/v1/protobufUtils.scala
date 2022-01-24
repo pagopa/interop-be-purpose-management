@@ -5,11 +5,13 @@ import it.pagopa.pdnd.interop.commons.utils.TypeConversions.{LongOps, OffsetDate
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence.serializer.v1.purpose.{
   PurposeStateV1,
   PurposeV1,
+  PurposeVersionDocumentV1,
   PurposeVersionV1
 }
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.{
   PersistentPurpose,
   PersistentPurposeVersion,
+  PersistentPurposeVersionDocument,
   PersistentPurposeVersionState
 }
 
@@ -32,6 +34,8 @@ object protobufUtils {
       versions = versions,
       suspendedByConsumer = protobufPurpose.suspendedByConsumer,
       suspendedByProducer = protobufPurpose.suspendedByProducer,
+      title = protobufPurpose.title,
+      description = protobufPurpose.description,
       createdAt = createdAt,
       updatedAt = updatedAt
     )
@@ -47,6 +51,8 @@ object protobufUtils {
         versions = persistentPurpose.versions.map(toProtobufPurposeVersion),
         suspendedByConsumer = persistentPurpose.suspendedByConsumer,
         suspendedByProducer = persistentPurpose.suspendedByProducer,
+        title = persistentPurpose.title,
+        description = persistentPurpose.description,
         createdAt = persistentPurpose.createdAt.toMillis,
         updatedAt = persistentPurpose.updatedAt.map(_.toMillis)
       )
@@ -60,11 +66,15 @@ object protobufUtils {
       state                <- fromProtobufPurposeState(protobufPurposeVersion.state)
       id                   <- protobufPurposeVersion.id.toUUID
       createdAt            <- protobufPurposeVersion.createdAt.toOffsetDateTime
+      updatedAt            <- protobufPurposeVersion.updatedAt.traverse(_.toOffsetDateTime)
       expectedApprovalDate <- protobufPurposeVersion.expectedApprovalDate.traverse(_.toOffsetDateTime)
+      riskAnalysisDoc      <- protobufPurposeVersion.riskAnalysis.traverse(toPersistentPurposeVersionDocument).toTry
     } yield PersistentPurposeVersion(
       id = id,
       state = state,
+      riskAnalysis = riskAnalysisDoc,
       createdAt = createdAt,
+      updatedAt = updatedAt,
       expectedApprovalDate = expectedApprovalDate
     )
     purpose.toEither
@@ -75,7 +85,9 @@ object protobufUtils {
       id = persistentPurposeVersion.id.toString,
       state = toProtobufPurposeState(persistentPurposeVersion.state),
       createdAt = persistentPurposeVersion.createdAt.toMillis,
-      expectedApprovalDate = persistentPurposeVersion.expectedApprovalDate.map(_.toMillis)
+      updatedAt = persistentPurposeVersion.updatedAt.map(_.toMillis),
+      expectedApprovalDate = persistentPurposeVersion.expectedApprovalDate.map(_.toMillis),
+      riskAnalysis = persistentPurposeVersion.riskAnalysis.map(toProtobufPurposeVersionDocument)
     )
 
   def toProtobufPurposeState(status: PersistentPurposeVersionState): PurposeStateV1 =
@@ -98,4 +110,29 @@ object protobufUtils {
         Failure(new RuntimeException(s"Protobuf PurposeStatus deserialization failed. Unrecognized value: $value"))
     }
 
+  def toPersistentPurposeVersionDocument(
+    protobufDocument: PurposeVersionDocumentV1
+  ): Either[Throwable, PersistentPurposeVersionDocument] = {
+    val purpose = for {
+      id        <- protobufDocument.id.toUUID
+      createdAt <- protobufDocument.createdAt.toOffsetDateTime
+    } yield PersistentPurposeVersionDocument(
+      id = id,
+      contentType = protobufDocument.contentType,
+      path = protobufDocument.path,
+      createdAt = createdAt
+    )
+    purpose.toEither
+  }
+
+  def toProtobufPurposeVersionDocument(
+    persistentDocument: PersistentPurposeVersionDocument
+  ): PurposeVersionDocumentV1 = {
+    PurposeVersionDocumentV1(
+      id = persistentDocument.id.toString,
+      contentType = persistentDocument.contentType,
+      path = persistentDocument.path,
+      createdAt = persistentDocument.createdAt.toMillis
+    )
+  }
 }

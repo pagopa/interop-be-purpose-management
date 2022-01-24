@@ -36,7 +36,7 @@ paths:
               $ref: '#/components/schemas/PurposeSeed'
         required: true
       responses:
-        '200':
+        '201':
           description: Purpose created
           content:
             application/json:
@@ -146,7 +146,7 @@ paths:
               $ref: '#/components/schemas/PurposeVersionSeed'
         required: true
       responses:
-        '200':
+        '201':
           description: Purpose Version created
           content:
             application/json:
@@ -154,6 +154,52 @@ paths:
                 $ref: '#/components/schemas/PurposeVersion'
         '400':
           description: Invalid input
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /purposes/{purposeId}/versions/{versionId}:
+    parameters:
+      - name: purposeId
+        in: path
+        required:
+          true
+        schema:
+          type: string
+          format: uuid
+      - name: versionId
+        in: path
+        required:
+          true
+        schema:
+          type: string
+          format: uuid
+    post:
+      tags:
+        - purpose
+      summary: Update a purpose version
+      operationId: updatePurposeVersion
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurposeVersionUpdateContent'
+        required: true
+      responses:
+        '200':
+          description: Purpose Version updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurposeVersion'
+        '400':
+          description: Invalid input
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: Not Found
           content:
             application/problem+json:
               schema:
@@ -320,17 +366,30 @@ components:
         consumerId:
           type: string
           format: uuid
+        title:
+          type: string
+        description:
+          type: string
       required:
         - eserviceId
         - consumerId
+        - title
     PurposeVersionSeed:
       type: object
       description: contains the expected payload for purpose version persistence.
       properties:
         state:
           $ref: '#/components/schemas/PurposeVersionState'
+        riskAnalysis:
+          $ref: '#/components/schemas/PurposeVersionDocument'
       required:
         - state
+    PurposeVersionUpdateContent:
+      type: object
+      description: contains the expected payload for purpose version update.
+      properties:
+        riskAnalysis:
+          $ref: '#/components/schemas/PurposeVersionDocument'
     Purpose:
       type: object
       properties:
@@ -351,6 +410,10 @@ components:
           type: boolean
         suspendedByProducer:
           type: boolean
+        title:
+          type: string
+        description:
+          type: string
         createdAt:
           type: string
           format: date-time
@@ -362,6 +425,7 @@ components:
         - eserviceId
         - consumerId
         - versions
+        - title
         - createdAt
       description: business representation of an purpose
     Purposes:
@@ -379,14 +443,37 @@ components:
         createdAt:
           type: string
           format: date-time
+        updatedAt:
+          type: string
+          format: date-time
         expectedApprovalDate:
           type: string
           format: date-time
+        riskAnalysis:
+          $ref: '#/components/schemas/PurposeVersionDocument'
       required:
         - id
         - state
         - createdAt
       description: business representation of an purpose version
+    PurposeVersionDocument:
+      type: object
+      required:
+        - id
+        - contentType
+        - path
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        contentType:
+          type: string
+        path:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
     Problem:
       properties:
         type:

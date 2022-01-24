@@ -5,6 +5,7 @@ import "v1/purpose.proto";
 
 option (scalapb.options) = {
   package_name: "it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence.serializer.v1"
+  no_default_values_in_constructor : true
 };
 
 message PurposeCreatedV1 {
@@ -12,6 +13,11 @@ message PurposeCreatedV1 {
 }
 
 message PurposeVersionCreatedV1 {
+  required string purposeId = 1;
+  required PurposeVersionV1 version = 2;
+}
+
+message PurposeVersionUpdatedV1 {
   required string purposeId = 1;
   required PurposeVersionV1 version = 2;
 }
@@ -27,4 +33,3 @@ message PurposeVersionSuspendedV1 {
 message PurposeVersionArchivedV1 {
   required PurposeV1 purpose = 1;
 }
-

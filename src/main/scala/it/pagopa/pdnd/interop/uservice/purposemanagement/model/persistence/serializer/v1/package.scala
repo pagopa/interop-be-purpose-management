@@ -1,15 +1,8 @@
 package it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence.serializer
 
 import cats.implicits.toTraverseOps
-import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.PersistentPurpose
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence._
-import it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence.serializer.v1.events.{
-  PurposeCreatedV1,
-  PurposeVersionActivatedV1,
-  PurposeVersionArchivedV1,
-  PurposeVersionCreatedV1,
-  PurposeVersionSuspendedV1
-}
+import it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence.serializer.v1.events._
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence.serializer.v1.protobufUtils.{
   toPersistentPurpose,
   toPersistentPurposeVersion,
@@ -17,6 +10,7 @@ import it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence.seria
   toProtobufPurposeVersion
 }
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence.serializer.v1.state.{PurposesV1, StateV1}
+import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.PersistentPurpose
 
 package object v1 {
 
@@ -59,6 +53,17 @@ package object v1 {
   implicit def purposeVersionCreatedV1PersistEventSerializer
     : PersistEventSerializer[PurposeVersionCreated, PurposeVersionCreatedV1] =
     event => Right(PurposeVersionCreatedV1.of(event.purposeId, toProtobufPurposeVersion(event.version)))
+
+  implicit def purposeVersionUpdatedV1PersistEventDeserializer
+    : PersistEventDeserializer[PurposeVersionUpdatedV1, PurposeVersionUpdated] =
+    event =>
+      for {
+        version <- toPersistentPurposeVersion(event.version)
+      } yield PurposeVersionUpdated(event.purposeId, version)
+
+  implicit def purposeVersionUpdatedV1PersistEventSerializer
+    : PersistEventSerializer[PurposeVersionUpdated, PurposeVersionUpdatedV1] =
+    event => Right(PurposeVersionUpdatedV1.of(event.purposeId, toProtobufPurposeVersion(event.version)))
 
   implicit def purposeActivatedV1PersistEventSerializer
     : PersistEventSerializer[PurposeVersionActivated, PurposeVersionActivatedV1] =

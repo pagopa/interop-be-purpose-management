@@ -107,7 +107,7 @@ object Main extends App {
         val dateTimeSupplier: OffsetDateTimeSupplier = OffsetDateTimeSupplierImp
 
         val purposeApi = new PurposeApi(
-          new PurposeApiServiceImpl(context.system, sharding, purposePersistenceEntity, uuidSupplier, dateTimeSupplier),
+          PurposeApiServiceImpl(context.system, sharding, purposePersistenceEntity, uuidSupplier, dateTimeSupplier),
           PurposeApiMarshallerImpl,
           jwtValidator.OAuth2JWTValidatorAsContexts
         )

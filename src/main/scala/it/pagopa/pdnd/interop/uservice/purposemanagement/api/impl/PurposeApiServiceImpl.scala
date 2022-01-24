@@ -18,7 +18,7 @@ import it.pagopa.pdnd.interop.uservice.purposemanagement.api.PurposeApiService
 import it.pagopa.pdnd.interop.uservice.purposemanagement.common.system._
 import it.pagopa.pdnd.interop.uservice.purposemanagement.error.InternalErrors.{
   PurposeNotFound,
-  PurposeVersionInDraftExists,
+  PurposeVersionStateConflict,
   PurposeVersionMissingRiskAnalysis,
   PurposeVersionNotFound,
   PurposeVersionNotInDraft,
@@ -121,8 +121,8 @@ final case class PurposeApiServiceImpl(
         statusReply.getError match {
           case PurposeNotFound(pId) =>
             createPurposeVersion404(problemOf(StatusCodes.NotFound, CreatePurposeVersionNotFound(pId)))
-          case PurposeVersionInDraftExists(pId) =>
-            createPurposeVersion409(problemOf(StatusCodes.Conflict, CreatePurposeVersionDraftExists(pId)))
+          case PurposeVersionStateConflict(pId, vId, s) =>
+            createPurposeVersion409(problemOf(StatusCodes.Conflict, CreatePurposeVersionDraftExists(pId, vId, s)))
           case _ =>
             createPurposeVersion400(problemOf(StatusCodes.BadRequest, CreatePurposeVersionBadRequest))
         }

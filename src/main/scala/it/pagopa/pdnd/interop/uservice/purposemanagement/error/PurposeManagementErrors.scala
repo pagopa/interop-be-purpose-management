@@ -104,8 +104,14 @@ object PurposeManagementErrors {
   final case class UpdatePurposeVersionBadRequest(purposeId: String, versionId: String)
       extends ComponentError("0031", s"Error while updating version $versionId of purpose $purposeId - Bad Request")
 
-  final case class CreatePurposeVersionDraftExists(purposeId: String)
-      extends ComponentError("0032", s"Version in status Draft already exists for Purpose $purposeId")
+  final case class CreatePurposeVersionDraftExists(
+    purposeId: String,
+    versionId: String,
+    state: PersistentPurposeVersionState
+  ) extends ComponentError(
+        "0032",
+        s"Version $versionId of Purpose $purposeId has a conflict state $state for this operation"
+      )
   final case class CreatePurposeVersionNotFound(purposeId: String)
       extends ComponentError("0033", s"Purpose $purposeId not found on version creation")
 

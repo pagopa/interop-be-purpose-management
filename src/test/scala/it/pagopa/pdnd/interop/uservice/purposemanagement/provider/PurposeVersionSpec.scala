@@ -83,8 +83,8 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
       val response: Future[Problem] = makeFailingRequest(s"purposes/$purposeId/versions", HttpMethods.POST, versionSeed)
 
       val result = response.futureValue
-      result.status shouldBe 400
-      result.errors.map(_.code) shouldBe Seq("011-0005")
+      result.status shouldBe 404
+      result.errors.map(_.code) shouldBe Seq("011-0033")
     }
 
     "fail if a version in Draft already exists for the same purpose" in {

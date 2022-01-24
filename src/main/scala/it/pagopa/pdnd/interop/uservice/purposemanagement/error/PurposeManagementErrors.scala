@@ -106,5 +106,7 @@ object PurposeManagementErrors {
 
   final case class CreatePurposeVersionDraftExists(purposeId: String)
       extends ComponentError("0032", s"Version in status Draft already exists for Purpose $purposeId")
+  final case class CreatePurposeVersionNotFound(purposeId: String)
+      extends ComponentError("0033", s"Purpose $purposeId not found on version creation")
 
 }

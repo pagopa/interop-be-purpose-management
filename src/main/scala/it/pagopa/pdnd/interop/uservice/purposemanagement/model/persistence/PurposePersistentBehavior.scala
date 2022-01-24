@@ -52,12 +52,13 @@ object PurposePersistentBehavior {
 
         purpose
           .fold {
-            replyTo ! StatusReply.Error[PersistentPurposeVersion](s"Purpose $purposeId not found")
+            replyTo ! StatusReply.Error[PersistentPurposeVersion](PurposeNotFound(purposeId))
             Effect.none[PurposeVersionCreated, State]
           } { p =>
             if (
               p.versions.exists(v =>
-                v.state == PersistentPurposeVersionState.Draft || v.state == PersistentPurposeVersionState.WaitingForApproval
+                v.state == PersistentPurposeVersionState.Draft ||
+                  v.state == PersistentPurposeVersionState.WaitingForApproval
               )
             ) {
               replyTo ! StatusReply.Error[PersistentPurposeVersion](PurposeVersionInDraftExists(purposeId))

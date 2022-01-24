@@ -119,6 +119,8 @@ final case class PurposeApiServiceImpl(
       case Success(statusReply) =>
         logger.error("Error while adding a version to purpose {}", purposeId, statusReply.getError)
         statusReply.getError match {
+          case PurposeNotFound(pId) =>
+            createPurposeVersion404(problemOf(StatusCodes.NotFound, CreatePurposeVersionNotFound(pId)))
           case PurposeVersionInDraftExists(pId) =>
             createPurposeVersion409(problemOf(StatusCodes.Conflict, CreatePurposeVersionDraftExists(pId)))
           case _ =>

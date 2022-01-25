@@ -7,6 +7,7 @@ import akka.pattern.StatusReply
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.{Effect, EffectBuilder, EventSourcedBehavior, RetentionCriteria}
 import it.pagopa.pdnd.interop.uservice.purposemanagement.error.InternalErrors.{
+  PurposeHasVersions,
   PurposeNotFound,
   PurposeVersionStateConflict,
   PurposeVersionNotFound,
@@ -45,6 +46,24 @@ object PurposePersistentBehavior {
           } { p =>
             replyTo ! StatusReply.Error[PersistentPurpose](s"Purpose ${p.id.toString} already exists")
             Effect.none[PurposeCreated, State]
+          }
+
+      case DeletePurpose(purposeId, replyTo) =>
+        val purpose = state.purposes.get(purposeId)
+
+        purpose
+          .fold {
+            replyTo ! StatusReply.Error[Unit](PurposeNotFound(purposeId))
+            Effect.none[PurposeDeleted, State]
+          } { p =>
+            if (p.versions.isEmpty) {
+              Effect
+                .persist(PurposeDeleted(purposeId))
+                .thenRun((_: State) => replyTo ! StatusReply.Success(()))
+            } else {
+              replyTo ! StatusReply.Error[Unit](PurposeHasVersions(purposeId))
+              Effect.none[PurposeDeleted, State]
+            }
           }
 
       case CreatePurposeVersion(purposeId, newVersion, replyTo) =>
@@ -200,6 +219,7 @@ object PurposePersistentBehavior {
   val eventHandler: (State, Event) => State = (state, event) =>
     event match {
       case PurposeCreated(purpose)                     => state.addPurpose(purpose)
+      case PurposeDeleted(purposeId)                   => state.removePurpose(purposeId)
       case PurposeVersionCreated(purposeId, version)   => state.addPurposeVersion(purposeId, version)
       case PurposeVersionUpdated(purposeId, version)   => state.addPurposeVersion(purposeId, version)
       case PurposeVersionDeleted(purposeId, versionId) => state.removePurposeVersion(purposeId, versionId)

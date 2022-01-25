@@ -104,7 +104,7 @@ paths:
     get:
       tags:
         - purpose
-      summary: Get an purpose
+      summary: Get a purpose
       operationId: getPurpose
       responses:
         '200':
@@ -121,6 +121,32 @@ paths:
                 $ref: '#/components/schemas/Problem'
         '404':
           description: Purpose not found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    delete:
+      tags:
+        - purpose
+      summary: Delete a purpose
+      operationId: deletePurpose
+      responses:
+        '204':
+          description: Purpose deleted
+        '400':
+          description: Bad request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: Purpose not found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '409':
+          description: Purpose contains versions
           content:
             application/problem+json:
               schema:
@@ -506,7 +532,7 @@ components:
         - versions
         - title
         - createdAt
-      description: business representation of an purpose
+      description: business representation of a purpose
     Purposes:
       type: array
       items:
@@ -534,7 +560,7 @@ components:
         - id
         - state
         - createdAt
-      description: business representation of an purpose version
+      description: business representation of a purpose version
     PurposeVersionDocument:
       type: object
       required:

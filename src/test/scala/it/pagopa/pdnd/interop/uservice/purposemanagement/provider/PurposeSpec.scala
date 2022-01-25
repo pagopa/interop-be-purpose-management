@@ -343,6 +343,46 @@ class PurposeSpec extends BaseIntegrationSpec {
     }
   }
 
+  "Deletion of a purpose" must {
+
+    "succeed" in {
+      val purposeId  = UUID.randomUUID()
+      val eServiceId = UUID.randomUUID()
+      val consumerId = UUID.randomUUID()
+
+      val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
+
+      val response: Future[Option[String]] =
+        for {
+          _      <- createPurpose(purposeId, purposeSeed)
+          result <- deletePurpose(purposeId)
+        } yield result
+
+      response.futureValue shouldBe Some("")
+    }
+
+    "fail if purpose contains versions" in {
+      val purposeId  = UUID.randomUUID()
+      val versionId  = UUID.randomUUID()
+      val eServiceId = UUID.randomUUID()
+      val consumerId = UUID.randomUUID()
+
+      val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
+      val versionSeed = PurposeVersionSeed()
+
+      val response: Future[Problem] =
+        for {
+          _      <- createPurpose(purposeId, purposeSeed)
+          _      <- createPurposeVersion(purposeId, versionId, versionSeed)
+          result <- makeFailingRequest(s"purposes/$purposeId", HttpMethods.DELETE)
+        } yield result
+
+      val result = response.futureValue
+      result.status shouldBe 409
+      result.errors.map(_.code) shouldBe Seq("011-0039")
+    }
+  }
+
   def purposesAreTheSame(a: Purpose, b: Purpose): Boolean =
     a match {
       case Purpose(

@@ -22,6 +22,9 @@ final case class State(purposes: Map[String, PersistentPurpose]) extends Persist
       case None => this
     }
 
+  def removePurpose(purposeId: String): State =
+    copy(purposes = purposes.filter(_._1 != purposeId))
+
   def removePurposeVersion(purposeId: String, versionId: String): State =
     purposes.get(purposeId) match {
       case Some(purpose) =>

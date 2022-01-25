@@ -81,11 +81,19 @@ package object v1 {
     : PersistEventDeserializer[PurposeVersionSuspendedV1, PurposeVersionSuspended] =
     event => toPersistentPurpose(event.purpose).map(PurposeVersionSuspended)
 
-  implicit def purposeDeactivatedV1PersistEventSerializer
+  implicit def purposeWaitingForApprovalV1PersistEventSerializer
+    : PersistEventSerializer[PurposeVersionWaitedForApproval, PurposeVersionWaitedForApprovalV1] =
+    event => toProtobufPurpose(event.purpose).map(ag => PurposeVersionWaitedForApprovalV1.of(ag))
+
+  implicit def purposeWaitingForApprovalV1PersistEventDeserializer
+    : PersistEventDeserializer[PurposeVersionWaitedForApprovalV1, PurposeVersionWaitedForApproval] =
+    event => toPersistentPurpose(event.purpose).map(PurposeVersionWaitedForApproval)
+
+  implicit def purposeArchivedV1PersistEventSerializer
     : PersistEventSerializer[PurposeVersionArchived, PurposeVersionArchivedV1] =
     event => toProtobufPurpose(event.purpose).map(ag => PurposeVersionArchivedV1.of(ag))
 
-  implicit def purposeDeactivatedV1PersistEventDeserializer
+  implicit def purposeArchivedV1PersistEventDeserializer
     : PersistEventDeserializer[PurposeVersionArchivedV1, PurposeVersionArchived] =
     event => toPersistentPurpose(event.purpose).map(PurposeVersionArchived)
 

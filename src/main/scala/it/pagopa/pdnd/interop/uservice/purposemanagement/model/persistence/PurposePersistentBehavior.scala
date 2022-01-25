@@ -5,8 +5,9 @@ import akka.actor.typed.{ActorRef, Behavior, SupervisorStrategy}
 import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityTypeKey}
 import akka.pattern.StatusReply
 import akka.persistence.typed.PersistenceId
-import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior, RetentionCriteria}
+import akka.persistence.typed.scaladsl.{Effect, EffectBuilder, EventSourcedBehavior, RetentionCriteria}
 import it.pagopa.pdnd.interop.uservice.purposemanagement.error.InternalErrors.{
+  PurposeNotFound,
   PurposeVersionNotFound,
   PurposeVersionNotInDraft
 }
@@ -16,6 +17,7 @@ import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.{
   PersistentPurposeVersionState
 }
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.{ChangedBy, StateChangeDetails}
+import it.pagopa.pdnd.interop.uservice.purposemanagement.service.OffsetDateTimeSupplier
 
 import java.time.temporal.ChronoUnit
 import scala.concurrent.duration.{DurationInt, DurationLong}
@@ -25,7 +27,8 @@ object PurposePersistentBehavior {
 
   def commandHandler(
     shard: ActorRef[ClusterSharding.ShardCommand],
-    context: ActorContext[Command]
+    context: ActorContext[Command],
+    dateTimeSupplier: OffsetDateTimeSupplier
   ): (State, Command) => Effect[Event, State] = { (state, command) =>
     val idleTimeout =
       context.system.settings.config.getDuration("uservice-purpose-management.idle-timeout")
@@ -57,12 +60,8 @@ object PurposePersistentBehavior {
           }
 
       case UpdatePurposeVersion(purposeId, versionId, update, replyTo) =>
-        val version: Option[PersistentPurposeVersion] = for {
-          purpose <- state.purposes.get(purposeId)
-          version <- purpose.versions.find(_.id.toString == versionId)
-        } yield version
-
-        version
+        state
+          .getPurposeVersion(purposeId, versionId)
           .fold {
             replyTo ! StatusReply.Error[PersistentPurposeVersion](PurposeVersionNotFound(purposeId, versionId))
             Effect.none[PurposeVersionUpdated, State]
@@ -85,37 +84,52 @@ object PurposePersistentBehavior {
         Effect.none[Event, State]
 
       case ActivatePurposeVersion(purposeId, versionId, stateChangeDetails, replyTo) =>
-        updatePurposeState(state, purposeId, versionId, PersistentPurposeVersionState.Active, stateChangeDetails)
-          .fold {
-            replyTo ! StatusReply.Error[PersistentPurpose](s"Purpose $purposeId and version $versionId not found.")
-            Effect.none[PurposeVersionActivated, State]
-          } { updatedPurpose =>
-            Effect
-              .persist(PurposeVersionActivated(updatedPurpose))
-              .thenRun((_: State) => replyTo ! StatusReply.Success(updatedPurpose))
-          }
+        changeState(
+          state,
+          purposeId,
+          versionId,
+          stateChangeDetails,
+          PersistentPurposeVersionState.Active,
+          replyTo,
+          _.isActivable(purposeId),
+          PurposeVersionActivated
+        )(dateTimeSupplier)
 
       case SuspendPurposeVersion(purposeId, versionId, stateChangeDetails, replyTo) =>
-        updatePurposeState(state, purposeId, versionId, PersistentPurposeVersionState.Suspended, stateChangeDetails)
-          .fold {
-            replyTo ! StatusReply.Error[PersistentPurpose](s"Purpose $purposeId and version $versionId not found.")
-            Effect.none[PurposeVersionSuspended, State]
-          } { updatedPurpose =>
-            Effect
-              .persist(PurposeVersionSuspended(updatedPurpose))
-              .thenRun((_: State) => replyTo ! StatusReply.Success(updatedPurpose))
-          }
+        changeState(
+          state,
+          purposeId,
+          versionId,
+          stateChangeDetails,
+          PersistentPurposeVersionState.Suspended,
+          replyTo,
+          _.isSuspendable(purposeId),
+          PurposeVersionSuspended
+        )(dateTimeSupplier)
+
+      case WaitForApprovalPurposeVersion(purposeId, versionId, stateChangeDetails, replyTo) =>
+        changeState(
+          state,
+          purposeId,
+          versionId,
+          stateChangeDetails,
+          PersistentPurposeVersionState.WaitingForApproval,
+          replyTo,
+          _.canWaitForApproval(purposeId),
+          PurposeVersionWaitedForApproval
+        )(dateTimeSupplier)
 
       case ArchivePurposeVersion(purposeId, versionId, stateChangeDetails, replyTo) =>
-        updatePurposeState(state, purposeId, versionId, PersistentPurposeVersionState.Archived, stateChangeDetails)
-          .fold {
-            replyTo ! StatusReply.Error[PersistentPurpose](s"Purpose $purposeId and version $versionId not found.")
-            Effect.none[PurposeVersionArchived, State]
-          } { updatedPurpose =>
-            Effect
-              .persist(PurposeVersionArchived(updatedPurpose))
-              .thenRun((_: State) => replyTo ! StatusReply.Success(updatedPurpose))
-          }
+        changeState(
+          state,
+          purposeId,
+          versionId,
+          stateChangeDetails,
+          PersistentPurposeVersionState.Archived,
+          replyTo,
+          _.isArchivable(purposeId),
+          PurposeVersionArchived
+        )(dateTimeSupplier)
 
       case ListPurposes(from, to, consumerId, eserviceId, purposeStates, replyTo) =>
         val purposes: Seq[PersistentPurpose] = state.purposes
@@ -145,13 +159,18 @@ object PurposePersistentBehavior {
       case PurposeVersionUpdated(purposeId, version) => state.addPurposeVersion(purposeId, version)
       case PurposeVersionActivated(purpose)          => state.updatePurpose(purpose)
       case PurposeVersionSuspended(purpose)          => state.updatePurpose(purpose)
+      case PurposeVersionWaitedForApproval(purpose)  => state.updatePurpose(purpose)
       case PurposeVersionArchived(purpose)           => state.updatePurpose(purpose)
     }
 
   val TypeKey: EntityTypeKey[Command] =
     EntityTypeKey[Command]("uservice-purpose-management-persistence-purpose")
 
-  def apply(shard: ActorRef[ClusterSharding.ShardCommand], persistenceId: PersistenceId): Behavior[Command] = {
+  def apply(
+    shard: ActorRef[ClusterSharding.ShardCommand],
+    persistenceId: PersistenceId,
+    dateTimeSupplier: OffsetDateTimeSupplier
+  ): Behavior[Command] = {
     Behaviors.setup { context =>
       context.log.info(s"Starting Purpose Shard ${persistenceId.id}")
       val numberOfEvents =
@@ -160,7 +179,7 @@ object PurposePersistentBehavior {
       EventSourcedBehavior[Command, Event, State](
         persistenceId = persistenceId,
         emptyState = State.empty,
-        commandHandler = commandHandler(shard, context),
+        commandHandler = commandHandler(shard, context, dateTimeSupplier),
         eventHandler = eventHandler
       ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = numberOfEvents, keepNSnapshots = 1))
         .withTagger(_ => Set(persistenceId.id))
@@ -168,35 +187,46 @@ object PurposePersistentBehavior {
     }
   }
 
-  // TODO Test me
-  private def updatePurposeState(
-    state: State,
-    purposeId: String,
-    versionId: String,
+  def updatePurposeFromState(
+    purpose: PersistentPurpose,
+    version: PersistentPurposeVersion,
     newVersionState: PersistentPurposeVersionState,
     stateChangeDetails: StateChangeDetails
-  ): Option[PersistentPurpose] = {
+  )(dateTimeSupplier: OffsetDateTimeSupplier): PersistentPurpose = {
 
     def isSuspended = newVersionState == PersistentPurposeVersionState.Suspended
 
-    for {
-      purpose <- state.purposes.get(purposeId)
-      version <- purpose.versions.find(_.id.toString == versionId)
-    } yield {
+    val timestamp = dateTimeSupplier.get
 
-      val updatedVersions =
-        purpose.versions.filterNot(_.id != version.id) :+ version
+    def updateVersions(newState: PersistentPurposeVersionState): Seq[PersistentPurposeVersion] = {
+      val updatedVersion = version.copy(state = newState, updatedAt = Some(timestamp))
+      purpose.versions.filter(_.id != version.id) :+ updatedVersion
+    }
 
-      stateChangeDetails.changedBy match {
-        case Some(changedBy) =>
-          changedBy match {
-            case ChangedBy.CONSUMER =>
-              purpose.copy(versions = updatedVersions, suspendedByConsumer = Some(isSuspended))
-            case ChangedBy.PRODUCER =>
-              purpose.copy(versions = updatedVersions, suspendedByProducer = Some(isSuspended))
-          }
-        case None => purpose.copy(versions = updatedVersions)
-      }
+    stateChangeDetails.changedBy match {
+      case ChangedBy.CONSUMER =>
+        val newState        = calcNewVersionState(purpose.suspendedByProducer, Some(isSuspended), newVersionState)
+        val updatedVersions = updateVersions(newState)
+
+        purpose.copy(versions = updatedVersions, suspendedByConsumer = Some(isSuspended), updatedAt = Some(timestamp))
+      case ChangedBy.PRODUCER =>
+        val newState        = calcNewVersionState(Some(isSuspended), purpose.suspendedByConsumer, newVersionState)
+        val updatedVersions = updateVersions(newState)
+
+        purpose.copy(versions = updatedVersions, suspendedByProducer = Some(isSuspended), updatedAt = Some(timestamp))
+    }
+  }
+
+  def calcNewVersionState(
+    suspendedByProducer: Option[Boolean],
+    suspendedByConsumer: Option[Boolean],
+    newState: PersistentPurposeVersionState
+  ): PersistentPurposeVersionState = {
+    import PersistentPurposeVersionState._
+    (newState, suspendedByProducer, suspendedByConsumer) match {
+      case (Active, Some(true), _) => Suspended
+      case (Active, _, Some(true)) => Suspended
+      case _                       => newState
     }
   }
 
@@ -207,4 +237,33 @@ object PurposePersistentBehavior {
       case _ =>
         Left(PurposeVersionNotInDraft(purposeId, version.id.toString))
     }
+
+  def changeState[T <: Event](
+    state: State,
+    purposeId: String,
+    versionId: String,
+    stateChangeDetails: StateChangeDetails,
+    newState: PersistentPurposeVersionState,
+    replyTo: ActorRef[StatusReply[PersistentPurpose]],
+    versionValidation: PersistentPurposeVersion => Either[Throwable, Unit],
+    eventConstructor: PersistentPurpose => T
+  )(dateTimeSupplier: OffsetDateTimeSupplier): EffectBuilder[T, State] = {
+    val purpose: Either[Throwable, PersistentPurpose] = for {
+      purpose <- state.purposes.get(purposeId).toRight(PurposeNotFound(purposeId))
+      version <- purpose.versions.find(_.id.toString == versionId).toRight(PurposeVersionNotFound(purposeId, versionId))
+      _       <- versionValidation(version)
+    } yield updatePurposeFromState(purpose, version, newState, stateChangeDetails)(dateTimeSupplier)
+
+    purpose
+      .fold(
+        ex => {
+          replyTo ! StatusReply.Error[PersistentPurpose](ex)
+          Effect.none[T, State]
+        },
+        updatedPurpose =>
+          Effect
+            .persist(eventConstructor(updatedPurpose))
+            .thenRun((_: State) => replyTo ! StatusReply.Success(updatedPurpose))
+      )
+  }
 }

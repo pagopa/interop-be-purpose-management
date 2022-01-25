@@ -33,3 +33,7 @@ message PurposeVersionSuspendedV1 {
 message PurposeVersionArchivedV1 {
   required PurposeV1 purpose = 1;
 }
+
+message PurposeVersionWaitedForApprovalV1 {
+  required PurposeV1 purpose = 1;
+}

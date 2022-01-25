@@ -95,6 +95,12 @@ trait SpecHelper {
   ): Future[Option[String]] =
     changeVersionState(purposeId, versionId, changedBy, "suspend")
 
+  def waitForApprovalVersion(purposeId: UUID, versionId: UUID, changedBy: ChangedBy)(implicit
+    ec: ExecutionContext,
+    actorSystem: actor.ActorSystem
+  ): Future[Option[String]] =
+    changeVersionState(purposeId, versionId, changedBy, "waitForApproval")
+
   def archiveVersion(purposeId: UUID, versionId: UUID, changedBy: ChangedBy)(implicit
     ec: ExecutionContext,
     actorSystem: actor.ActorSystem
@@ -105,9 +111,10 @@ trait SpecHelper {
     ec: ExecutionContext,
     actorSystem: actor.ActorSystem
   ): Future[Option[String]] = for {
-    data <- Marshal(StateChangeDetails(changedBy = Some(changedBy)))
+    data <- Marshal(StateChangeDetails(changedBy = changedBy))
       .to[MessageEntity]
       .map(_.dataBytes)
+    _ = (() => mockDateTimeSupplier.get).expects().returning(timestamp).once()
     result <- Unmarshal(makeRequest(data, s"purposes/$purposeId/versions/$versionId/$statePath", HttpMethods.POST))
       .to[Option[String]]
   } yield result

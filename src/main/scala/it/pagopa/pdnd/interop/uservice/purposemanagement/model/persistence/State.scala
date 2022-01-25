@@ -3,6 +3,13 @@ package it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.{PersistentPurpose, PersistentPurposeVersion}
 
 final case class State(purposes: Map[String, PersistentPurpose]) extends Persistable {
+
+  def getPurposeVersion(purposeId: String, versionId: String): Option[PersistentPurposeVersion] =
+    for {
+      purpose <- purposes.get(purposeId)
+      version <- purpose.versions.find(_.id.toString == versionId)
+    } yield version
+
   def addPurpose(purpose: PersistentPurpose): State =
     copy(purposes = purposes + (purpose.id.toString -> purpose))
 

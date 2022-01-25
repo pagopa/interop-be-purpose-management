@@ -47,7 +47,7 @@ class PurposeSpec extends BaseIntegrationSpec {
       val consumerId = UUID.randomUUID()
 
       val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
-      val versionSeed = PurposeVersionSeed(state = PurposeVersionState.ACTIVE)
+      val versionSeed = PurposeVersionSeed()
 
       val response: Future[Purpose] =
         for {
@@ -61,7 +61,12 @@ class PurposeSpec extends BaseIntegrationSpec {
         eserviceId = purposeSeed.eserviceId,
         consumerId = purposeSeed.consumerId,
         versions = Seq(
-          PurposeVersion(id = versionId, state = versionSeed.state, createdAt = timestamp, expectedApprovalDate = None)
+          PurposeVersion(
+            id = versionId,
+            state = PurposeVersionState.DRAFT,
+            createdAt = timestamp,
+            expectedApprovalDate = None
+          )
         ),
         suspendedByConsumer = None,
         suspendedByProducer = None,
@@ -98,7 +103,7 @@ class PurposeSpec extends BaseIntegrationSpec {
 
       val purposeSeed1 = PurposeSeed(eserviceId = eServiceId1, consumerId = consumerId1, title = "Purpose")
       val purposeSeed2 = PurposeSeed(eserviceId = eServiceId2, consumerId = consumerId2, title = "Purpose")
-      val versionSeed  = PurposeVersionSeed(state = PurposeVersionState.ACTIVE)
+      val versionSeed  = PurposeVersionSeed()
 
       val response: Future[Seq[Purpose]] =
         for {
@@ -117,7 +122,7 @@ class PurposeSpec extends BaseIntegrationSpec {
             versions = Seq(
               PurposeVersion(
                 id = versionId1,
-                state = versionSeed.state,
+                state = PurposeVersionState.DRAFT,
                 createdAt = timestamp,
                 expectedApprovalDate = None
               )
@@ -157,7 +162,7 @@ class PurposeSpec extends BaseIntegrationSpec {
 
       val purposeSeed1 = PurposeSeed(eserviceId = eServiceId1, consumerId = consumerId1, title = "Purpose")
       val purposeSeed2 = PurposeSeed(eserviceId = eServiceId2, consumerId = consumerId2, title = "Purpose")
-      val versionSeed  = PurposeVersionSeed(state = PurposeVersionState.ACTIVE)
+      val versionSeed  = PurposeVersionSeed()
 
       val response: Future[Seq[Purpose]] =
         for {
@@ -176,7 +181,7 @@ class PurposeSpec extends BaseIntegrationSpec {
             versions = Seq(
               PurposeVersion(
                 id = versionId1,
-                state = versionSeed.state,
+                state = PurposeVersionState.DRAFT,
                 createdAt = timestamp,
                 expectedApprovalDate = None
               )
@@ -204,7 +209,7 @@ class PurposeSpec extends BaseIntegrationSpec {
 
       val purposeSeed1 = PurposeSeed(eserviceId = eServiceId1, consumerId = consumerId1, title = "Purpose")
       val purposeSeed2 = PurposeSeed(eserviceId = eServiceId2, consumerId = consumerId2, title = "Purpose")
-      val versionSeed  = PurposeVersionSeed(state = PurposeVersionState.ACTIVE)
+      val versionSeed  = PurposeVersionSeed()
 
       val response: Future[Seq[Purpose]] =
         for {
@@ -234,33 +239,46 @@ class PurposeSpec extends BaseIntegrationSpec {
     }
 
     "succeed filtering by Version State" in {
-      val purposeId1   = UUID.randomUUID()
-      val purposeId2   = UUID.randomUUID()
-      val purposeId3   = UUID.randomUUID()
-      val versionId1_1 = UUID.randomUUID()
-      val versionId1_2 = UUID.randomUUID()
-      val versionId2_1 = UUID.randomUUID()
-      val versionId3_1 = UUID.randomUUID()
-      val eServiceId   = UUID.randomUUID()
-      val consumerId   = UUID.randomUUID()
+      val purposeId1     = UUID.randomUUID()
+      val purposeId2     = UUID.randomUUID()
+      val purposeId3     = UUID.randomUUID()
+      val versionId1_1   = UUID.randomUUID()
+      val versionId1_2   = UUID.randomUUID()
+      val versionId2_1   = UUID.randomUUID()
+      val versionId3_1   = UUID.randomUUID()
+      val eServiceId     = UUID.randomUUID()
+      val consumerId     = UUID.randomUUID()
+      val riskAnalysisId = UUID.randomUUID()
+
+      val riskAnalysisDoc = PurposeVersionDocument(
+        id = riskAnalysisId,
+        contentType = "a-content-type",
+        path = "a/store/path",
+        createdAt = timestamp
+      )
 
       val purposeSeed1   = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
       val purposeSeed2   = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
       val purposeSeed3   = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
-      val versionSeed1_1 = PurposeVersionSeed(state = PurposeVersionState.ACTIVE)
-      val versionSeed1_2 = PurposeVersionSeed(state = PurposeVersionState.DRAFT)
-      val versionSeed2_1 = PurposeVersionSeed(state = PurposeVersionState.SUSPENDED)
-      val versionSeed3_1 = PurposeVersionSeed(state = PurposeVersionState.ARCHIVED)
+      val versionSeed1_1 = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc))
+      val versionSeed1_2 = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc))
+      val versionSeed2_1 = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc))
+      val versionSeed3_1 = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc))
 
       val response: Future[Seq[Purpose]] =
         for {
           _ <- createPurpose(purposeId1, purposeSeed1)
           _ <- createPurposeVersion(purposeId1, versionId1_1, versionSeed1_1)
           _ <- createPurposeVersion(purposeId1, versionId1_2, versionSeed1_2)
+          _ <- activateVersion(purposeId1, versionId1_1, ChangedBy.CONSUMER)
           _ <- createPurpose(purposeId2, purposeSeed2)
           _ <- createPurposeVersion(purposeId2, versionId2_1, versionSeed2_1)
+          _ <- activateVersion(purposeId2, versionId2_1, ChangedBy.CONSUMER)
+          _ <- suspendVersion(purposeId2, versionId2_1, ChangedBy.CONSUMER)
           _ <- createPurpose(purposeId3, purposeSeed3)
           _ <- createPurposeVersion(purposeId3, versionId3_1, versionSeed3_1)
+          _ <- activateVersion(purposeId3, versionId3_1, ChangedBy.CONSUMER)
+          _ <- archiveVersion(purposeId3, versionId3_1, ChangedBy.CONSUMER)
           response <- getPurposes(
             eServiceId = Some(eServiceId),
             consumerId = Some(consumerId),
@@ -277,23 +295,26 @@ class PurposeSpec extends BaseIntegrationSpec {
             versions = Seq(
               PurposeVersion(
                 id = versionId1_1,
-                state = versionSeed1_1.state,
+                state = PurposeVersionState.ACTIVE,
                 createdAt = timestamp,
-                expectedApprovalDate = None
+                updatedAt = Some(timestamp),
+                expectedApprovalDate = None,
+                riskAnalysis = Some(riskAnalysisDoc)
               ),
               PurposeVersion(
                 id = versionId1_2,
-                state = versionSeed1_2.state,
+                state = PurposeVersionState.DRAFT,
                 createdAt = timestamp,
-                expectedApprovalDate = None
+                expectedApprovalDate = None,
+                riskAnalysis = Some(riskAnalysisDoc)
               )
             ),
-            suspendedByConsumer = None,
+            suspendedByConsumer = Some(false),
             suspendedByProducer = None,
             title = purposeSeed1.title,
             description = purposeSeed1.description,
             createdAt = timestamp,
-            updatedAt = None
+            updatedAt = Some(timestamp)
           ),
           Purpose(
             id = purposeId2,
@@ -302,17 +323,19 @@ class PurposeSpec extends BaseIntegrationSpec {
             versions = Seq(
               PurposeVersion(
                 id = versionId2_1,
-                state = versionSeed2_1.state,
+                state = PurposeVersionState.SUSPENDED,
                 createdAt = timestamp,
-                expectedApprovalDate = None
+                updatedAt = Some(timestamp),
+                expectedApprovalDate = None,
+                riskAnalysis = Some(riskAnalysisDoc)
               )
             ),
-            suspendedByConsumer = None,
+            suspendedByConsumer = Some(true),
             suspendedByProducer = None,
             title = purposeSeed2.title,
             description = purposeSeed2.description,
             createdAt = timestamp,
-            updatedAt = None
+            updatedAt = Some(timestamp)
           )
         )
 

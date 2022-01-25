@@ -40,6 +40,12 @@ final case class SuspendPurposeVersion(
   stateChangeDetails: StateChangeDetails,
   replyTo: ActorRef[StatusReply[PersistentPurpose]]
 ) extends Command
+final case class WaitForApprovalPurposeVersion(
+  purposeId: String,
+  versionId: String,
+  stateChangeDetails: StateChangeDetails,
+  replyTo: ActorRef[StatusReply[PersistentPurpose]]
+) extends Command
 final case class ArchivePurposeVersion(
   purposeId: String,
   versionId: String,

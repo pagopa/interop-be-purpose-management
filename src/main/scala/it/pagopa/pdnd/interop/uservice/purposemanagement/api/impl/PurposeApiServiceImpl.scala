@@ -18,6 +18,7 @@ import it.pagopa.pdnd.interop.uservice.purposemanagement.api.PurposeApiService
 import it.pagopa.pdnd.interop.uservice.purposemanagement.common.system._
 import it.pagopa.pdnd.interop.uservice.purposemanagement.error.InternalErrors.{
   PurposeNotFound,
+  PurposeVersionStateConflict,
   PurposeVersionMissingRiskAnalysis,
   PurposeVersionNotFound,
   PurposeVersionNotInDraft,
@@ -108,7 +109,6 @@ final case class PurposeApiServiceImpl(
     toEntityMarshallerProblem: ToEntityMarshaller[Problem],
     contexts: Seq[(String, String)]
   ): Route = {
-    // TODO It could return 409 if state conflicts
     logger.info("Adding a version to purpose {}", purposeId)
     val purposeVersion: PersistentPurposeVersion =
       PersistentPurposeVersion.fromSeed(purposeVersionSeed, uuidSupplier, dateTimeSupplier)
@@ -118,7 +118,14 @@ final case class PurposeApiServiceImpl(
         createPurposeVersion201(PersistentPurposeVersion.toAPI(statusReply.getValue))
       case Success(statusReply) =>
         logger.error("Error while adding a version to purpose {}", purposeId, statusReply.getError)
-        createPurposeVersion400(problemOf(StatusCodes.BadRequest, CreatePurposeVersionBadRequest))
+        statusReply.getError match {
+          case PurposeNotFound(pId) =>
+            createPurposeVersion404(problemOf(StatusCodes.NotFound, CreatePurposeVersionNotFound(pId)))
+          case PurposeVersionStateConflict(pId, vId, s) =>
+            createPurposeVersion409(problemOf(StatusCodes.Conflict, CreatePurposeVersionStateConflict(pId, vId, s)))
+          case _ =>
+            createPurposeVersion400(problemOf(StatusCodes.BadRequest, CreatePurposeVersionBadRequest))
+        }
       case Failure(ex) =>
         logger.error("Error while adding a version to purpose {}", purposeId, ex)
         createPurposeVersion400(problemOf(StatusCodes.BadRequest, CreatePurposeVersionBadRequest))

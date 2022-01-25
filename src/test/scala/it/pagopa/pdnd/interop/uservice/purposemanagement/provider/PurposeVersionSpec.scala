@@ -83,9 +83,63 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
       val response: Future[Problem] = makeFailingRequest(s"purposes/$purposeId/versions", HttpMethods.POST, versionSeed)
 
       val result = response.futureValue
-      result.status shouldBe 400
-      result.errors.map(_.code) shouldBe Seq("011-0005")
+      result.status shouldBe 404
+      result.errors.map(_.code) shouldBe Seq("011-0033")
+    }
 
+    "fail if a version in Draft already exists for the same purpose" in {
+      val purposeId  = UUID.randomUUID()
+      val versionId  = UUID.randomUUID()
+      val eServiceId = UUID.randomUUID()
+      val consumerId = UUID.randomUUID()
+
+      val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
+      val versionSeed = PurposeVersionSeed()
+
+      val response: Future[Problem] =
+        for {
+          _ <- createPurpose(purposeId, purposeSeed)
+          _ <- createPurposeVersion(purposeId, versionId, versionSeed)
+          _ = (() => mockUUIDSupplier.get).expects().returning(versionId).once()
+          _ = (() => mockDateTimeSupplier.get).expects().returning(timestamp).once()
+          result <- makeFailingRequest(s"purposes/$purposeId/versions", HttpMethods.POST, versionSeed)
+        } yield result
+
+      val result = response.futureValue
+      result.status shouldBe 409
+      result.errors.map(_.code) shouldBe Seq("011-0032")
+    }
+
+    "fail if a version in Waiting For Approval already exists for the same purpose" in {
+      val purposeId      = UUID.randomUUID()
+      val versionId      = UUID.randomUUID()
+      val eServiceId     = UUID.randomUUID()
+      val consumerId     = UUID.randomUUID()
+      val riskAnalysisId = UUID.randomUUID()
+
+      val riskAnalysisDoc = PurposeVersionDocument(
+        id = riskAnalysisId,
+        contentType = "a-content-type",
+        path = "a/store/path",
+        createdAt = timestamp
+      )
+
+      val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
+      val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc))
+
+      val response: Future[Problem] =
+        for {
+          _ <- createPurpose(purposeId, purposeSeed)
+          _ <- createPurposeVersion(purposeId, versionId, versionSeed)
+          _ <- waitForApprovalVersion(purposeId, versionId, ChangedBy.CONSUMER)
+          _ = (() => mockUUIDSupplier.get).expects().returning(versionId).once()
+          _ = (() => mockDateTimeSupplier.get).expects().returning(timestamp).once()
+          result <- makeFailingRequest(s"purposes/$purposeId/versions", HttpMethods.POST, versionSeed)
+        } yield result
+
+      val result = response.futureValue
+      result.status shouldBe 409
+      result.errors.map(_.code) shouldBe Seq("011-0032")
     }
   }
 

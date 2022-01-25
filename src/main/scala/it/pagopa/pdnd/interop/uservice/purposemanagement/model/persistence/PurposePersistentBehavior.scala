@@ -84,6 +84,19 @@ object PurposePersistentBehavior {
         Effect.none[Event, State]
 
       case ActivatePurposeVersion(purposeId, versionId, stateChangeDetails, replyTo) =>
+        def archiveOldVersion(purpose: PersistentPurpose, newActiveVersionId: String): PurposeVersionActivated = {
+          val updatedVersions = purpose.versions.map { v =>
+            v.state match {
+              case PersistentPurposeVersionState.Active if v.id.toString != newActiveVersionId =>
+                v.copy(state = PersistentPurposeVersionState.Archived)
+              case PersistentPurposeVersionState.Suspended =>
+                v.copy(state = PersistentPurposeVersionState.Archived)
+              case _ => v
+            }
+          }
+          PurposeVersionActivated(purpose.copy(versions = updatedVersions))
+        }
+
         changeState(
           state,
           purposeId,
@@ -92,7 +105,7 @@ object PurposePersistentBehavior {
           PersistentPurposeVersionState.Active,
           replyTo,
           _.isActivable(purposeId),
-          PurposeVersionActivated
+          archiveOldVersion(_, versionId)
         )(dateTimeSupplier)
 
       case SuspendPurposeVersion(purposeId, versionId, stateChangeDetails, replyTo) =>

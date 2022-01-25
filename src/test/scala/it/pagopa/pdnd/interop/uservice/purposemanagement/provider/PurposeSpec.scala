@@ -379,7 +379,7 @@ class PurposeSpec extends BaseIntegrationSpec {
 
       val result = response.futureValue
       result.status shouldBe 409
-      result.errors.map(_.code) shouldBe Seq("011-0039")
+      result.errors.map(_.code) shouldBe Seq("011-0038")
     }
   }
 

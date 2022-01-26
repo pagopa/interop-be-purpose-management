@@ -100,7 +100,7 @@ object PurposePersistentBehavior {
             Effect.none[PurposeVersionDeleted, State]
           } { v =>
             v.state match {
-              case PersistentPurposeVersionState.Draft =>
+              case PersistentPurposeVersionState.Draft | PersistentPurposeVersionState.WaitingForApproval =>
                 Effect
                   .persist(PurposeVersionDeleted(purposeId, versionId))
                   .thenRun((_: State) => replyTo ! StatusReply.Success(()))

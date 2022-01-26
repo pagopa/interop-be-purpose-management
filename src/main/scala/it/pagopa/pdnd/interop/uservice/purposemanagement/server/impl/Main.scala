@@ -19,8 +19,8 @@ import it.pagopa.pdnd.interop.commons.jwt.service.impl.DefaultJWTReader
 import it.pagopa.pdnd.interop.commons.jwt.{JWTConfiguration, KID, PublicKeysHolder, SerializedKey}
 import it.pagopa.pdnd.interop.commons.utils.OpenapiUtils
 import it.pagopa.pdnd.interop.commons.utils.errors.GenericComponentErrors.ValidationRequestError
-import it.pagopa.pdnd.interop.commons.utils.service.UUIDSupplier
-import it.pagopa.pdnd.interop.commons.utils.service.impl.UUIDSupplierImpl
+import it.pagopa.pdnd.interop.commons.utils.service.{OffsetDateTimeSupplier, UUIDSupplier}
+import it.pagopa.pdnd.interop.commons.utils.service.impl.{OffsetDateTimeSupplierImpl, UUIDSupplierImpl}
 import it.pagopa.pdnd.interop.uservice.purposemanagement.api.PurposeApi
 import it.pagopa.pdnd.interop.uservice.purposemanagement.api.impl.{
   PurposeApiMarshallerImpl,
@@ -34,8 +34,6 @@ import it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence.{
   PurposePersistentProjection
 }
 import it.pagopa.pdnd.interop.uservice.purposemanagement.server.Controller
-import it.pagopa.pdnd.interop.uservice.purposemanagement.service.OffsetDateTimeSupplier
-import it.pagopa.pdnd.interop.uservice.purposemanagement.service.impl.OffsetDateTimeSupplierImp
 import kamon.Kamon
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
@@ -80,7 +78,7 @@ object Main extends App {
         val sharding: ClusterSharding = ClusterSharding(context.system)
 
         val uuidSupplier: UUIDSupplier               = new UUIDSupplierImpl
-        val dateTimeSupplier: OffsetDateTimeSupplier = OffsetDateTimeSupplierImp
+        val dateTimeSupplier: OffsetDateTimeSupplier = OffsetDateTimeSupplierImpl
 
         val purposePersistenceEntity: Entity[Command, ShardingEnvelope[Command]] =
           buildPersistentEntity(dateTimeSupplier)

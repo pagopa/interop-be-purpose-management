@@ -13,17 +13,17 @@ import com.typesafe.scalalogging.Logger
 import it.pagopa.pdnd.interop.commons.logging.{CanLogContextFields, ContextFieldsToLog}
 import it.pagopa.pdnd.interop.commons.utils.AkkaUtils
 import it.pagopa.pdnd.interop.commons.utils.OpenapiUtils.parseArrayParameters
-import it.pagopa.pdnd.interop.commons.utils.service.UUIDSupplier
+import it.pagopa.pdnd.interop.commons.utils.service.{OffsetDateTimeSupplier, UUIDSupplier}
 import it.pagopa.pdnd.interop.uservice.purposemanagement.api.PurposeApiService
 import it.pagopa.pdnd.interop.uservice.purposemanagement.common.system._
 import it.pagopa.pdnd.interop.uservice.purposemanagement.error.InternalErrors.{
   PurposeHasVersions,
   PurposeNotFound,
-  PurposeVersionStateConflict,
   PurposeVersionMissingRiskAnalysis,
   PurposeVersionNotFound,
   PurposeVersionNotInDraft,
-  PurposeVersionNotInExpectedState
+  PurposeVersionNotInExpectedState,
+  PurposeVersionStateConflict
 }
 import it.pagopa.pdnd.interop.uservice.purposemanagement.error.PurposeManagementErrors._
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model._
@@ -34,7 +34,6 @@ import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.{
   PersistentPurposeVersion,
   PersistentPurposeVersionState
 }
-import it.pagopa.pdnd.interop.uservice.purposemanagement.service.OffsetDateTimeSupplier
 import org.slf4j.LoggerFactory
 
 import scala.concurrent._

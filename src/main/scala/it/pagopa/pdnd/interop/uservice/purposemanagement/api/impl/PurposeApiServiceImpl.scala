@@ -13,16 +13,17 @@ import com.typesafe.scalalogging.Logger
 import it.pagopa.pdnd.interop.commons.logging.{CanLogContextFields, ContextFieldsToLog}
 import it.pagopa.pdnd.interop.commons.utils.AkkaUtils
 import it.pagopa.pdnd.interop.commons.utils.OpenapiUtils.parseArrayParameters
-import it.pagopa.pdnd.interop.commons.utils.service.UUIDSupplier
+import it.pagopa.pdnd.interop.commons.utils.service.{OffsetDateTimeSupplier, UUIDSupplier}
 import it.pagopa.pdnd.interop.uservice.purposemanagement.api.PurposeApiService
 import it.pagopa.pdnd.interop.uservice.purposemanagement.common.system._
 import it.pagopa.pdnd.interop.uservice.purposemanagement.error.InternalErrors.{
+  PurposeHasVersions,
   PurposeNotFound,
-  PurposeVersionStateConflict,
   PurposeVersionMissingRiskAnalysis,
   PurposeVersionNotFound,
   PurposeVersionNotInDraft,
-  PurposeVersionNotInExpectedState
+  PurposeVersionNotInExpectedState,
+  PurposeVersionStateConflict
 }
 import it.pagopa.pdnd.interop.uservice.purposemanagement.error.PurposeManagementErrors._
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model._
@@ -33,7 +34,6 @@ import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.{
   PersistentPurposeVersion,
   PersistentPurposeVersionState
 }
-import it.pagopa.pdnd.interop.uservice.purposemanagement.service.OffsetDateTimeSupplier
 import org.slf4j.LoggerFactory
 
 import scala.concurrent._
@@ -104,6 +104,34 @@ final case class PurposeApiServiceImpl(
     }
   }
 
+  override def deletePurpose(
+    purposeId: String
+  )(implicit toEntityMarshallerProblem: ToEntityMarshaller[Problem], contexts: Seq[(String, String)]): Route = {
+    logger.info("Deleting purpose {}", purposeId)
+    val commander: EntityRef[Command] =
+      sharding.entityRefFor(PurposePersistentBehavior.TypeKey, AkkaUtils.getShard(purposeId, settings.numberOfShards))
+    val result: Future[StatusReply[Unit]] =
+      commander.ask(ref => DeletePurpose(purposeId, ref))
+
+    onComplete(result) {
+      case Success(statusReply) if statusReply.isSuccess =>
+        deletePurpose204
+      case Success(statusReply) =>
+        logger.error("Error while deleting purpose {}", purposeId, statusReply.getError)
+        statusReply.getError match {
+          case PurposeNotFound(pId) =>
+            deletePurpose404(problemOf(StatusCodes.NotFound, DeletePurposeNotFound(pId)))
+          case PurposeHasVersions(pId) =>
+            deletePurpose409(problemOf(StatusCodes.Conflict, DeletePurposeVersionsNotEmpty(pId)))
+          case _ =>
+            deletePurpose400(problemOf(StatusCodes.BadRequest, DeletePurposeBadRequest(purposeId)))
+        }
+      case Failure(ex) =>
+        logger.error("Error while deleting purpose {}", purposeId, ex)
+        deletePurpose400(problemOf(StatusCodes.BadRequest, DeletePurposeBadRequest(purposeId)))
+    }
+  }
+
   override def createPurposeVersion(purposeId: String, purposeVersionSeed: PurposeVersionSeed)(implicit
     toEntityMarshallerPurposeVersion: ToEntityMarshaller[PurposeVersion],
     toEntityMarshallerProblem: ToEntityMarshaller[Problem],
@@ -129,6 +157,37 @@ final case class PurposeApiServiceImpl(
       case Failure(ex) =>
         logger.error("Error while adding a version to purpose {}", purposeId, ex)
         createPurposeVersion400(problemOf(StatusCodes.BadRequest, CreatePurposeVersionBadRequest))
+    }
+  }
+
+  override def deletePurposeVersion(purposeId: String, versionId: String)(implicit
+    toEntityMarshallerProblem: ToEntityMarshaller[Problem],
+    contexts: Seq[(String, String)]
+  ): Route = {
+    logger.info("Deleting version {} of purpose {}", versionId, purposeId)
+    val commander: EntityRef[Command] =
+      sharding.entityRefFor(PurposePersistentBehavior.TypeKey, AkkaUtils.getShard(purposeId, settings.numberOfShards))
+    val result: Future[StatusReply[Unit]] =
+      commander.ask(ref => DeletePurposeVersion(purposeId, versionId, ref))
+
+    onComplete(result) {
+      case Success(statusReply) if statusReply.isSuccess =>
+        deletePurposeVersion204
+      case Success(statusReply) =>
+        logger.error("Error while deleting version {} of purpose {}", versionId, purposeId, statusReply.getError)
+        statusReply.getError match {
+          case PurposeVersionNotFound(pId, vId) =>
+            deletePurposeVersion404(problemOf(StatusCodes.NotFound, DeletePurposeVersionNotFound(pId, vId)))
+          case PurposeVersionNotInDraft(pId, vId) =>
+            deletePurposeVersion409(problemOf(StatusCodes.Conflict, DeletePurposeVersionNotInDraft(pId, vId)))
+          case _ =>
+            deletePurposeVersion400(
+              problemOf(StatusCodes.BadRequest, DeletePurposeVersionBadRequest(purposeId, versionId))
+            )
+        }
+      case Failure(ex) =>
+        logger.error("Error while deleting version {} of purpose {}", versionId, purposeId, ex)
+        deletePurposeVersion400(problemOf(StatusCodes.BadRequest, DeletePurposeVersionBadRequest(purposeId, versionId)))
     }
   }
 

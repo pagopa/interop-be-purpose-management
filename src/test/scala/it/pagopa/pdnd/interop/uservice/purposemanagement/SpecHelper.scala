@@ -49,6 +49,17 @@ trait SpecHelper {
         .to[PurposeVersion]
     } yield purpose
 
+  def deletePurpose(
+    purposeId: UUID
+  )(implicit ec: ExecutionContext, actorSystem: actor.ActorSystem): Future[Option[String]] =
+    Unmarshal(makeRequest(emptyData, s"purposes/$purposeId", HttpMethods.DELETE)).to[Option[String]]
+
+  def deletePurposeVersion(purposeId: UUID, versionId: UUID)(implicit
+    ec: ExecutionContext,
+    actorSystem: actor.ActorSystem
+  ): Future[Option[String]] =
+    Unmarshal(makeRequest(emptyData, s"purposes/$purposeId/versions/$versionId", HttpMethods.DELETE)).to[Option[String]]
+
   def makeFailingRequest[T](url: String, verb: HttpMethod, data: T)(implicit
     ec: ExecutionContext,
     actorSystem: actor.ActorSystem,

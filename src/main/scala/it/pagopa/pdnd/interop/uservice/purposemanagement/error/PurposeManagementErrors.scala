@@ -115,4 +115,21 @@ object PurposeManagementErrors {
   final case class CreatePurposeVersionNotFound(purposeId: String)
       extends ComponentError("0033", s"Purpose $purposeId not found on version creation")
 
+  final case class DeletePurposeVersionNotFound(purposeId: String, versionId: String)
+      extends ComponentError(
+        "0034",
+        s"Error deleting Version $versionId of Purpose $purposeId - Purpose of Version not found"
+      )
+  final case class DeletePurposeVersionNotInDraft(purposeId: String, versionId: String)
+      extends ComponentError("0035", s"Error deleting Version $versionId of Purpose $purposeId - Version not in Draft")
+  final case class DeletePurposeVersionBadRequest(purposeId: String, versionId: String)
+      extends ComponentError("0036", s"Error deleting Version $versionId of Purpose $purposeId - Bad Request")
+
+  final case class DeletePurposeNotFound(purposeId: String)
+      extends ComponentError("0037", s"Purpose $purposeId not found on purpose deletion")
+  final case class DeletePurposeVersionsNotEmpty(purposeId: String)
+      extends ComponentError("0038", s"Error deleting Purpose $purposeId - Purpose contains versions")
+  final case class DeletePurposeBadRequest(purposeId: String)
+      extends ComponentError("0039", s"Error deleting Purpose $purposeId - Bad Request")
+
 }

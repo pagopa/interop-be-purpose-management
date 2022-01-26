@@ -17,11 +17,14 @@ final case class CreatePurpose(purpose: PersistentPurpose, replyTo: ActorRef[Sta
     extends Command
 final case class GetPurpose(purposeId: String, replyTo: ActorRef[StatusReply[Option[PersistentPurpose]]])
     extends Command
+final case class DeletePurpose(purposeId: String, replyTo: ActorRef[StatusReply[Unit]]) extends Command
 final case class CreatePurposeVersion(
   purposeId: String,
   purposeVersion: PersistentPurposeVersion,
   replyTo: ActorRef[StatusReply[PersistentPurposeVersion]]
 ) extends Command
+final case class DeletePurposeVersion(purposeId: String, versionId: String, replyTo: ActorRef[StatusReply[Unit]])
+    extends Command
 final case class UpdatePurposeVersion(
   purposeId: String,
   versionId: String,

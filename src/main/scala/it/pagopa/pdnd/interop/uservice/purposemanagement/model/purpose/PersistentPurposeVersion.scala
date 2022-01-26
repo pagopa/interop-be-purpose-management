@@ -1,6 +1,6 @@
 package it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose
 
-import it.pagopa.pdnd.interop.commons.utils.service.UUIDSupplier
+import it.pagopa.pdnd.interop.commons.utils.service.{OffsetDateTimeSupplier, UUIDSupplier}
 import it.pagopa.pdnd.interop.uservice.purposemanagement.error.InternalErrors.{
   PurposeVersionMissingRiskAnalysis,
   PurposeVersionNotInExpectedState
@@ -8,7 +8,6 @@ import it.pagopa.pdnd.interop.uservice.purposemanagement.error.InternalErrors.{
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.decoupling.PurposeVersionUpdate
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.PersistentPurposeVersion._
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.{PurposeVersion, PurposeVersionSeed}
-import it.pagopa.pdnd.interop.uservice.purposemanagement.service.OffsetDateTimeSupplier
 
 import java.time.OffsetDateTime
 import java.util.UUID

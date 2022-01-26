@@ -1,8 +1,7 @@
 package it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose
 
-import it.pagopa.pdnd.interop.commons.utils.service.UUIDSupplier
+import it.pagopa.pdnd.interop.commons.utils.service.{OffsetDateTimeSupplier, UUIDSupplier}
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.{Purpose, PurposeSeed}
-import it.pagopa.pdnd.interop.uservice.purposemanagement.service.OffsetDateTimeSupplier
 
 import java.time.OffsetDateTime
 import java.util.UUID

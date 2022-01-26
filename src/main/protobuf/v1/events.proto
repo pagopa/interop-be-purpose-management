@@ -37,3 +37,12 @@ message PurposeVersionArchivedV1 {
 message PurposeVersionWaitedForApprovalV1 {
   required PurposeV1 purpose = 1;
 }
+
+message PurposeDeletedV1 {
+  required string purposeId = 1;
+}
+
+message PurposeVersionDeletedV1 {
+  required string purposeId = 1;
+  required string versionId = 2;
+}

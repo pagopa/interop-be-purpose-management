@@ -49,7 +49,7 @@ object PurposePersistentBehavior {
           }
 
       case DeletePurpose(purposeId, replyTo) =>
-        val purpose = state.purposes.get(purposeId)
+        val purpose: Option[PersistentPurpose] = state.purposes.get(purposeId)
 
         purpose
           .fold {
@@ -92,7 +92,7 @@ object PurposePersistentBehavior {
           }
 
       case DeletePurposeVersion(purposeId, versionId, replyTo) =>
-        val version = state.getPurposeVersion(purposeId, versionId)
+        val version: Option[PersistentPurposeVersion] = state.getPurposeVersion(purposeId, versionId)
 
         version
           .fold {

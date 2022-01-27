@@ -2,7 +2,7 @@ package it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence
 
 import akka.actor.typed.ActorRef
 import akka.pattern.StatusReply
-import it.pagopa.pdnd.interop.uservice.purposemanagement.model.StateChangeDetails
+import it.pagopa.pdnd.interop.uservice.purposemanagement.model.{PurposeVersionDocument, StateChangeDetails}
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.decoupling.PurposeVersionUpdate
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.{
   PersistentPurpose,
@@ -34,6 +34,7 @@ final case class UpdatePurposeVersion(
 final case class ActivatePurposeVersion(
   purposeId: String,
   versionId: String,
+  riskAnalysis: Option[PurposeVersionDocument],
   stateChangeDetails: StateChangeDetails,
   replyTo: ActorRef[StatusReply[PersistentPurpose]]
 ) extends Command

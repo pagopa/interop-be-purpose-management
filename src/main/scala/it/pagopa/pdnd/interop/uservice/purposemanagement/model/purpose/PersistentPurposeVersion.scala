@@ -33,7 +33,6 @@ final case class PersistentPurposeVersion(
         (),
         PurposeVersionNotInExpectedState(purposeId, id.toString, state)
       )
-      _ <- Either.cond(riskAnalysis.isDefined, (), PurposeVersionMissingRiskAnalysis(purposeId, id.toString))
     } yield ()
 
   def isSuspendable(purposeId: String): Either[Throwable, Unit] =

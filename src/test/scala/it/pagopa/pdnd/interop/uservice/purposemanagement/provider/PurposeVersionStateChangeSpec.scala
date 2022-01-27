@@ -31,7 +31,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         for {
           _      <- createPurpose(purposeId, purposeSeed)
           _      <- createPurposeVersion(purposeId, versionId, versionSeed)
-          result <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER)
+          result <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, versionSeed.riskAnalysis)
         } yield result
 
       response.futureValue shouldBe Some("")
@@ -59,9 +59,9 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         for {
           _       <- createPurpose(purposeId, purposeSeed)
           _       <- createPurposeVersion(purposeId, versionId1, versionSeed)
-          _       <- activateVersion(purposeId, versionId1, ChangedBy.CONSUMER)
+          _       <- activateVersion(purposeId, versionId1, ChangedBy.CONSUMER, versionSeed.riskAnalysis)
           _       <- createPurposeVersion(purposeId, versionId2, versionSeed)
-          _       <- activateVersion(purposeId, versionId2, ChangedBy.CONSUMER)
+          _       <- activateVersion(purposeId, versionId2, ChangedBy.CONSUMER, versionSeed.riskAnalysis)
           purpose <- getPurpose(purposeId)
         } yield purpose
 
@@ -109,10 +109,10 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         for {
           _       <- createPurpose(purposeId, purposeSeed)
           _       <- createPurposeVersion(purposeId, versionId1, versionSeed)
-          _       <- activateVersion(purposeId, versionId1, ChangedBy.CONSUMER)
+          _       <- activateVersion(purposeId, versionId1, ChangedBy.CONSUMER, versionSeed.riskAnalysis)
           _       <- suspendVersion(purposeId, versionId1, ChangedBy.CONSUMER)
           _       <- createPurposeVersion(purposeId, versionId2, versionSeed)
-          _       <- activateVersion(purposeId, versionId2, ChangedBy.CONSUMER)
+          _       <- activateVersion(purposeId, versionId2, ChangedBy.CONSUMER, versionSeed.riskAnalysis)
           purpose <- getPurpose(purposeId)
         } yield purpose
 
@@ -145,7 +145,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
       val response: Future[Problem] = makeFailingRequest(
         s"purposes/$purposeId/versions/$versionId/activate",
         HttpMethods.POST,
-        StateChangeDetails(changedBy = ChangedBy.CONSUMER)
+        ActivatePurposeVersionPayload(stateChangeDetails = StateChangeDetails(changedBy = ChangedBy.CONSUMER))
       )
 
       val result = response.futureValue
@@ -169,7 +169,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
           result <- makeFailingRequest(
             s"purposes/$purposeId/versions/$versionId/activate",
             HttpMethods.POST,
-            StateChangeDetails(changedBy = ChangedBy.CONSUMER)
+            ActivatePurposeVersionPayload(stateChangeDetails = StateChangeDetails(changedBy = ChangedBy.CONSUMER))
           )
         } yield result
 
@@ -199,12 +199,12 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         for {
           _ <- createPurpose(purposeId, purposeSeed)
           _ <- createPurposeVersion(purposeId, versionId, versionSeed)
-          _ <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER)
+          _ <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, versionSeed.riskAnalysis)
           _ <- archiveVersion(purposeId, versionId, ChangedBy.CONSUMER)
           result <- makeFailingRequest(
             s"purposes/$purposeId/versions/$versionId/activate",
             HttpMethods.POST,
-            StateChangeDetails(changedBy = ChangedBy.CONSUMER)
+            ActivatePurposeVersionPayload(stateChangeDetails = StateChangeDetails(changedBy = ChangedBy.CONSUMER))
           )
         } yield result
 
@@ -236,7 +236,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         for {
           _      <- createPurpose(purposeId, purposeSeed)
           _      <- createPurposeVersion(purposeId, versionId, versionSeed)
-          _      <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER)
+          _      <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, versionSeed.riskAnalysis)
           result <- suspendVersion(purposeId, versionId, ChangedBy.CONSUMER)
         } yield result
 
@@ -306,7 +306,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         for {
           _      <- createPurpose(purposeId, purposeSeed)
           _      <- createPurposeVersion(purposeId, versionId, versionSeed)
-          _      <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER)
+          _      <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, versionSeed.riskAnalysis)
           result <- archiveVersion(purposeId, versionId, ChangedBy.CONSUMER)
         } yield result
 
@@ -443,7 +443,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         for {
           _ <- createPurpose(purposeId, purposeSeed)
           _ <- createPurposeVersion(purposeId, versionId, versionSeed)
-          _ <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER)
+          _ <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, versionSeed.riskAnalysis)
           result <- makeFailingRequest(
             s"purposes/$purposeId/versions/$versionId/waitForApproval",
             HttpMethods.POST,

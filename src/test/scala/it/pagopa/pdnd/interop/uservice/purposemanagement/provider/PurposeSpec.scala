@@ -269,15 +269,15 @@ class PurposeSpec extends BaseIntegrationSpec {
         for {
           _ <- createPurpose(purposeId1, purposeSeed1)
           _ <- createPurposeVersion(purposeId1, versionId1_1, versionSeed1_1)
-          _ <- activateVersion(purposeId1, versionId1_1, ChangedBy.CONSUMER)
+          _ <- activateVersion(purposeId1, versionId1_1, ChangedBy.CONSUMER, versionSeed1_1.riskAnalysis)
           _ <- createPurposeVersion(purposeId1, versionId1_2, versionSeed1_2)
           _ <- createPurpose(purposeId2, purposeSeed2)
           _ <- createPurposeVersion(purposeId2, versionId2_1, versionSeed2_1)
-          _ <- activateVersion(purposeId2, versionId2_1, ChangedBy.CONSUMER)
+          _ <- activateVersion(purposeId2, versionId2_1, ChangedBy.CONSUMER, versionSeed2_1.riskAnalysis)
           _ <- suspendVersion(purposeId2, versionId2_1, ChangedBy.CONSUMER)
           _ <- createPurpose(purposeId3, purposeSeed3)
           _ <- createPurposeVersion(purposeId3, versionId3_1, versionSeed3_1)
-          _ <- activateVersion(purposeId3, versionId3_1, ChangedBy.CONSUMER)
+          _ <- activateVersion(purposeId3, versionId3_1, ChangedBy.CONSUMER, versionSeed3_1.riskAnalysis)
           _ <- archiveVersion(purposeId3, versionId3_1, ChangedBy.CONSUMER)
           response <- getPurposes(
             eServiceId = Some(eServiceId),

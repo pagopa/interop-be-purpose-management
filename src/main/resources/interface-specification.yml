@@ -291,7 +291,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StateChangeDetails'
+              $ref: '#/components/schemas/ActivatePurposeVersionPayload'
         required: true
       responses:
         '204':
@@ -442,6 +442,16 @@ paths:
       description: archives the purpose version by id
 components:
   schemas:
+    ActivatePurposeVersionPayload:
+      type: object
+      description: models the activation payload for this purpose version.
+      properties:
+        riskAnalysis:
+          $ref: '#/components/schemas/PurposeVersionDocument'
+        stateChangeDetails:
+          $ref: '#/components/schemas/StateChangeDetails'
+      required:
+        - stateChangeDetails
     StateChangeDetails:
       type: object
       description: tracks the owner of the change.

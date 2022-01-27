@@ -534,9 +534,14 @@ components:
         - createdAt
       description: business representation of a purpose
     Purposes:
-      type: array
-      items:
-        $ref: '#/components/schemas/Purpose'
+      type: object
+      properties:
+        purposes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Purpose'
+      required:
+        - purposes
     PurposeVersion:
       type: object
       properties:

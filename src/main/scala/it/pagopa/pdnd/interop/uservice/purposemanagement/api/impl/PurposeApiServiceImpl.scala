@@ -306,7 +306,7 @@ final case class PurposeApiServiceImpl(
   }
 
   override def getPurposes(eserviceId: Option[String], consumerId: Option[String], states: String)(implicit
-    toEntityMarshallerPurposearray: ToEntityMarshaller[Seq[Purpose]],
+    toEntityMarshallerPurposes: ToEntityMarshaller[Purposes],
     toEntityMarshallerProblem: ToEntityMarshaller[Problem],
     contexts: Seq[(String, String)]
   ): Route = {
@@ -325,7 +325,7 @@ final case class PurposeApiServiceImpl(
       )
       persistentPurposes = commanders.flatMap(ref => slices(ref, sliceSize)(generator))
       purposes           = persistentPurposes.map(PersistentPurpose.toAPI)
-    } yield purposes
+    } yield Purposes(purposes = purposes)
 
     result match {
       case Right(purposes) => getPurposes200(purposes)

@@ -84,14 +84,14 @@ trait SpecHelper {
     eServiceId: Option[UUID] = None,
     consumerId: Option[UUID] = None,
     states: Seq[PurposeVersionState] = Seq.empty
-  )(implicit ec: ExecutionContext, actorSystem: actor.ActorSystem): Future[Seq[Purpose]] = {
+  )(implicit ec: ExecutionContext, actorSystem: actor.ActorSystem): Future[Purposes] = {
     val eServiceParam = eServiceId.fold("")(id => s"eserviceId=${id.toString}")
     val consumerParam = consumerId.fold("")(id => s"consumerId=${id.toString}")
     val stateParam    = states.mkString("states=", ",", "")
 
     val params   = Seq(eServiceParam, consumerParam, stateParam).mkString("?", "&", "")
     val response = makeRequest(emptyData, s"purposes$params", HttpMethods.GET)
-    Unmarshal(response).to[Seq[Purpose]]
+    Unmarshal(response).to[Purposes]
   }
 
   def activateVersion(purposeId: UUID, versionId: UUID, changedBy: ChangedBy)(implicit

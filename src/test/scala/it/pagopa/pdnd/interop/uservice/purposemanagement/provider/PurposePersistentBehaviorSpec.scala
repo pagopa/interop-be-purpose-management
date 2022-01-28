@@ -21,6 +21,7 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
     state = PersistentPurposeVersionState.Draft,
     expectedApprovalDate = None,
     riskAnalysis = None,
+    dailyCalls = 100,
     createdAt = timestamp,
     updatedAt = None
   )

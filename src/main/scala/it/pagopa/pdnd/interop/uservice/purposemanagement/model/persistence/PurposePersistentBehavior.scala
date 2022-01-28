@@ -8,7 +8,6 @@ import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.{Effect, EffectBuilder, EventSourcedBehavior, RetentionCriteria}
 import it.pagopa.pdnd.interop.commons.utils.service.OffsetDateTimeSupplier
 import it.pagopa.pdnd.interop.uservice.purposemanagement.error.InternalErrors._
-import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.PersistentPurposeVersionState.Draft
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.{
   PersistentPurpose,
   PersistentPurposeVersion,
@@ -151,16 +150,7 @@ object PurposePersistentBehavior {
           stateChangeDetails,
           PersistentPurposeVersionState.Active,
           replyTo,
-          v => {
-            for {
-              _ <- Either.cond(
-                (v.state == Draft && versionDocument.isDefined) || (v.state != Draft && !versionDocument.isDefined),
-                (),
-                PurposeVersionMissingRiskAnalysis(purposeId, versionId)
-              )
-              _ <- v.isActivable(purposeId)
-            } yield ()
-          },
+          _.isActivable(purposeId),
           archiveOldVersion(_, versionId),
           versionDocument
         )(dateTimeSupplier)
@@ -263,34 +253,27 @@ object PurposePersistentBehavior {
     purpose: PersistentPurpose,
     version: PersistentPurposeVersion,
     newVersionState: PersistentPurposeVersionState,
-    stateChangeDetails: StateChangeDetails,
-    riskAnalysis: Option[PurposeVersionDocument] = None
+    stateChangeDetails: StateChangeDetails
   )(dateTimeSupplier: OffsetDateTimeSupplier): PersistentPurpose = {
 
     def isSuspended = newVersionState == PersistentPurposeVersionState.Suspended
 
     val timestamp = dateTimeSupplier.get
 
-    def updateVersions(
-      newState: PersistentPurposeVersionState,
-      riskAnalysis: Option[PurposeVersionDocument]
-    ): Seq[PersistentPurposeVersion] = {
+    def updateVersions(newState: PersistentPurposeVersionState): Seq[PersistentPurposeVersion] = {
       val updatedVersion = version.copy(state = newState, updatedAt = Some(timestamp))
-      val updated = riskAnalysis
-        .map(doc => updatedVersion.copy(riskAnalysis = Option(PersistentPurposeVersionDocument.fromAPI(doc))))
-        .getOrElse(updatedVersion)
-      purpose.versions.filter(_.id != version.id) :+ updated
+      purpose.versions.filter(_.id != version.id) :+ updatedVersion
     }
 
     stateChangeDetails.changedBy match {
       case ChangedBy.CONSUMER =>
         val newState        = calcNewVersionState(purpose.suspendedByProducer, Some(isSuspended), newVersionState)
-        val updatedVersions = updateVersions(newState, riskAnalysis)
+        val updatedVersions = updateVersions(newState)
 
         purpose.copy(versions = updatedVersions, suspendedByConsumer = Some(isSuspended), updatedAt = Some(timestamp))
       case ChangedBy.PRODUCER =>
         val newState        = calcNewVersionState(Some(isSuspended), purpose.suspendedByConsumer, newVersionState)
-        val updatedVersions = updateVersions(newState, riskAnalysis)
+        val updatedVersions = updateVersions(newState)
 
         purpose.copy(versions = updatedVersions, suspendedByProducer = Some(isSuspended), updatedAt = Some(timestamp))
     }
@@ -326,13 +309,16 @@ object PurposePersistentBehavior {
     replyTo: ActorRef[StatusReply[PersistentPurpose]],
     versionValidation: PersistentPurposeVersion => Either[Throwable, Unit],
     eventConstructor: PersistentPurpose => T,
-    riskAnalysis: Option[PurposeVersionDocument] = None
+    riskAnalysisOpt: Option[PurposeVersionDocument] = None
   )(dateTimeSupplier: OffsetDateTimeSupplier): EffectBuilder[T, State] = {
+
     val purpose: Either[Throwable, PersistentPurpose] = for {
       purpose <- state.purposes.get(purposeId).toRight(PurposeNotFound(purposeId))
       version <- purpose.versions.find(_.id.toString == versionId).toRight(PurposeVersionNotFound(purposeId, versionId))
-      _       <- versionValidation(version)
-    } yield updatePurposeFromState(purpose, version, newState, stateChangeDetails, riskAnalysis)(dateTimeSupplier)
+      riskAnalysisUpdated = riskAnalysisOpt.map(PersistentPurposeVersionDocument.fromAPI).orElse(version.riskAnalysis)
+      versionWithRisk     = version.copy(riskAnalysis = riskAnalysisUpdated)
+      _ <- versionValidation(versionWithRisk)
+    } yield updatePurposeFromState(purpose, version, newState, stateChangeDetails)(dateTimeSupplier)
 
     purpose
       .fold(

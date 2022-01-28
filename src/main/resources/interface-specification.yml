@@ -496,15 +496,27 @@ components:
     PurposeVersionSeed:
       type: object
       description: contains the expected payload for purpose version persistence.
+      required:
+        - dailyCalls
       properties:
+        dailyCalls:
+          description: 'maximum number of daily calls that this version can perform.'
+          type: integer
+          format: int32
+          minimum: 0
         riskAnalysis:
           $ref: '#/components/schemas/PurposeVersionDocument'
     PurposeVersionUpdateContent:
       type: object
       description: contains the expected payload for purpose version update.
       properties:
-        riskAnalysis:
-          $ref: '#/components/schemas/PurposeVersionDocument'
+        dailyCalls:
+          description: 'maximum number of daily calls that this version can perform.'
+          type: integer
+          format: int32
+          minimum: 0
+      required:
+        - dailyCalls
     Purpose:
       type: object
       properties:
@@ -564,11 +576,17 @@ components:
         expectedApprovalDate:
           type: string
           format: date-time
+        dailyCalls:
+          description: 'maximum number of daily calls that this version can perform.'
+          type: integer
+          format: int32
+          minimum: 0
         riskAnalysis:
           $ref: '#/components/schemas/PurposeVersionDocument'
       required:
         - id
         - state
+        - dailyCalls
         - createdAt
       description: business representation of a purpose version
     PurposeVersionDocument:

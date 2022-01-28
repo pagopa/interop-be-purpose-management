@@ -25,7 +25,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
       )
 
       val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
-      val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc))
+      val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
 
       val response: Future[Option[String]] =
         for {
@@ -53,7 +53,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
       )
 
       val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
-      val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc))
+      val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
 
       val response: Future[Purpose] =
         for {
@@ -72,7 +72,8 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
           createdAt = timestamp,
           updatedAt = Some(timestamp),
           expectedApprovalDate = None,
-          riskAnalysis = Some(riskAnalysisDoc)
+          riskAnalysis = Some(riskAnalysisDoc),
+          dailyCalls = 100
         ),
         PurposeVersion(
           id = versionId2,
@@ -80,7 +81,8 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
           createdAt = timestamp,
           updatedAt = Some(timestamp),
           expectedApprovalDate = None,
-          riskAnalysis = Some(riskAnalysisDoc)
+          riskAnalysis = Some(riskAnalysisDoc),
+          dailyCalls = 100
         )
       )
 
@@ -103,7 +105,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
       )
 
       val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
-      val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc))
+      val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
 
       val response: Future[Purpose] =
         for {
@@ -123,7 +125,8 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
           createdAt = timestamp,
           updatedAt = Some(timestamp),
           expectedApprovalDate = None,
-          riskAnalysis = Some(riskAnalysisDoc)
+          riskAnalysis = Some(riskAnalysisDoc),
+          dailyCalls = 100
         ),
         PurposeVersion(
           id = versionId2,
@@ -131,7 +134,8 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
           createdAt = timestamp,
           updatedAt = Some(timestamp),
           expectedApprovalDate = None,
-          riskAnalysis = Some(riskAnalysisDoc)
+          riskAnalysis = Some(riskAnalysisDoc),
+          dailyCalls = 100
         )
       )
 
@@ -160,7 +164,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
       val consumerId = UUID.randomUUID()
 
       val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
-      val versionSeed = PurposeVersionSeed(riskAnalysis = None)
+      val versionSeed = PurposeVersionSeed(riskAnalysis = None, dailyCalls = 100)
 
       val response: Future[Problem] =
         for {
@@ -193,7 +197,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
       )
 
       val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
-      val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc))
+      val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
 
       val response: Future[Problem] =
         for {
@@ -230,7 +234,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
       )
 
       val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
-      val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc))
+      val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
 
       val response: Future[Option[String]] =
         for {
@@ -265,7 +269,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
       val consumerId = UUID.randomUUID()
 
       val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
-      val versionSeed = PurposeVersionSeed()
+      val versionSeed = PurposeVersionSeed(dailyCalls = 100)
 
       val response: Future[Problem] =
         for {
@@ -300,7 +304,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
       )
 
       val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
-      val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc))
+      val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
 
       val response: Future[Option[String]] =
         for {
@@ -335,7 +339,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
       val consumerId = UUID.randomUUID()
 
       val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
-      val versionSeed = PurposeVersionSeed()
+      val versionSeed = PurposeVersionSeed(dailyCalls = 100)
 
       val response: Future[Problem] =
         for {
@@ -370,7 +374,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
       )
 
       val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
-      val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc))
+      val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
 
       val response: Future[Option[String]] =
         for {
@@ -404,7 +408,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
       val consumerId = UUID.randomUUID()
 
       val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
-      val versionSeed = PurposeVersionSeed(riskAnalysis = None)
+      val versionSeed = PurposeVersionSeed(riskAnalysis = None, dailyCalls = 100)
 
       val response: Future[Problem] =
         for {
@@ -437,7 +441,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
       )
 
       val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
-      val versionSeed = PurposeVersionSeed(Some(riskAnalysisDoc))
+      val versionSeed = PurposeVersionSeed(dailyCalls = 100, Some(riskAnalysisDoc))
 
       val response: Future[Problem] =
         for {

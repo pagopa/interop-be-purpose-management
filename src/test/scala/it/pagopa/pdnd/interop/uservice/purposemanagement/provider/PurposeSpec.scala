@@ -105,7 +105,7 @@ class PurposeSpec extends BaseIntegrationSpec {
       val purposeSeed2 = PurposeSeed(eserviceId = eServiceId2, consumerId = consumerId2, title = "Purpose")
       val versionSeed  = PurposeVersionSeed()
 
-      val response: Future[Seq[Purpose]] =
+      val response: Future[Purposes] =
         for {
           _        <- createPurpose(purposeId1, purposeSeed1)
           _        <- createPurposeVersion(purposeId1, versionId1, versionSeed)
@@ -148,7 +148,7 @@ class PurposeSpec extends BaseIntegrationSpec {
           )
         )
 
-      response.futureValue should contain allElementsOf expected
+      response.futureValue.purposes should contain allElementsOf expected
     }
 
     "succeed filtering by EService" in {
@@ -164,7 +164,7 @@ class PurposeSpec extends BaseIntegrationSpec {
       val purposeSeed2 = PurposeSeed(eserviceId = eServiceId2, consumerId = consumerId2, title = "Purpose")
       val versionSeed  = PurposeVersionSeed()
 
-      val response: Future[Seq[Purpose]] =
+      val response: Future[Purposes] =
         for {
           _        <- createPurpose(purposeId1, purposeSeed1)
           _        <- createPurposeVersion(purposeId1, versionId1, versionSeed)
@@ -195,7 +195,7 @@ class PurposeSpec extends BaseIntegrationSpec {
           )
         )
 
-      response.futureValue should contain theSameElementsAs expected
+      response.futureValue.purposes should contain theSameElementsAs expected
     }
 
     "succeed filtering by Consumer" in {
@@ -211,7 +211,7 @@ class PurposeSpec extends BaseIntegrationSpec {
       val purposeSeed2 = PurposeSeed(eserviceId = eServiceId2, consumerId = consumerId2, title = "Purpose")
       val versionSeed  = PurposeVersionSeed()
 
-      val response: Future[Seq[Purpose]] =
+      val response: Future[Purposes] =
         for {
           _        <- createPurpose(purposeId1, purposeSeed1)
           _        <- createPurposeVersion(purposeId1, versionId1, versionSeed)
@@ -235,7 +235,7 @@ class PurposeSpec extends BaseIntegrationSpec {
           )
         )
 
-      response.futureValue should contain theSameElementsAs expected
+      response.futureValue.purposes should contain theSameElementsAs expected
     }
 
     "succeed filtering by Version State" in {
@@ -265,7 +265,7 @@ class PurposeSpec extends BaseIntegrationSpec {
       val versionSeed2_1 = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc))
       val versionSeed3_1 = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc))
 
-      val response: Future[Seq[Purpose]] =
+      val response: Future[Purposes] =
         for {
           _ <- createPurpose(purposeId1, purposeSeed1)
           _ <- createPurposeVersion(purposeId1, versionId1_1, versionSeed1_1)
@@ -339,7 +339,9 @@ class PurposeSpec extends BaseIntegrationSpec {
           )
         )
 
-      response.futureValue.map(p => purposesAreTheSame(p, expected.find(_.id == p.id).get)) should not contain false
+      response.futureValue.purposes.map(p =>
+        purposesAreTheSame(p, expected.find(_.id == p.id).get)
+      ) should not contain false
     }
   }
 

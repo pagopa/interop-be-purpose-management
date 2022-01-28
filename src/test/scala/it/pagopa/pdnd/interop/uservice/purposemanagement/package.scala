@@ -39,8 +39,8 @@ package object purposemanagement extends MockFactory {
   implicit def toEntityMarshallerPurposeVersionUpdateContent: ToEntityMarshaller[PurposeVersionUpdateContent] =
     sprayJsonMarshaller[PurposeVersionUpdateContent]
 
-  implicit def fromEntityUnmarshallerPurposes: FromEntityUnmarshaller[Seq[Purpose]] =
-    sprayJsonUnmarshaller[Seq[Purpose]]
+  implicit def fromEntityUnmarshallerPurposes: FromEntityUnmarshaller[Purposes] =
+    sprayJsonUnmarshaller[Purposes]
 
   implicit def fromEntityUnmarshallerPurpose: FromEntityUnmarshaller[Purpose] =
     sprayJsonUnmarshaller[Purpose]

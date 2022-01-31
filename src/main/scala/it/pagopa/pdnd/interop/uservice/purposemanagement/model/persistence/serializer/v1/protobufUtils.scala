@@ -73,6 +73,7 @@ object protobufUtils {
       id = id,
       state = state,
       riskAnalysis = riskAnalysisDoc,
+      dailyCalls = protobufPurposeVersion.dailyCalls,
       createdAt = createdAt,
       updatedAt = updatedAt,
       expectedApprovalDate = expectedApprovalDate
@@ -84,6 +85,7 @@ object protobufUtils {
     PurposeVersionV1(
       id = persistentPurposeVersion.id.toString,
       state = toProtobufPurposeState(persistentPurposeVersion.state),
+      dailyCalls = persistentPurposeVersion.dailyCalls,
       createdAt = persistentPurposeVersion.createdAt.toMillis,
       updatedAt = persistentPurposeVersion.updatedAt.map(_.toMillis),
       expectedApprovalDate = persistentPurposeVersion.expectedApprovalDate.map(_.toMillis),

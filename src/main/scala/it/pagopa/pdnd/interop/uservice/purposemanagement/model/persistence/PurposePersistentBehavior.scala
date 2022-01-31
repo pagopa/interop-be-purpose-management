@@ -7,19 +7,14 @@ import akka.pattern.StatusReply
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.{Effect, EffectBuilder, EventSourcedBehavior, RetentionCriteria}
 import it.pagopa.pdnd.interop.commons.utils.service.OffsetDateTimeSupplier
-import it.pagopa.pdnd.interop.uservice.purposemanagement.error.InternalErrors.{
-  PurposeHasVersions,
-  PurposeNotFound,
-  PurposeVersionNotFound,
-  PurposeVersionNotInDraft,
-  PurposeVersionStateConflict
-}
+import it.pagopa.pdnd.interop.uservice.purposemanagement.error.InternalErrors._
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.{
   PersistentPurpose,
   PersistentPurposeVersion,
+  PersistentPurposeVersionDocument,
   PersistentPurposeVersionState
 }
-import it.pagopa.pdnd.interop.uservice.purposemanagement.model.{ChangedBy, StateChangeDetails}
+import it.pagopa.pdnd.interop.uservice.purposemanagement.model.{ChangedBy, PurposeVersionDocument, StateChangeDetails}
 
 import java.time.temporal.ChronoUnit
 import scala.concurrent.duration.{DurationInt, DurationLong}
@@ -134,7 +129,7 @@ object PurposePersistentBehavior {
         replyTo ! StatusReply.Success[Option[PersistentPurpose]](purpose)
         Effect.none[Event, State]
 
-      case ActivatePurposeVersion(purposeId, versionId, stateChangeDetails, replyTo) =>
+      case ActivatePurposeVersion(purposeId, versionId, versionDocument, stateChangeDetails, replyTo) =>
         def archiveOldVersion(purpose: PersistentPurpose, newActiveVersionId: String): PurposeVersionActivated = {
           val updatedVersions = purpose.versions.map { v =>
             v.state match {
@@ -156,7 +151,8 @@ object PurposePersistentBehavior {
           PersistentPurposeVersionState.Active,
           replyTo,
           _.isActivable(purposeId),
-          archiveOldVersion(_, versionId)
+          archiveOldVersion(_, versionId),
+          versionDocument
         )(dateTimeSupplier)
 
       case SuspendPurposeVersion(purposeId, versionId, stateChangeDetails, replyTo) =>
@@ -312,12 +308,16 @@ object PurposePersistentBehavior {
     newState: PersistentPurposeVersionState,
     replyTo: ActorRef[StatusReply[PersistentPurpose]],
     versionValidation: PersistentPurposeVersion => Either[Throwable, Unit],
-    eventConstructor: PersistentPurpose => T
+    eventConstructor: PersistentPurpose => T,
+    riskAnalysisOpt: Option[PurposeVersionDocument] = None
   )(dateTimeSupplier: OffsetDateTimeSupplier): EffectBuilder[T, State] = {
+
     val purpose: Either[Throwable, PersistentPurpose] = for {
       purpose <- state.purposes.get(purposeId).toRight(PurposeNotFound(purposeId))
       version <- purpose.versions.find(_.id.toString == versionId).toRight(PurposeVersionNotFound(purposeId, versionId))
-      _       <- versionValidation(version)
+      riskAnalysisUpdated = riskAnalysisOpt.map(PersistentPurposeVersionDocument.fromAPI).orElse(version.riskAnalysis)
+      versionWithRisk     = version.copy(riskAnalysis = riskAnalysisUpdated)
+      _ <- versionValidation(versionWithRisk)
     } yield updatePurposeFromState(purpose, version, newState, stateChangeDetails)(dateTimeSupplier)
 
     purpose

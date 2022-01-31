@@ -17,14 +17,12 @@ final case class PersistentPurposeVersion(
   state: PersistentPurposeVersionState,
   expectedApprovalDate: Option[OffsetDateTime],
   riskAnalysis: Option[PersistentPurposeVersionDocument],
+  dailyCalls: Integer,
   createdAt: OffsetDateTime,
   updatedAt: Option[OffsetDateTime]
 ) {
   def update(update: PurposeVersionUpdate): PersistentPurposeVersion =
-    copy(
-      riskAnalysis = update.riskAnalysis.map(PersistentPurposeVersionDocument.fromAPI),
-      updatedAt = Some(update.timestamp)
-    )
+    copy(dailyCalls = update.dailyCalls, updatedAt = Some(update.timestamp))
 
   def isActivable(purposeId: String): Either[Throwable, Unit] =
     for {
@@ -71,6 +69,7 @@ object PersistentPurposeVersion {
     PersistentPurposeVersion(
       id = uuidSupplier.get,
       state = PersistentPurposeVersionState.Draft,
+      dailyCalls = seed.dailyCalls,
       createdAt = dateTimeSupplier.get,
       updatedAt = None,
       riskAnalysis = seed.riskAnalysis.map(PersistentPurposeVersionDocument.fromAPI),
@@ -84,7 +83,8 @@ object PersistentPurposeVersion {
       riskAnalysis = persistentPurposeVersion.riskAnalysis.map(PersistentPurposeVersionDocument.toAPI),
       createdAt = persistentPurposeVersion.createdAt,
       updatedAt = persistentPurposeVersion.updatedAt,
-      expectedApprovalDate = persistentPurposeVersion.expectedApprovalDate
+      expectedApprovalDate = persistentPurposeVersion.expectedApprovalDate,
+      dailyCalls = persistentPurposeVersion.dailyCalls
     )
   }
 }

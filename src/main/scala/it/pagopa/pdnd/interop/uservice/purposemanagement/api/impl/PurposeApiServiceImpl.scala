@@ -194,11 +194,16 @@ final case class PurposeApiServiceImpl(
   override def activatePurposeVersion(
     purposeId: String,
     versionId: String,
-    stateChangeDetails: StateChangeDetails
+    activatePurposeVersionPayload: ActivatePurposeVersionPayload
   )(implicit toEntityMarshallerProblem: ToEntityMarshaller[Problem], contexts: Seq[(String, String)]): Route = {
     logger.info("Activating purpose {} version {}", purposeId, versionId)
     val result: Future[StatusReply[PersistentPurpose]] =
-      activatePurposeVersionById(purposeId, versionId, stateChangeDetails)
+      activatePurposeVersionById(
+        purposeId,
+        versionId,
+        activatePurposeVersionPayload.riskAnalysis,
+        activatePurposeVersionPayload.stateChangeDetails
+      )
     onSuccess(result) {
       case statusReply if statusReply.isSuccess => activatePurposeVersion204
       case statusReply if statusReply.isError =>
@@ -403,12 +408,13 @@ final case class PurposeApiServiceImpl(
   private def activatePurposeVersionById(
     purposeId: String,
     versionId: String,
+    riskAnalysis: Option[PurposeVersionDocument],
     stateChangeDetails: StateChangeDetails
   ): Future[StatusReply[PersistentPurpose]] = {
     val commander: EntityRef[Command] =
       sharding.entityRefFor(PurposePersistentBehavior.TypeKey, AkkaUtils.getShard(purposeId, settings.numberOfShards))
 
-    commander.ask(ref => ActivatePurposeVersion(purposeId, versionId, stateChangeDetails, ref))
+    commander.ask(ref => ActivatePurposeVersion(purposeId, versionId, riskAnalysis, stateChangeDetails, ref))
   }
 
   private def suspendPurposeVersionById(

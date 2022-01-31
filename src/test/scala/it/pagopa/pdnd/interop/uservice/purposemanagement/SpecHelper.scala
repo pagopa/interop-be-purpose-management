@@ -94,11 +94,26 @@ trait SpecHelper {
     Unmarshal(response).to[Purposes]
   }
 
-  def activateVersion(purposeId: UUID, versionId: UUID, changedBy: ChangedBy)(implicit
-    ec: ExecutionContext,
-    actorSystem: actor.ActorSystem
-  ): Future[Option[String]] =
-    changeVersionState(purposeId, versionId, changedBy, "activate")
+  def activateVersion(
+    purposeId: UUID,
+    versionId: UUID,
+    changedBy: ChangedBy,
+    riskAnalysis: Option[PurposeVersionDocument]
+  )(implicit ec: ExecutionContext, actorSystem: actor.ActorSystem): Future[Option[String]] = {
+    for {
+      data <- Marshal(
+        ActivatePurposeVersionPayload(
+          riskAnalysis = riskAnalysis,
+          stateChangeDetails = StateChangeDetails(changedBy = changedBy)
+        )
+      )
+        .to[MessageEntity]
+        .map(_.dataBytes)
+      _ = (() => mockDateTimeSupplier.get).expects().returning(timestamp).once()
+      result <- Unmarshal(makeRequest(data, s"purposes/$purposeId/versions/$versionId/activate", HttpMethods.POST))
+        .to[Option[String]]
+    } yield result
+  }
 
   def suspendVersion(purposeId: UUID, versionId: UUID, changedBy: ChangedBy)(implicit
     ec: ExecutionContext,

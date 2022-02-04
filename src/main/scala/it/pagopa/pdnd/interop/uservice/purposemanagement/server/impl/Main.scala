@@ -47,8 +47,10 @@ object Main extends App {
   val dependenciesLoaded: Try[JWTReader] = for {
     keyset <- JWTConfiguration.jwtReader.loadKeyset()
     jwtValidator = new DefaultJWTReader with PublicKeysHolder {
-      var publicKeyset: Map[KID, SerializedKey]                                        = keyset
-      override protected val claimsVerifier: DefaultJWTClaimsVerifier[SecurityContext] = getClaimsVerifier()
+      var publicKeyset: Map[KID, SerializedKey] = keyset
+
+      override protected val claimsVerifier: DefaultJWTClaimsVerifier[SecurityContext] =
+        getClaimsVerifier(audiences = ApplicationConfiguration.jwtAudience)
     }
   } yield jwtValidator
 

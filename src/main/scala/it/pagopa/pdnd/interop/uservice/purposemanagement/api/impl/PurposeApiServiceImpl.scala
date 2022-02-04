@@ -64,7 +64,7 @@ final case class PurposeApiServiceImpl(
     val result: Future[StatusReply[PersistentPurpose]] = createPurpose(purpose)
     onComplete(result) {
       case Success(statusReply) if statusReply.isSuccess =>
-        createPurpose201(PersistentPurpose.toAPI(statusReply.getValue))
+        createPurpose201(statusReply.getValue.toAPI)
       case Success(statusReply) =>
         logger.error(
           "Error while adding a purpose for consumer {} to e-service {}",
@@ -96,7 +96,7 @@ final case class PurposeApiServiceImpl(
     onSuccess(result) {
       case statusReply if statusReply.isSuccess =>
         statusReply.getValue.fold(getPurpose404(problemOf(StatusCodes.NotFound, GetPurposeNotFound)))(purpose =>
-          getPurpose200(PersistentPurpose.toAPI(purpose))
+          getPurpose200(purpose.toAPI)
         )
       case statusReply if statusReply.isError =>
         logger.error("Error retrieving purpose {}", purposeId, statusReply.getError)
@@ -143,7 +143,7 @@ final case class PurposeApiServiceImpl(
     val result: Future[StatusReply[PersistentPurposeVersion]] = createPurposeVersion(purposeId, purposeVersion)
     onComplete(result) {
       case Success(statusReply) if statusReply.isSuccess =>
-        createPurposeVersion201(PersistentPurposeVersion.toAPI(statusReply.getValue))
+        createPurposeVersion201(statusReply.getValue.toAPI)
       case Success(statusReply) =>
         logger.error("Error while adding a version to purpose {}", purposeId, statusReply.getError)
         statusReply.getError match {
@@ -329,7 +329,7 @@ final case class PurposeApiServiceImpl(
         _
       )
       persistentPurposes = commanders.flatMap(ref => slices(ref, sliceSize)(generator))
-      purposes           = persistentPurposes.map(PersistentPurpose.toAPI)
+      purposes           = persistentPurposes.map(_.toAPI)
     } yield Purposes(purposes = purposes)
 
     result match {
@@ -364,7 +364,7 @@ final case class PurposeApiServiceImpl(
 
     onComplete(result) {
       case Success(statusReply) if statusReply.isSuccess =>
-        updatePurposeVersion200(PersistentPurposeVersion.toAPI(statusReply.getValue))
+        updatePurposeVersion200(statusReply.getValue.toAPI)
       case Success(statusReply) =>
         logger.error("Error while updating version {} of purpose {}", versionId, purposeId, statusReply.getError)
         statusReply.getError match {

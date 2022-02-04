@@ -8,12 +8,12 @@ import it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence.seria
   PurposeVersionDocumentV1,
   PurposeVersionV1
 }
-import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.{
-  PersistentPurpose,
-  PersistentPurposeVersion,
-  PersistentPurposeVersionDocument,
-  PersistentPurposeVersionState
+import it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence.serializer.v1.riskAnalysis.{
+  RiskAnalysisFormV1,
+  RiskAnalysisMultiAnswerV1,
+  RiskAnalysisSingleAnswerV1
 }
+import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose._
 
 import scala.util.{Failure, Success, Try}
 
@@ -21,12 +21,13 @@ object protobufUtils {
 
   def toPersistentPurpose(protobufPurpose: PurposeV1): Either[Throwable, PersistentPurpose] = {
     val purpose = for {
-      id         <- protobufPurpose.id.toUUID
-      eserviceId <- protobufPurpose.eserviceId.toUUID
-      consumerId <- protobufPurpose.consumerId.toUUID
-      versions   <- protobufPurpose.versions.traverse(toPersistentPurposeVersion).toTry
-      createdAt  <- protobufPurpose.createdAt.toOffsetDateTime
-      updatedAt  <- protobufPurpose.updatedAt.traverse(_.toOffsetDateTime)
+      id               <- protobufPurpose.id.toUUID
+      eserviceId       <- protobufPurpose.eserviceId.toUUID
+      consumerId       <- protobufPurpose.consumerId.toUUID
+      versions         <- protobufPurpose.versions.traverse(toPersistentPurposeVersion).toTry
+      riskAnalysisForm <- toPersistentRiskAnalysis(protobufPurpose.riskAnalysisForm).toTry
+      createdAt        <- protobufPurpose.createdAt.toOffsetDateTime
+      updatedAt        <- protobufPurpose.updatedAt.traverse(_.toOffsetDateTime)
     } yield PersistentPurpose(
       id = id,
       eserviceId = eserviceId,
@@ -36,6 +37,7 @@ object protobufUtils {
       suspendedByProducer = protobufPurpose.suspendedByProducer,
       title = protobufPurpose.title,
       description = protobufPurpose.description,
+      riskAnalysisForm = riskAnalysisForm,
       createdAt = createdAt,
       updatedAt = updatedAt
     )
@@ -53,6 +55,7 @@ object protobufUtils {
         suspendedByProducer = persistentPurpose.suspendedByProducer,
         title = persistentPurpose.title,
         description = persistentPurpose.description,
+        riskAnalysisForm = toProtobufRiskAnalysis(persistentPurpose.riskAnalysisForm),
         createdAt = persistentPurpose.createdAt.toMillis,
         updatedAt = persistentPurpose.updatedAt.map(_.toMillis)
       )
@@ -137,4 +140,69 @@ object protobufUtils {
       createdAt = persistentDocument.createdAt.toMillis
     )
   }
+
+  def toPersistentRiskAnalysis(
+    protobufRiskAnalysis: RiskAnalysisFormV1
+  ): Either[Throwable, PersistentRiskAnalysisForm] =
+    for {
+      id            <- protobufRiskAnalysis.id.toUUID.toEither
+      singleAnswers <- protobufRiskAnalysis.singleAnswers.traverse(toPersistentRiskAnalysisSingleAnswer)
+      multiAnswers  <- protobufRiskAnalysis.multiAnswers.traverse(toPersistentRiskAnalysisMultiAnswer)
+    } yield PersistentRiskAnalysisForm(
+      id = id,
+      version = protobufRiskAnalysis.version,
+      singleAnswers = singleAnswers,
+      multiAnswers = multiAnswers
+    )
+
+  def toProtobufRiskAnalysis(persistentRiskAnalysis: PersistentRiskAnalysisForm): RiskAnalysisFormV1 =
+    RiskAnalysisFormV1(
+      id = persistentRiskAnalysis.id.toString,
+      version = persistentRiskAnalysis.version,
+      singleAnswers = persistentRiskAnalysis.singleAnswers.map(toProtobufRiskAnalysisSingleAnswer),
+      multiAnswers = persistentRiskAnalysis.multiAnswers.map(toProtobufRiskAnalysisMultiAnswer)
+    )
+
+  def toPersistentRiskAnalysisSingleAnswer(
+    protobufSingleAnswer: RiskAnalysisSingleAnswerV1
+  ): Either[Throwable, PersistentRiskAnalysisSingleAnswer] = {
+    val answers = for {
+      id <- protobufSingleAnswer.id.toUUID
+    } yield PersistentRiskAnalysisSingleAnswer(
+      id = id,
+      key = protobufSingleAnswer.key,
+      value = protobufSingleAnswer.value
+    )
+    answers.toEither
+  }
+
+  def toProtobufRiskAnalysisSingleAnswer(
+    persistentSingleAnswer: PersistentRiskAnalysisSingleAnswer
+  ): RiskAnalysisSingleAnswerV1 =
+    RiskAnalysisSingleAnswerV1(
+      id = persistentSingleAnswer.id.toString,
+      key = persistentSingleAnswer.key,
+      value = persistentSingleAnswer.value
+    )
+
+  def toPersistentRiskAnalysisMultiAnswer(
+    protobufMultiAnswer: RiskAnalysisMultiAnswerV1
+  ): Either[Throwable, PersistentRiskAnalysisMultiAnswer] = {
+    val answers = for {
+      id <- protobufMultiAnswer.id.toUUID
+    } yield PersistentRiskAnalysisMultiAnswer(
+      id = id,
+      key = protobufMultiAnswer.key,
+      values = protobufMultiAnswer.values
+    )
+    answers.toEither
+  }
+  def toProtobufRiskAnalysisMultiAnswer(
+    persistentMultiAnswer: PersistentRiskAnalysisMultiAnswer
+  ): RiskAnalysisMultiAnswerV1 =
+    RiskAnalysisMultiAnswerV1(
+      id = persistentMultiAnswer.id.toString,
+      key = persistentMultiAnswer.key,
+      values = persistentMultiAnswer.values
+    )
 }

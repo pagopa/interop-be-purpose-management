@@ -13,6 +13,7 @@ import it.pagopa.pdnd.interop.uservice.purposemanagement.model._
 import org.scalamock.scalatest.MockFactory
 
 import java.time.{OffsetDateTime, ZoneOffset}
+import java.util.UUID
 
 package object purposemanagement extends MockFactory {
 
@@ -20,7 +21,9 @@ package object purposemanagement extends MockFactory {
     s"http://localhost:18088/pdnd-interop-uservice-purpose-management/${buildinfo.BuildInfo.interfaceVersion}"
   final val authorization: Seq[Authorization] = Seq(headers.Authorization(OAuth2BearerToken("token")))
 
-  final val timestamp = OffsetDateTime.of(2022, 12, 31, 11, 22, 33, 44, ZoneOffset.UTC)
+  final val timestamp            = OffsetDateTime.of(2022, 12, 31, 11, 22, 33, 44, ZoneOffset.UTC)
+  final val riskAnalysisFormSeed = RiskAnalysisFormSeed(version = "1.0", Seq.empty, Seq.empty)
+  final val riskAnalysisForm     = RiskAnalysisForm(id = UUID.randomUUID(), version = "1.0", Seq.empty, Seq.empty)
 
   val mockUUIDSupplier: UUIDSupplier               = mock[UUIDSupplier]
   val mockDateTimeSupplier: OffsetDateTimeSupplier = mock[OffsetDateTimeSupplier]

@@ -16,7 +16,12 @@ class PurposeSpec extends BaseIntegrationSpec {
       val eServiceId = UUID.randomUUID()
       val consumerId = UUID.randomUUID()
 
-      val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
+      val purposeSeed = PurposeSeed(
+        eserviceId = eServiceId,
+        consumerId = consumerId,
+        title = "Purpose",
+        riskAnalysisForm = riskAnalysisFormSeed
+      )
 
       val response: Future[Purpose] = createPurpose(purposeId, purposeSeed)
 
@@ -29,6 +34,7 @@ class PurposeSpec extends BaseIntegrationSpec {
         suspendedByProducer = None,
         title = purposeSeed.title,
         description = purposeSeed.description,
+        riskAnalysisForm = riskAnalysisForm,
         createdAt = timestamp,
         updatedAt = None
       )
@@ -46,7 +52,12 @@ class PurposeSpec extends BaseIntegrationSpec {
       val eServiceId = UUID.randomUUID()
       val consumerId = UUID.randomUUID()
 
-      val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
+      val purposeSeed = PurposeSeed(
+        eserviceId = eServiceId,
+        consumerId = consumerId,
+        title = "Purpose",
+        riskAnalysisForm = riskAnalysisFormSeed
+      )
       val versionSeed = PurposeVersionSeed(dailyCalls = 100)
 
       val response: Future[Purpose] =
@@ -73,6 +84,7 @@ class PurposeSpec extends BaseIntegrationSpec {
         suspendedByProducer = None,
         title = purposeSeed.title,
         description = purposeSeed.description,
+        riskAnalysisForm = riskAnalysisForm,
         createdAt = timestamp,
         updatedAt = None
       )
@@ -102,9 +114,19 @@ class PurposeSpec extends BaseIntegrationSpec {
       val eServiceId2 = UUID.randomUUID()
       val consumerId2 = UUID.randomUUID()
 
-      val purposeSeed1 = PurposeSeed(eserviceId = eServiceId1, consumerId = consumerId1, title = "Purpose")
-      val purposeSeed2 = PurposeSeed(eserviceId = eServiceId2, consumerId = consumerId2, title = "Purpose")
-      val versionSeed  = PurposeVersionSeed(dailyCalls = 100)
+      val purposeSeed1 = PurposeSeed(
+        eserviceId = eServiceId1,
+        consumerId = consumerId1,
+        title = "Purpose",
+        riskAnalysisForm = riskAnalysisFormSeed
+      )
+      val purposeSeed2 = PurposeSeed(
+        eserviceId = eServiceId2,
+        consumerId = consumerId2,
+        title = "Purpose",
+        riskAnalysisForm = riskAnalysisFormSeed
+      )
+      val versionSeed = PurposeVersionSeed(dailyCalls = 100)
 
       val response: Future[Purposes] =
         for {
@@ -133,6 +155,7 @@ class PurposeSpec extends BaseIntegrationSpec {
             suspendedByProducer = None,
             title = purposeSeed1.title,
             description = purposeSeed1.description,
+            riskAnalysisForm = riskAnalysisForm,
             createdAt = timestamp,
             updatedAt = None
           ),
@@ -145,6 +168,7 @@ class PurposeSpec extends BaseIntegrationSpec {
             suspendedByProducer = None,
             title = purposeSeed2.title,
             description = purposeSeed2.description,
+            riskAnalysisForm = riskAnalysisForm,
             createdAt = timestamp,
             updatedAt = None
           )
@@ -162,9 +186,19 @@ class PurposeSpec extends BaseIntegrationSpec {
       val eServiceId2 = UUID.randomUUID()
       val consumerId2 = UUID.randomUUID()
 
-      val purposeSeed1 = PurposeSeed(eserviceId = eServiceId1, consumerId = consumerId1, title = "Purpose")
-      val purposeSeed2 = PurposeSeed(eserviceId = eServiceId2, consumerId = consumerId2, title = "Purpose")
-      val versionSeed  = PurposeVersionSeed(dailyCalls = 100)
+      val purposeSeed1 = PurposeSeed(
+        eserviceId = eServiceId1,
+        consumerId = consumerId1,
+        title = "Purpose",
+        riskAnalysisForm = riskAnalysisFormSeed
+      )
+      val purposeSeed2 = PurposeSeed(
+        eserviceId = eServiceId2,
+        consumerId = consumerId2,
+        title = "Purpose",
+        riskAnalysisForm = riskAnalysisFormSeed
+      )
+      val versionSeed = PurposeVersionSeed(dailyCalls = 100)
 
       val response: Future[Purposes] =
         for {
@@ -193,6 +227,7 @@ class PurposeSpec extends BaseIntegrationSpec {
             suspendedByProducer = None,
             title = purposeSeed1.title,
             description = purposeSeed1.description,
+            riskAnalysisForm = riskAnalysisForm,
             createdAt = timestamp,
             updatedAt = None
           )
@@ -210,9 +245,19 @@ class PurposeSpec extends BaseIntegrationSpec {
       val eServiceId2 = UUID.randomUUID()
       val consumerId2 = UUID.randomUUID()
 
-      val purposeSeed1 = PurposeSeed(eserviceId = eServiceId1, consumerId = consumerId1, title = "Purpose")
-      val purposeSeed2 = PurposeSeed(eserviceId = eServiceId2, consumerId = consumerId2, title = "Purpose")
-      val versionSeed  = PurposeVersionSeed(dailyCalls = 100)
+      val purposeSeed1 = PurposeSeed(
+        eserviceId = eServiceId1,
+        consumerId = consumerId1,
+        title = "Purpose",
+        riskAnalysisForm = riskAnalysisFormSeed
+      )
+      val purposeSeed2 = PurposeSeed(
+        eserviceId = eServiceId2,
+        consumerId = consumerId2,
+        title = "Purpose",
+        riskAnalysisForm = riskAnalysisFormSeed
+      )
+      val versionSeed = PurposeVersionSeed(dailyCalls = 100)
 
       val response: Future[Purposes] =
         for {
@@ -233,6 +278,7 @@ class PurposeSpec extends BaseIntegrationSpec {
             suspendedByProducer = None,
             title = purposeSeed2.title,
             description = purposeSeed2.description,
+            riskAnalysisForm = riskAnalysisForm,
             createdAt = timestamp,
             updatedAt = None
           )
@@ -260,9 +306,24 @@ class PurposeSpec extends BaseIntegrationSpec {
         createdAt = timestamp
       )
 
-      val purposeSeed1   = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
-      val purposeSeed2   = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
-      val purposeSeed3   = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
+      val purposeSeed1 = PurposeSeed(
+        eserviceId = eServiceId,
+        consumerId = consumerId,
+        title = "Purpose",
+        riskAnalysisForm = riskAnalysisFormSeed
+      )
+      val purposeSeed2 = PurposeSeed(
+        eserviceId = eServiceId,
+        consumerId = consumerId,
+        title = "Purpose",
+        riskAnalysisForm = riskAnalysisFormSeed
+      )
+      val purposeSeed3 = PurposeSeed(
+        eserviceId = eServiceId,
+        consumerId = consumerId,
+        title = "Purpose",
+        riskAnalysisForm = riskAnalysisFormSeed
+      )
       val versionSeed1_1 = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
       val versionSeed1_2 = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
       val versionSeed2_1 = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
@@ -318,6 +379,7 @@ class PurposeSpec extends BaseIntegrationSpec {
             suspendedByProducer = None,
             title = purposeSeed1.title,
             description = purposeSeed1.description,
+            riskAnalysisForm = riskAnalysisForm,
             createdAt = timestamp,
             updatedAt = Some(timestamp)
           ),
@@ -340,6 +402,7 @@ class PurposeSpec extends BaseIntegrationSpec {
             suspendedByProducer = None,
             title = purposeSeed2.title,
             description = purposeSeed2.description,
+            riskAnalysisForm = riskAnalysisForm,
             createdAt = timestamp,
             updatedAt = Some(timestamp)
           )
@@ -358,7 +421,12 @@ class PurposeSpec extends BaseIntegrationSpec {
       val eServiceId = UUID.randomUUID()
       val consumerId = UUID.randomUUID()
 
-      val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
+      val purposeSeed = PurposeSeed(
+        eserviceId = eServiceId,
+        consumerId = consumerId,
+        title = "Purpose",
+        riskAnalysisForm = riskAnalysisFormSeed
+      )
 
       val response: Future[Option[String]] =
         for {
@@ -375,7 +443,12 @@ class PurposeSpec extends BaseIntegrationSpec {
       val eServiceId = UUID.randomUUID()
       val consumerId = UUID.randomUUID()
 
-      val purposeSeed = PurposeSeed(eserviceId = eServiceId, consumerId = consumerId, title = "Purpose")
+      val purposeSeed = PurposeSeed(
+        eserviceId = eServiceId,
+        consumerId = consumerId,
+        title = "Purpose",
+        riskAnalysisForm = riskAnalysisFormSeed
+      )
       val versionSeed = PurposeVersionSeed(dailyCalls = 100)
 
       val response: Future[Problem] =
@@ -402,6 +475,7 @@ class PurposeSpec extends BaseIntegrationSpec {
             b.`suspendedByProducer`,
             b.`title`,
             b.`description`,
+            b.`riskAnalysisForm`,
             b.`createdAt`,
             b.`updatedAt`
           ) =>

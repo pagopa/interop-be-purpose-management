@@ -7,7 +7,8 @@ import it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence.Purpo
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.{
   PersistentPurpose,
   PersistentPurposeVersion,
-  PersistentPurposeVersionState
+  PersistentPurposeVersionState,
+  PersistentRiskAnalysisForm
 }
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -34,6 +35,7 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
     suspendedByProducer = None,
     title = "Some title",
     description = None,
+    riskAnalysisForm = PersistentRiskAnalysisForm(UUID.randomUUID(), "1.0", Seq.empty, Seq.empty),
     createdAt = timestamp,
     updatedAt = None
   )

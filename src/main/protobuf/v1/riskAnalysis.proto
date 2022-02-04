@@ -1,0 +1,27 @@
+syntax = "proto2";
+
+import "scalapb/scalapb.proto";
+
+option (scalapb.options) = {
+  package_name: "it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence.serializer.v1"
+  no_default_values_in_constructor : true
+};
+
+message RiskAnalysisFormV1 {
+  required string id = 1;
+  required string version = 2;
+  repeated RiskAnalysisSingleAnswerV1 singleAnswers = 3;
+  repeated RiskAnalysisMultiAnswerV1 multiAnswers = 4;
+}
+
+message RiskAnalysisSingleAnswerV1 {
+  required string id = 1;
+  required string key = 2;
+  optional string value = 3;
+}
+
+message RiskAnalysisMultiAnswerV1 {
+  required string id = 1;
+  required string key = 2;
+  repeated string values = 3;
+}

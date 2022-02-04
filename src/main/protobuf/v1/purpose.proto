@@ -7,6 +7,8 @@ option (scalapb.options) = {
   no_default_values_in_constructor : true
 };
 
+import "v1/riskAnalysis.proto";
+
 message PurposeV1 {
   required string id = 1;
   required string eserviceId = 2;
@@ -16,8 +18,9 @@ message PurposeV1 {
   repeated PurposeVersionV1 versions = 7;
   required string title = 8;
   optional string description = 9;
-  required int64 createdAt = 10;
-  optional int64 updatedAt = 11;
+  required RiskAnalysisFormV1 riskAnalysisForm = 10;
+  required int64 createdAt = 11;
+  optional int64 updatedAt = 12;
 }
 
 message PurposeVersionV1 {

@@ -10,7 +10,10 @@ final case class PersistentPurposeVersionDocument(
   contentType: String,
   path: String,
   createdAt: OffsetDateTime
-)
+) {
+  def toAPI: PurposeVersionDocument =
+    PurposeVersionDocument(id = id, contentType = contentType, path = path, createdAt = createdAt)
+}
 
 object PersistentPurposeVersionDocument {
 
@@ -22,11 +25,4 @@ object PersistentPurposeVersionDocument {
       createdAt = document.createdAt
     )
 
-  def toAPI(document: PersistentPurposeVersionDocument): PurposeVersionDocument =
-    PurposeVersionDocument(
-      id = document.id,
-      contentType = document.contentType,
-      path = document.path,
-      createdAt = document.createdAt
-    )
 }

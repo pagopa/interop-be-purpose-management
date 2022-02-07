@@ -489,10 +489,13 @@ components:
           type: string
         description:
           type: string
+        riskAnalysisForm:
+          $ref: '#/components/schemas/RiskAnalysisFormSeed'
       required:
         - eserviceId
         - consumerId
         - title
+        - riskAnalysisForm
     PurposeVersionSeed:
       type: object
       description: contains the expected payload for purpose version persistence.
@@ -541,6 +544,8 @@ components:
           type: string
         description:
           type: string
+        riskAnalysisForm:
+          $ref: '#/components/schemas/RiskAnalysisForm'
         createdAt:
           type: string
           format: date-time
@@ -551,6 +556,7 @@ components:
         - id
         - eserviceId
         - consumerId
+        - riskAnalysisForm
         - versions
         - title
         - createdAt
@@ -612,6 +618,94 @@ components:
         createdAt:
           type: string
           format: date-time
+    RiskAnalysisFormSeed:
+      type: object
+      properties:
+        version:
+          type: string
+        singleAnswers:
+          type: array
+          items:
+            $ref: '#/components/schemas/RiskAnalysisSingleAnswerSeed'
+        multiAnswers:
+          type: array
+          items:
+            $ref: '#/components/schemas/RiskAnalysisMultiAnswerSeed'
+      required:
+        - version
+        - singleAnswers
+        - multiAnswers
+    RiskAnalysisSingleAnswerSeed:
+      type: object
+      properties:
+        key:
+          type: string
+        value:
+          type: string
+      required:
+        - key
+    RiskAnalysisMultiAnswerSeed:
+      type: object
+      properties:
+        key:
+          type: string
+        values:
+          type: array
+          items:
+            type: string
+      required:
+        - key
+        - values
+    RiskAnalysisForm:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        version:
+          type: string
+        singleAnswers:
+          type: array
+          items:
+            $ref: '#/components/schemas/RiskAnalysisSingleAnswer'
+        multiAnswers:
+          type: array
+          items:
+            $ref: '#/components/schemas/RiskAnalysisMultiAnswer'
+      required:
+        - id
+        - version
+        - singleAnswers
+        - multiAnswers
+    RiskAnalysisSingleAnswer:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        key:
+          type: string
+        value:
+          type: string
+      required:
+        - id
+        - key
+    RiskAnalysisMultiAnswer:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        key:
+          type: string
+        values:
+          type: array
+          items:
+            type: string
+      required:
+        - id
+        - key
+        - values
     Problem:
       properties:
         type:

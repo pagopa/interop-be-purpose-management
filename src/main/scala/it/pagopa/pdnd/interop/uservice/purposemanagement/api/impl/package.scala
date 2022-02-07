@@ -17,14 +17,24 @@ import scala.concurrent.duration.Duration
 
 package object impl extends SprayJsonSupport with DefaultJsonProtocol {
 
-  implicit val purposeSeedFormat: RootJsonFormat[PurposeSeed]                = jsonFormat4(PurposeSeed)
-  implicit val versionDocumentFormat: RootJsonFormat[PurposeVersionDocument] = jsonFormat4(PurposeVersionDocument)
-  implicit val purposeVersionSeedFormat: RootJsonFormat[PurposeVersionSeed]  = jsonFormat2(PurposeVersionSeed)
+  implicit val riskAnalysisSingleAnswerFormat: RootJsonFormat[RiskAnalysisSingleAnswer] =
+    jsonFormat3(RiskAnalysisSingleAnswer)
+  implicit val riskAnalysisMultiAnswerFormat: RootJsonFormat[RiskAnalysisMultiAnswer] =
+    jsonFormat3(RiskAnalysisMultiAnswer)
+  implicit val riskAnalysisFormFormat: RootJsonFormat[RiskAnalysisForm] = jsonFormat4(RiskAnalysisForm)
+  implicit val riskAnalysisSingleAnswerSeedFormat: RootJsonFormat[RiskAnalysisSingleAnswerSeed] =
+    jsonFormat2(RiskAnalysisSingleAnswerSeed)
+  implicit val riskAnalysisMultiAnswerSeedFormat: RootJsonFormat[RiskAnalysisMultiAnswerSeed] =
+    jsonFormat2(RiskAnalysisMultiAnswerSeed)
+  implicit val riskAnalysisFormSeedFormat: RootJsonFormat[RiskAnalysisFormSeed] = jsonFormat3(RiskAnalysisFormSeed)
+  implicit val purposeSeedFormat: RootJsonFormat[PurposeSeed]                   = jsonFormat5(PurposeSeed)
+  implicit val versionDocumentFormat: RootJsonFormat[PurposeVersionDocument]    = jsonFormat4(PurposeVersionDocument)
+  implicit val purposeVersionSeedFormat: RootJsonFormat[PurposeVersionSeed]     = jsonFormat2(PurposeVersionSeed)
   implicit val purposeVersionUpdateFormat: RootJsonFormat[PurposeVersionUpdateContent] = jsonFormat1(
     PurposeVersionUpdateContent
   )
   implicit val purposeVersionFormat: RootJsonFormat[PurposeVersion]         = jsonFormat7(PurposeVersion)
-  implicit val purposeFormat: RootJsonFormat[Purpose]                       = jsonFormat10(Purpose)
+  implicit val purposeFormat: RootJsonFormat[Purpose]                       = jsonFormat11(Purpose)
   implicit val purposesFormat: RootJsonFormat[Purposes]                     = jsonFormat1(Purposes)
   implicit val stateChangeDetailsFormat: RootJsonFormat[StateChangeDetails] = jsonFormat1(StateChangeDetails)
   implicit val problemErrorFormat: RootJsonFormat[ProblemError]             = jsonFormat2(ProblemError)

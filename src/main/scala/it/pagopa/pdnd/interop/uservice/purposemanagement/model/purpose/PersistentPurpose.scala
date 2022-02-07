@@ -15,9 +15,26 @@ final case class PersistentPurpose(
   suspendedByProducer: Option[Boolean],
   title: String,
   description: Option[String],
+  riskAnalysisForm: PersistentRiskAnalysisForm,
   createdAt: OffsetDateTime,
   updatedAt: Option[OffsetDateTime]
-)
+) {
+  def toAPI: Purpose = {
+    Purpose(
+      id = id,
+      eserviceId = eserviceId,
+      consumerId = consumerId,
+      versions = versions.map(_.toAPI),
+      suspendedByConsumer = suspendedByConsumer,
+      suspendedByProducer = suspendedByProducer,
+      title = title,
+      description = description,
+      riskAnalysisForm = riskAnalysisForm.toAPI,
+      createdAt = createdAt,
+      updatedAt = updatedAt
+    )
+  }
+}
 
 object PersistentPurpose {
   def fromSeed(
@@ -34,22 +51,9 @@ object PersistentPurpose {
       suspendedByProducer = None,
       title = seed.title,
       description = seed.description,
+      riskAnalysisForm = PersistentRiskAnalysisForm.fromSeed(uuidSupplier)(seed.riskAnalysisForm),
       createdAt = dateTimeSupplier.get,
       updatedAt = None
     )
 
-  def toAPI(persistentPurpose: PersistentPurpose): Purpose = {
-    Purpose(
-      id = persistentPurpose.id,
-      eserviceId = persistentPurpose.eserviceId,
-      consumerId = persistentPurpose.consumerId,
-      versions = persistentPurpose.versions.map(PersistentPurposeVersion.toAPI),
-      suspendedByConsumer = persistentPurpose.suspendedByConsumer,
-      suspendedByProducer = persistentPurpose.suspendedByProducer,
-      title = persistentPurpose.title,
-      description = persistentPurpose.description,
-      createdAt = persistentPurpose.createdAt,
-      updatedAt = persistentPurpose.updatedAt
-    )
-  }
 }

@@ -49,6 +49,18 @@ final case class PersistentPurposeVersion(
 
   def isArchivable(purposeId: String): Either[Throwable, Unit] =
     Either.cond(ARCHIVABLE_STATES.contains(state), (), PurposeVersionNotInExpectedState(purposeId, id.toString, state))
+
+  def toAPI: PurposeVersion = {
+    PurposeVersion(
+      id = id,
+      state = state.toApi,
+      riskAnalysis = riskAnalysis.map(_.toAPI),
+      createdAt = createdAt,
+      updatedAt = updatedAt,
+      expectedApprovalDate = expectedApprovalDate,
+      dailyCalls = dailyCalls
+    )
+  }
 }
 
 object PersistentPurposeVersion {
@@ -76,15 +88,4 @@ object PersistentPurposeVersion {
       expectedApprovalDate = None
     )
 
-  def toAPI(persistentPurposeVersion: PersistentPurposeVersion): PurposeVersion = {
-    PurposeVersion(
-      id = persistentPurposeVersion.id,
-      state = persistentPurposeVersion.state.toApi,
-      riskAnalysis = persistentPurposeVersion.riskAnalysis.map(PersistentPurposeVersionDocument.toAPI),
-      createdAt = persistentPurposeVersion.createdAt,
-      updatedAt = persistentPurposeVersion.updatedAt,
-      expectedApprovalDate = persistentPurposeVersion.expectedApprovalDate,
-      dailyCalls = persistentPurposeVersion.dailyCalls
-    )
-  }
 }

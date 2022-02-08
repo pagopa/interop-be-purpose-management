@@ -38,14 +38,11 @@ final case class PersistentPurposeVersion(
     Either.cond(SUSPENDABLE_STATES.contains(state), (), PurposeVersionNotInExpectedState(purposeId, id.toString, state))
 
   def canWaitForApproval(purposeId: String): Either[Throwable, Unit] =
-    for {
-      _ <- Either.cond(
-        WAITABLE_FOR_APPROVAL_STATES.contains(state),
-        (),
-        PurposeVersionNotInExpectedState(purposeId, id.toString, state)
-      )
-      _ <- Either.cond(riskAnalysis.isDefined, (), PurposeVersionMissingRiskAnalysis(purposeId, id.toString))
-    } yield ()
+    Either.cond(
+      WAITABLE_FOR_APPROVAL_STATES.contains(state),
+      (),
+      PurposeVersionNotInExpectedState(purposeId, id.toString, state)
+    )
 
   def isArchivable(purposeId: String): Either[Throwable, Unit] =
     Either.cond(ARCHIVABLE_STATES.contains(state), (), PurposeVersionNotInExpectedState(purposeId, id.toString, state))

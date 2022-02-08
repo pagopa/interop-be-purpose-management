@@ -408,18 +408,10 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
 
   "Wait for approval of purpose" must {
     "succeed" in {
-      val purposeId      = UUID.randomUUID()
-      val versionId      = UUID.randomUUID()
-      val eServiceId     = UUID.randomUUID()
-      val consumerId     = UUID.randomUUID()
-      val riskAnalysisId = UUID.randomUUID()
-
-      val riskAnalysisDoc = PurposeVersionDocument(
-        id = riskAnalysisId,
-        contentType = "a-content-type",
-        path = "a/store/path",
-        createdAt = timestamp
-      )
+      val purposeId  = UUID.randomUUID()
+      val versionId  = UUID.randomUUID()
+      val eServiceId = UUID.randomUUID()
+      val consumerId = UUID.randomUUID()
 
       val purposeSeed = PurposeSeed(
         eserviceId = eServiceId,
@@ -427,7 +419,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         title = "Purpose",
         riskAnalysisForm = riskAnalysisFormSeed
       )
-      val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
+      val versionSeed = PurposeVersionSeed(riskAnalysis = None, dailyCalls = 100)
 
       val response: Future[(PurposeVersion, PurposeVersion)] =
         for {
@@ -453,36 +445,6 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
       val result = response.futureValue
       result.status shouldBe 404
       result.errors.map(_.code) shouldBe Seq("011-0019")
-    }
-
-    "fail on missing risk analysis" in {
-      val purposeId  = UUID.randomUUID()
-      val versionId  = UUID.randomUUID()
-      val eServiceId = UUID.randomUUID()
-      val consumerId = UUID.randomUUID()
-
-      val purposeSeed = PurposeSeed(
-        eserviceId = eServiceId,
-        consumerId = consumerId,
-        title = "Purpose",
-        riskAnalysisForm = riskAnalysisFormSeed
-      )
-      val versionSeed = PurposeVersionSeed(riskAnalysis = None, dailyCalls = 100)
-
-      val response: Future[Problem] =
-        for {
-          _ <- createPurpose(purposeId, purposeSeed)
-          _ <- createPurposeVersion(purposeId, versionId, versionSeed)
-          result <- makeFailingRequest(
-            s"purposes/$purposeId/versions/$versionId/waitForApproval",
-            HttpMethods.POST,
-            StateChangeDetails(changedBy = ChangedBy.CONSUMER)
-          )
-        } yield result
-
-      val result = response.futureValue
-      result.status shouldBe 400
-      result.errors.map(_.code) shouldBe Seq("011-0022")
     }
 
     "fail on wrong current version state" in {

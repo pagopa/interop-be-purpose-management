@@ -294,8 +294,12 @@ paths:
               $ref: '#/components/schemas/ActivatePurposeVersionPayload'
         required: true
       responses:
-        '204':
+        '200':
           description: Purpose Version Activated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurposeVersion'
         '400':
           description: Bad Request
           content:
@@ -337,8 +341,12 @@ paths:
               $ref: '#/components/schemas/StateChangeDetails'
         required: true
       responses:
-        '204':
+        '200':
           description: Purpose Version Suspended
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurposeVersion'
         '400':
           description: Bad Request
           content:
@@ -380,8 +388,12 @@ paths:
               $ref: '#/components/schemas/StateChangeDetails'
         required: true
       responses:
-        '204':
+        '200':
           description: Purpose Version In Waiting for Approval
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurposeVersion'
         '400':
           description: Bad Request
           content:
@@ -423,8 +435,12 @@ paths:
               $ref: '#/components/schemas/StateChangeDetails'
         required: true
       responses:
-        '204':
+        '200':
           description: Purpose Version Archived
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurposeVersion'
         '400':
           description: Bad Request
           content:

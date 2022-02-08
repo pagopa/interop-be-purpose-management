@@ -19,7 +19,8 @@ final case class PersistentPurposeVersion(
   riskAnalysis: Option[PersistentPurposeVersionDocument],
   dailyCalls: Integer,
   createdAt: OffsetDateTime,
-  updatedAt: Option[OffsetDateTime]
+  updatedAt: Option[OffsetDateTime],
+  firstActivationAt: Option[OffsetDateTime]
 ) {
   def update(update: PurposeVersionUpdate): PersistentPurposeVersion =
     copy(dailyCalls = update.dailyCalls, updatedAt = Some(update.timestamp))
@@ -54,6 +55,7 @@ final case class PersistentPurposeVersion(
       riskAnalysis = riskAnalysis.map(_.toAPI),
       createdAt = createdAt,
       updatedAt = updatedAt,
+      firstActivationAt = firstActivationAt,
       expectedApprovalDate = expectedApprovalDate,
       dailyCalls = dailyCalls
     )
@@ -81,6 +83,7 @@ object PersistentPurposeVersion {
       dailyCalls = seed.dailyCalls,
       createdAt = dateTimeSupplier.get,
       updatedAt = None,
+      firstActivationAt = None,
       riskAnalysis = seed.riskAnalysis.map(PersistentPurposeVersionDocument.fromAPI),
       expectedApprovalDate = None
     )

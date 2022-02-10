@@ -5,7 +5,7 @@ import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, Entity, EntityRef}
 import akka.cluster.sharding.typed.{ClusterShardingSettings, ShardingEnvelope}
 import akka.http.scaladsl.marshalling.ToEntityMarshaller
 import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.server.Directives.{onComplete, onSuccess}
+import akka.http.scaladsl.server.Directives.{complete, onComplete, onSuccess}
 import akka.http.scaladsl.server.Route
 import akka.pattern.StatusReply
 import cats.implicits.toTraverseOps
@@ -195,7 +195,11 @@ final case class PurposeApiServiceImpl(
     purposeId: String,
     versionId: String,
     activatePurposeVersionPayload: ActivatePurposeVersionPayload
-  )(implicit toEntityMarshallerProblem: ToEntityMarshaller[Problem], contexts: Seq[(String, String)]): Route = {
+  )(implicit
+    toEntityMarshallerPurposeVersion: ToEntityMarshaller[PurposeVersion],
+    toEntityMarshallerProblem: ToEntityMarshaller[Problem],
+    contexts: Seq[(String, String)]
+  ): Route = {
     logger.info("Activating purpose {} version {}", purposeId, versionId)
     val result: Future[StatusReply[PersistentPurpose]] =
       activatePurposeVersionById(
@@ -205,7 +209,13 @@ final case class PurposeApiServiceImpl(
         activatePurposeVersionPayload.stateChangeDetails
       )
     onSuccess(result) {
-      case statusReply if statusReply.isSuccess => activatePurposeVersion204
+      case statusReply if statusReply.isSuccess =>
+        statusReply.getValue.versions.find(_.id.toString == versionId) match {
+          case Some(version) => activatePurposeVersion200(version.toAPI)
+          case None =>
+            val problem = problemOf(StatusCodes.InternalServerError, UnexpectedMissingVersion(purposeId, versionId))
+            complete(problem.status, problem)
+        }
       case statusReply if statusReply.isError =>
         logger.error("Error activating purpose {} version {}", purposeId, versionId, statusReply.getError)
         statusReply.getError match {
@@ -225,16 +235,23 @@ final case class PurposeApiServiceImpl(
     }
   }
 
-  override def suspendPurposeVersion(
-    purposeId: String,
-    versionId: String,
-    stateChangeDetails: StateChangeDetails
-  )(implicit toEntityMarshallerProblem: ToEntityMarshaller[Problem], contexts: Seq[(String, String)]): Route = {
+  override def suspendPurposeVersion(purposeId: String, versionId: String, stateChangeDetails: StateChangeDetails)(
+    implicit
+    toEntityMarshallerPurposeVersion: ToEntityMarshaller[PurposeVersion],
+    toEntityMarshallerProblem: ToEntityMarshaller[Problem],
+    contexts: Seq[(String, String)]
+  ): Route = {
     logger.info("Suspending purpose {} version {}", purposeId, versionId)
     val result: Future[StatusReply[PersistentPurpose]] =
       suspendPurposeVersionById(purposeId, versionId, stateChangeDetails)
     onSuccess(result) {
-      case statusReply if statusReply.isSuccess => suspendPurposeVersion204
+      case statusReply if statusReply.isSuccess =>
+        statusReply.getValue.versions.find(_.id.toString == versionId) match {
+          case Some(version) => suspendPurposeVersion200(version.toAPI)
+          case None =>
+            val problem = problemOf(StatusCodes.InternalServerError, UnexpectedMissingVersion(purposeId, versionId))
+            complete(problem.status, problem)
+        }
       case statusReply if statusReply.isError =>
         logger.error("Error suspending purpose {} version {}", purposeId, versionId, statusReply.getError)
         statusReply.getError match {
@@ -254,12 +271,22 @@ final case class PurposeApiServiceImpl(
     purposeId: String,
     versionId: String,
     stateChangeDetails: StateChangeDetails
-  )(implicit toEntityMarshallerProblem: ToEntityMarshaller[Problem], contexts: Seq[(String, String)]): Route = {
+  )(implicit
+    toEntityMarshallerPurposeVersion: ToEntityMarshaller[PurposeVersion],
+    toEntityMarshallerProblem: ToEntityMarshaller[Problem],
+    contexts: Seq[(String, String)]
+  ): Route = {
     logger.info("Wait for Approval purpose {} version {}", purposeId, versionId)
     val result: Future[StatusReply[PersistentPurpose]] =
       waitForApprovalPurposeVersionById(purposeId, versionId, stateChangeDetails)
     onSuccess(result) {
-      case statusReply if statusReply.isSuccess => waitForApprovalPurposeVersion204
+      case statusReply if statusReply.isSuccess =>
+        statusReply.getValue.versions.find(_.id.toString == versionId) match {
+          case Some(version) => waitForApprovalPurposeVersion200(version.toAPI)
+          case None =>
+            val problem = problemOf(StatusCodes.InternalServerError, UnexpectedMissingVersion(purposeId, versionId))
+            complete(problem.status, problem)
+        }
       case statusReply if statusReply.isError =>
         logger.error("Error waiting for approval purpose {} version {}", purposeId, versionId, statusReply.getError)
         statusReply.getError match {
@@ -285,16 +312,23 @@ final case class PurposeApiServiceImpl(
     }
   }
 
-  override def archivePurposeVersion(
-    purposeId: String,
-    versionId: String,
-    stateChangeDetails: StateChangeDetails
-  )(implicit toEntityMarshallerProblem: ToEntityMarshaller[Problem], contexts: Seq[(String, String)]): Route = {
+  override def archivePurposeVersion(purposeId: String, versionId: String, stateChangeDetails: StateChangeDetails)(
+    implicit
+    toEntityMarshallerPurposeVersion: ToEntityMarshaller[PurposeVersion],
+    toEntityMarshallerProblem: ToEntityMarshaller[Problem],
+    contexts: Seq[(String, String)]
+  ): Route = {
     logger.info("Archiving purpose {} version {}", purposeId, versionId)
     val result: Future[StatusReply[PersistentPurpose]] =
       archivePurposeVersionById(purposeId, versionId, stateChangeDetails)
     onSuccess(result) {
-      case statusReply if statusReply.isSuccess => archivePurposeVersion204
+      case statusReply if statusReply.isSuccess =>
+        statusReply.getValue.versions.find(_.id.toString == versionId) match {
+          case Some(version) => archivePurposeVersion200(version.toAPI)
+          case None =>
+            val problem = problemOf(StatusCodes.InternalServerError, UnexpectedMissingVersion(purposeId, versionId))
+            complete(problem.status, problem)
+        }
       case statusReply if statusReply.isError =>
         logger.error("Error archiving purpose {} version {}", purposeId, versionId, statusReply.getError)
         statusReply.getError match {

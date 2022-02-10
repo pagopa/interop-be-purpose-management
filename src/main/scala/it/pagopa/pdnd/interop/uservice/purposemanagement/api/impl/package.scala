@@ -30,18 +30,16 @@ package object impl extends SprayJsonSupport with DefaultJsonProtocol {
   implicit val purposeSeedFormat: RootJsonFormat[PurposeSeed]                   = jsonFormat5(PurposeSeed)
   implicit val versionDocumentFormat: RootJsonFormat[PurposeVersionDocument]    = jsonFormat4(PurposeVersionDocument)
   implicit val purposeVersionSeedFormat: RootJsonFormat[PurposeVersionSeed]     = jsonFormat2(PurposeVersionSeed)
-  implicit val purposeVersionUpdateFormat: RootJsonFormat[PurposeVersionUpdateContent] = jsonFormat1(
-    PurposeVersionUpdateContent
-  )
-  implicit val purposeVersionFormat: RootJsonFormat[PurposeVersion]         = jsonFormat7(PurposeVersion)
+  implicit val purposeVersionUpdateFormat: RootJsonFormat[PurposeVersionUpdateContent] =
+    jsonFormat1(PurposeVersionUpdateContent)
+  implicit val purposeVersionFormat: RootJsonFormat[PurposeVersion]         = jsonFormat8(PurposeVersion)
   implicit val purposeFormat: RootJsonFormat[Purpose]                       = jsonFormat11(Purpose)
   implicit val purposesFormat: RootJsonFormat[Purposes]                     = jsonFormat1(Purposes)
   implicit val stateChangeDetailsFormat: RootJsonFormat[StateChangeDetails] = jsonFormat1(StateChangeDetails)
   implicit val problemErrorFormat: RootJsonFormat[ProblemError]             = jsonFormat2(ProblemError)
   implicit val problemFormat: RootJsonFormat[Problem]                       = jsonFormat5(Problem)
-  implicit val activatePurposeVersionPayloadFormat: RootJsonFormat[ActivatePurposeVersionPayload] = jsonFormat2(
-    ActivatePurposeVersionPayload
-  )
+  implicit val activatePurposeVersionPayloadFormat: RootJsonFormat[ActivatePurposeVersionPayload] =
+    jsonFormat2(ActivatePurposeVersionPayload)
 
   def slices[A, B <: Command](commander: EntityRef[B], sliceSize: Int)(
     commandGenerator: (Int, Int) => ActorRef[Seq[A]] => B

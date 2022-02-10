@@ -23,7 +23,8 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
     riskAnalysis = None,
     dailyCalls = 100,
     createdAt = timestamp,
-    updatedAt = None
+    updatedAt = None,
+    firstActivationAt = None
   )
   val purposeTemplate: PersistentPurpose = PersistentPurpose(
     id = UUID.randomUUID(),
@@ -56,7 +57,11 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
         stateChangeDetails = StateChangeDetails(ChangedBy.CONSUMER)
       )(mockDateTimeSupplier)
 
-      val expectedVersion = version.copy(state = PersistentPurposeVersionState.Active, updatedAt = Some(newTimestamp))
+      val expectedVersion = version.copy(
+        state = PersistentPurposeVersionState.Active,
+        updatedAt = Some(newTimestamp),
+        firstActivationAt = Some(newTimestamp)
+      )
       val expected =
         purpose.copy(versions = Seq(expectedVersion), suspendedByConsumer = Some(false), updatedAt = Some(newTimestamp))
 

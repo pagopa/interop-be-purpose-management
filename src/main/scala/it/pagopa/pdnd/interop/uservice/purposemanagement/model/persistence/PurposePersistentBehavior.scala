@@ -16,6 +16,7 @@ import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.{
 }
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.{ChangedBy, PurposeVersionDocument, StateChangeDetails}
 
+import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
 import scala.concurrent.duration.{DurationInt, DurationLong}
 import scala.language.postfixOps
@@ -261,7 +262,14 @@ object PurposePersistentBehavior {
     val timestamp = dateTimeSupplier.get
 
     def updateVersions(newState: PersistentPurposeVersionState): Seq[PersistentPurposeVersion] = {
-      val updatedVersion = version.copy(state = newState, updatedAt = Some(timestamp))
+      import PersistentPurposeVersionState._
+      val firstActivationAt: Option[OffsetDateTime] = version.state match {
+        case Draft | WaitingForApproval => Some(timestamp)
+        case _                          => version.firstActivationAt
+      }
+
+      val updatedVersion =
+        version.copy(state = newState, updatedAt = Some(timestamp), firstActivationAt = firstActivationAt)
       purpose.versions.filter(_.id != version.id) :+ updatedVersion
     }
 

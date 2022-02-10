@@ -30,7 +30,8 @@ message PurposeVersionV1 {
   required int32 dailyCalls = 4;
   required int64 createdAt = 5;
   optional int64 updatedAt = 6;
-  optional int64 expectedApprovalDate = 7;
+  optional int64 firstActivationAt = 7;
+  optional int64 expectedApprovalDate = 8;
 }
 
 enum PurposeStateV1 {

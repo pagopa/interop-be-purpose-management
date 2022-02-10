@@ -132,4 +132,7 @@ object PurposeManagementErrors {
   final case class DeletePurposeBadRequest(purposeId: String)
       extends ComponentError("0039", s"Error deleting Purpose $purposeId - Bad Request")
 
+  final case class UnexpectedMissingVersion(purposeId: String, versionId: String)
+      extends ComponentError("0040", s"Version $versionId not found in Purpose $purposeId")
+
 }

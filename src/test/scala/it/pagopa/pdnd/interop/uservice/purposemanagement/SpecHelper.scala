@@ -10,6 +10,7 @@ import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model._
 
+import java.time.OffsetDateTime
 import java.util.UUID
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext, Future}
@@ -99,8 +100,9 @@ trait SpecHelper {
     purposeId: UUID,
     versionId: UUID,
     changedBy: ChangedBy,
-    riskAnalysis: Option[PurposeVersionDocument]
-  )(implicit ec: ExecutionContext, actorSystem: actor.ActorSystem): Future[Option[String]] = {
+    riskAnalysis: Option[PurposeVersionDocument],
+    timestamp: OffsetDateTime = timestamp
+  )(implicit ec: ExecutionContext, actorSystem: actor.ActorSystem): Future[PurposeVersion] = {
     for {
       data <- Marshal(
         ActivatePurposeVersionPayload(
@@ -112,38 +114,38 @@ trait SpecHelper {
         .map(_.dataBytes)
       _ = (() => mockDateTimeSupplier.get).expects().returning(timestamp).once()
       result <- Unmarshal(makeRequest(data, s"purposes/$purposeId/versions/$versionId/activate", HttpMethods.POST))
-        .to[Option[String]]
+        .to[PurposeVersion]
     } yield result
   }
 
   def suspendVersion(purposeId: UUID, versionId: UUID, changedBy: ChangedBy)(implicit
     ec: ExecutionContext,
     actorSystem: actor.ActorSystem
-  ): Future[Option[String]] =
+  ): Future[PurposeVersion] =
     changeVersionState(purposeId, versionId, changedBy, "suspend")
 
   def waitForApprovalVersion(purposeId: UUID, versionId: UUID, changedBy: ChangedBy)(implicit
     ec: ExecutionContext,
     actorSystem: actor.ActorSystem
-  ): Future[Option[String]] =
+  ): Future[PurposeVersion] =
     changeVersionState(purposeId, versionId, changedBy, "waitForApproval")
 
   def archiveVersion(purposeId: UUID, versionId: UUID, changedBy: ChangedBy)(implicit
     ec: ExecutionContext,
     actorSystem: actor.ActorSystem
-  ): Future[Option[String]] =
+  ): Future[PurposeVersion] =
     changeVersionState(purposeId, versionId, changedBy, "archive")
 
   def changeVersionState(purposeId: UUID, versionId: UUID, changedBy: ChangedBy, statePath: String)(implicit
     ec: ExecutionContext,
     actorSystem: actor.ActorSystem
-  ): Future[Option[String]] = for {
+  ): Future[PurposeVersion] = for {
     data <- Marshal(StateChangeDetails(changedBy = changedBy))
       .to[MessageEntity]
       .map(_.dataBytes)
     _ = (() => mockDateTimeSupplier.get).expects().returning(timestamp).once()
     result <- Unmarshal(makeRequest(data, s"purposes/$purposeId/versions/$versionId/$statePath", HttpMethods.POST))
-      .to[Option[String]]
+      .to[PurposeVersion]
   } yield result
 
   def makeRequest(data: Source[ByteString, Any], path: String, verb: HttpMethod)(implicit

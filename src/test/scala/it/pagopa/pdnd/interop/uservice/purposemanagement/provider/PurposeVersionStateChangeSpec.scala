@@ -32,14 +32,20 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
       )
       val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
 
-      val response: Future[Option[String]] =
+      val response: Future[(PurposeVersion, PurposeVersion)] =
         for {
-          _      <- createPurpose(purposeId, purposeSeed)
-          _      <- createPurposeVersion(purposeId, versionId, versionSeed)
-          result <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, versionSeed.riskAnalysis)
-        } yield result
+          _       <- createPurpose(purposeId, purposeSeed)
+          version <- createPurposeVersion(purposeId, versionId, versionSeed)
+          result  <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, versionSeed.riskAnalysis)
+        } yield (version, result)
 
-      response.futureValue shouldBe Some("")
+      val (version, result) = response.futureValue
+      val expected = version.copy(
+        state = PurposeVersionState.ACTIVE,
+        updatedAt = Some(timestamp),
+        firstActivationAt = Some(timestamp)
+      )
+      result shouldBe expected
     }
 
     "succeed and archive old active version" in {
@@ -81,6 +87,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
           state = PurposeVersionState.ARCHIVED,
           createdAt = timestamp,
           updatedAt = Some(timestamp),
+          firstActivationAt = Some(timestamp),
           expectedApprovalDate = None,
           riskAnalysis = Some(riskAnalysisDoc),
           dailyCalls = 100
@@ -90,6 +97,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
           state = PurposeVersionState.ACTIVE,
           createdAt = timestamp,
           updatedAt = Some(timestamp),
+          firstActivationAt = Some(timestamp),
           expectedApprovalDate = None,
           riskAnalysis = Some(riskAnalysisDoc),
           dailyCalls = 100
@@ -139,6 +147,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
           state = PurposeVersionState.ARCHIVED,
           createdAt = timestamp,
           updatedAt = Some(timestamp),
+          firstActivationAt = Some(timestamp),
           expectedApprovalDate = None,
           riskAnalysis = Some(riskAnalysisDoc),
           dailyCalls = 100
@@ -148,6 +157,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
           state = PurposeVersionState.ACTIVE,
           createdAt = timestamp,
           updatedAt = Some(timestamp),
+          firstActivationAt = Some(timestamp),
           expectedApprovalDate = None,
           riskAnalysis = Some(riskAnalysisDoc),
           dailyCalls = 100
@@ -155,6 +165,49 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
       )
 
       response.futureValue.versions should contain theSameElementsAs expectedVersions
+    }
+
+    "succeed and update activation date only the first time" in {
+      val purposeId      = UUID.randomUUID()
+      val versionId      = UUID.randomUUID()
+      val eServiceId     = UUID.randomUUID()
+      val consumerId     = UUID.randomUUID()
+      val riskAnalysisId = UUID.randomUUID()
+
+      val firstActivationAt  = timestamp.plusDays(10)
+      val secondActivationAt = firstActivationAt.plusDays(10)
+
+      val riskAnalysisDoc = PurposeVersionDocument(
+        id = riskAnalysisId,
+        contentType = "a-content-type",
+        path = "a/store/path",
+        createdAt = timestamp
+      )
+
+      val purposeSeed = PurposeSeed(
+        eserviceId = eServiceId,
+        consumerId = consumerId,
+        title = "Purpose",
+        riskAnalysisForm = riskAnalysisFormSeed
+      )
+      val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
+
+      val response: Future[(PurposeVersion, PurposeVersion)] =
+        for {
+          _       <- createPurpose(purposeId, purposeSeed)
+          version <- createPurposeVersion(purposeId, versionId, versionSeed)
+          _       <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, versionSeed.riskAnalysis, firstActivationAt)
+          _       <- suspendVersion(purposeId, versionId, ChangedBy.CONSUMER)
+          result  <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, None, secondActivationAt)
+        } yield (version, result)
+
+      val (version, result) = response.futureValue
+      val expected = version.copy(
+        state = PurposeVersionState.ACTIVE,
+        updatedAt = Some(secondActivationAt),
+        firstActivationAt = Some(firstActivationAt)
+      )
+      result shouldBe expected
     }
 
     "fail if not exist" in {
@@ -266,15 +319,21 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
       )
       val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
 
-      val response: Future[Option[String]] =
+      val response: Future[(PurposeVersion, PurposeVersion)] =
         for {
-          _      <- createPurpose(purposeId, purposeSeed)
-          _      <- createPurposeVersion(purposeId, versionId, versionSeed)
-          _      <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, versionSeed.riskAnalysis)
-          result <- suspendVersion(purposeId, versionId, ChangedBy.CONSUMER)
-        } yield result
+          _       <- createPurpose(purposeId, purposeSeed)
+          version <- createPurposeVersion(purposeId, versionId, versionSeed)
+          _       <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, versionSeed.riskAnalysis)
+          result  <- suspendVersion(purposeId, versionId, ChangedBy.CONSUMER)
+        } yield (version, result)
 
-      response.futureValue shouldBe Some("")
+      val (version, result) = response.futureValue
+      val expected = version.copy(
+        state = PurposeVersionState.SUSPENDED,
+        updatedAt = Some(timestamp),
+        firstActivationAt = Some(timestamp)
+      )
+      result shouldBe expected
     }
 
     "fail if not exist" in {
@@ -346,15 +405,21 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
       )
       val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
 
-      val response: Future[Option[String]] =
+      val response: Future[(PurposeVersion, PurposeVersion)] =
         for {
-          _      <- createPurpose(purposeId, purposeSeed)
-          _      <- createPurposeVersion(purposeId, versionId, versionSeed)
-          _      <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, versionSeed.riskAnalysis)
-          result <- archiveVersion(purposeId, versionId, ChangedBy.CONSUMER)
-        } yield result
+          _       <- createPurpose(purposeId, purposeSeed)
+          version <- createPurposeVersion(purposeId, versionId, versionSeed)
+          _       <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, versionSeed.riskAnalysis)
+          result  <- archiveVersion(purposeId, versionId, ChangedBy.CONSUMER)
+        } yield (version, result)
 
-      response.futureValue shouldBe Some("")
+      val (version, result) = response.futureValue
+      val expected = version.copy(
+        state = PurposeVersionState.ARCHIVED,
+        updatedAt = Some(timestamp),
+        firstActivationAt = Some(timestamp)
+      )
+      result shouldBe expected
     }
 
     "fail if not exist" in {
@@ -405,18 +470,10 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
 
   "Wait for approval of purpose" must {
     "succeed" in {
-      val purposeId      = UUID.randomUUID()
-      val versionId      = UUID.randomUUID()
-      val eServiceId     = UUID.randomUUID()
-      val consumerId     = UUID.randomUUID()
-      val riskAnalysisId = UUID.randomUUID()
-
-      val riskAnalysisDoc = PurposeVersionDocument(
-        id = riskAnalysisId,
-        contentType = "a-content-type",
-        path = "a/store/path",
-        createdAt = timestamp
-      )
+      val purposeId  = UUID.randomUUID()
+      val versionId  = UUID.randomUUID()
+      val eServiceId = UUID.randomUUID()
+      val consumerId = UUID.randomUUID()
 
       val purposeSeed = PurposeSeed(
         eserviceId = eServiceId,
@@ -424,16 +481,22 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         title = "Purpose",
         riskAnalysisForm = riskAnalysisFormSeed
       )
-      val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
+      val versionSeed = PurposeVersionSeed(riskAnalysis = None, dailyCalls = 100)
 
-      val response: Future[Option[String]] =
+      val response: Future[(PurposeVersion, PurposeVersion)] =
         for {
-          _      <- createPurpose(purposeId, purposeSeed)
-          _      <- createPurposeVersion(purposeId, versionId, versionSeed)
-          result <- waitForApprovalVersion(purposeId, versionId, ChangedBy.CONSUMER)
-        } yield result
+          _       <- createPurpose(purposeId, purposeSeed)
+          version <- createPurposeVersion(purposeId, versionId, versionSeed)
+          result  <- waitForApprovalVersion(purposeId, versionId, ChangedBy.CONSUMER)
+        } yield (version, result)
 
-      response.futureValue shouldBe Some("")
+      val (version, result) = response.futureValue
+      val expected = version.copy(
+        state = PurposeVersionState.WAITING_FOR_APPROVAL,
+        updatedAt = Some(timestamp),
+        firstActivationAt = Some(timestamp)
+      )
+      result shouldBe expected
     }
 
     "fail if not exist" in {
@@ -449,36 +512,6 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
       val result = response.futureValue
       result.status shouldBe 404
       result.errors.map(_.code) shouldBe Seq("011-0019")
-    }
-
-    "fail on missing risk analysis" in {
-      val purposeId  = UUID.randomUUID()
-      val versionId  = UUID.randomUUID()
-      val eServiceId = UUID.randomUUID()
-      val consumerId = UUID.randomUUID()
-
-      val purposeSeed = PurposeSeed(
-        eserviceId = eServiceId,
-        consumerId = consumerId,
-        title = "Purpose",
-        riskAnalysisForm = riskAnalysisFormSeed
-      )
-      val versionSeed = PurposeVersionSeed(riskAnalysis = None, dailyCalls = 100)
-
-      val response: Future[Problem] =
-        for {
-          _ <- createPurpose(purposeId, purposeSeed)
-          _ <- createPurposeVersion(purposeId, versionId, versionSeed)
-          result <- makeFailingRequest(
-            s"purposes/$purposeId/versions/$versionId/waitForApproval",
-            HttpMethods.POST,
-            StateChangeDetails(changedBy = ChangedBy.CONSUMER)
-          )
-        } yield result
-
-      val result = response.futureValue
-      result.status shouldBe 400
-      result.errors.map(_.code) shouldBe Seq("011-0022")
     }
 
     "fail on wrong current version state" in {

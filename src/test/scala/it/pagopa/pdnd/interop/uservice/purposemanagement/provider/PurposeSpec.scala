@@ -362,6 +362,7 @@ class PurposeSpec extends BaseIntegrationSpec {
                 state = PurposeVersionState.ACTIVE,
                 createdAt = timestamp,
                 updatedAt = Some(timestamp),
+                firstActivationAt = Some(timestamp),
                 expectedApprovalDate = None,
                 riskAnalysis = Some(riskAnalysisDoc),
                 dailyCalls = 100
@@ -393,6 +394,7 @@ class PurposeSpec extends BaseIntegrationSpec {
                 state = PurposeVersionState.SUSPENDED,
                 createdAt = timestamp,
                 updatedAt = Some(timestamp),
+                firstActivationAt = Some(timestamp),
                 expectedApprovalDate = None,
                 riskAnalysis = Some(riskAnalysisDoc),
                 dailyCalls = 100

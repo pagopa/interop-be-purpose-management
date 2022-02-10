@@ -10,6 +10,7 @@ import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model._
 
+import java.time.OffsetDateTime
 import java.util.UUID
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext, Future}
@@ -99,7 +100,8 @@ trait SpecHelper {
     purposeId: UUID,
     versionId: UUID,
     changedBy: ChangedBy,
-    riskAnalysis: Option[PurposeVersionDocument]
+    riskAnalysis: Option[PurposeVersionDocument],
+    timestamp: OffsetDateTime = timestamp
   )(implicit ec: ExecutionContext, actorSystem: actor.ActorSystem): Future[PurposeVersion] = {
     for {
       data <- Marshal(

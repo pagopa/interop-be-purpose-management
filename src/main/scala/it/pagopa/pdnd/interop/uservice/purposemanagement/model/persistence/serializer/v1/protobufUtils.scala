@@ -70,6 +70,7 @@ object protobufUtils {
       id                   <- protobufPurposeVersion.id.toUUID
       createdAt            <- protobufPurposeVersion.createdAt.toOffsetDateTime
       updatedAt            <- protobufPurposeVersion.updatedAt.traverse(_.toOffsetDateTime)
+      firstActivationAt    <- protobufPurposeVersion.firstActivationAt.traverse(_.toOffsetDateTime)
       expectedApprovalDate <- protobufPurposeVersion.expectedApprovalDate.traverse(_.toOffsetDateTime)
       riskAnalysisDoc      <- protobufPurposeVersion.riskAnalysis.traverse(toPersistentPurposeVersionDocument).toTry
     } yield PersistentPurposeVersion(
@@ -79,6 +80,7 @@ object protobufUtils {
       dailyCalls = protobufPurposeVersion.dailyCalls,
       createdAt = createdAt,
       updatedAt = updatedAt,
+      firstActivationAt = firstActivationAt,
       expectedApprovalDate = expectedApprovalDate
     )
     purpose.toEither
@@ -91,6 +93,7 @@ object protobufUtils {
       dailyCalls = persistentPurposeVersion.dailyCalls,
       createdAt = persistentPurposeVersion.createdAt.toMillis,
       updatedAt = persistentPurposeVersion.updatedAt.map(_.toMillis),
+      firstActivationAt = persistentPurposeVersion.firstActivationAt.map(_.toMillis),
       expectedApprovalDate = persistentPurposeVersion.expectedApprovalDate.map(_.toMillis),
       riskAnalysis = persistentPurposeVersion.riskAnalysis.map(toProtobufPurposeVersionDocument)
     )

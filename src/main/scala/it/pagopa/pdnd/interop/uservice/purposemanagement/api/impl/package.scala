@@ -28,7 +28,7 @@ package object impl extends SprayJsonSupport with DefaultJsonProtocol {
     jsonFormat2(RiskAnalysisMultiAnswerSeed)
   implicit val riskAnalysisFormSeedFormat: RootJsonFormat[RiskAnalysisFormSeed] = jsonFormat3(RiskAnalysisFormSeed)
   implicit val purposeSeedFormat: RootJsonFormat[PurposeSeed]                   = jsonFormat5(PurposeSeed)
-  implicit val purposeUpdatePayloadFormat: RootJsonFormat[PurposeUpdatePayload] = jsonFormat3(PurposeUpdatePayload)
+  implicit val PurposeUpdateContentFormat: RootJsonFormat[PurposeUpdateContent] = jsonFormat3(PurposeUpdateContent)
   implicit val versionDocumentFormat: RootJsonFormat[PurposeVersionDocument]    = jsonFormat4(PurposeVersionDocument)
   implicit val purposeVersionSeedFormat: RootJsonFormat[PurposeVersionSeed]     = jsonFormat2(PurposeVersionSeed)
   implicit val purposeVersionUpdateFormat: RootJsonFormat[PurposeVersionUpdateContent] =

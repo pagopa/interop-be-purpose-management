@@ -161,7 +161,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PurposeUpdatePayload'
+              $ref: '#/components/schemas/PurposeUpdateContent'
         required: true
       responses:
         '200':
@@ -625,7 +625,7 @@ components:
             $ref: '#/components/schemas/Purpose'
       required:
         - purposes
-    PurposeUpdatePayload:
+    PurposeUpdateContent:
       type: object
       description: contains the expected payload for purpose update.
       properties:

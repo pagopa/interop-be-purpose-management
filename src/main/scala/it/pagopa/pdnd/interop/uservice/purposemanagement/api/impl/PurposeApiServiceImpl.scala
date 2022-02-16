@@ -381,7 +381,7 @@ final case class PurposeApiServiceImpl(
 
   }
 
-  override def updatePurpose(purposeId: String, payload: PurposeUpdatePayload)(implicit
+  override def updatePurpose(purposeId: String, payload: PurposeUpdateContent)(implicit
     toEntityMarshallerPurpose: ToEntityMarshaller[Purpose],
     toEntityMarshallerProblem: ToEntityMarshaller[Problem],
     contexts: Seq[(String, String)]

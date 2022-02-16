@@ -40,7 +40,7 @@ trait SpecHelper {
       purpose <- Unmarshal(makeRequest(data, s"purposes/$purposeId/versions", HttpMethods.POST)).to[PurposeVersion]
     } yield purpose
 
-  def updatePurpose(purposeId: UUID, seed: PurposeUpdatePayload)(implicit
+  def updatePurpose(purposeId: UUID, seed: PurposeUpdateContent)(implicit
     ec: ExecutionContext,
     actorSystem: actor.ActorSystem
   ): Future[Purpose] =

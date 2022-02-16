@@ -494,7 +494,7 @@ class PurposeSpec extends BaseIntegrationSpec {
         riskAnalysisForm = riskAnalysisFormSeed
       )
 
-      val updateContent = PurposeUpdatePayload(
+      val updateContent = PurposeUpdateContent(
         title = "Another title",
         description = "Another description",
         riskAnalysisForm = riskAnalysisFormSeed.copy(version = "2.0")
@@ -527,7 +527,7 @@ class PurposeSpec extends BaseIntegrationSpec {
       )
       val versionSeed = PurposeVersionSeed(dailyCalls = 100)
 
-      val updateContent = PurposeUpdatePayload(
+      val updateContent = PurposeUpdateContent(
         title = "Another title",
         description = "Another description",
         riskAnalysisForm = riskAnalysisFormSeed.copy(version = "2.0")
@@ -549,7 +549,7 @@ class PurposeSpec extends BaseIntegrationSpec {
     "fail if purpose does not exist" in {
       val purposeId = UUID.randomUUID()
 
-      val updateContent = PurposeUpdatePayload(
+      val updateContent = PurposeUpdateContent(
         title = "Another title",
         description = "Another description",
         riskAnalysisForm = riskAnalysisFormSeed.copy(version = "2.0")
@@ -587,7 +587,7 @@ class PurposeSpec extends BaseIntegrationSpec {
         riskAnalysisForm = riskAnalysisFormSeed
       )
       val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 200)
-      val updateContent = PurposeUpdatePayload(
+      val updateContent = PurposeUpdateContent(
         title = "Another title",
         description = "Another description",
         riskAnalysisForm = riskAnalysisFormSeed.copy(version = "2.0")
@@ -630,7 +630,7 @@ class PurposeSpec extends BaseIntegrationSpec {
         riskAnalysisForm = riskAnalysisFormSeed
       )
       val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 200)
-      val updateContent = PurposeUpdatePayload(
+      val updateContent = PurposeUpdateContent(
         title = "Another title",
         description = "Another description",
         riskAnalysisForm = riskAnalysisFormSeed.copy(version = "2.0")

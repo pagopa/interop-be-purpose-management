@@ -40,6 +40,17 @@ trait SpecHelper {
       purpose <- Unmarshal(makeRequest(data, s"purposes/$purposeId/versions", HttpMethods.POST)).to[PurposeVersion]
     } yield purpose
 
+  def updatePurpose(purposeId: UUID, seed: PurposeUpdatePayload)(implicit
+    ec: ExecutionContext,
+    actorSystem: actor.ActorSystem
+  ): Future[Purpose] =
+    for {
+      data <- Marshal(seed).to[MessageEntity].map(_.dataBytes)
+      _ = (() => mockUUIDSupplier.get).expects().returning(UUID.randomUUID()).once()
+      purpose <- Unmarshal(makeRequest(data, s"purposes/$purposeId", HttpMethods.POST))
+        .to[Purpose]
+    } yield purpose
+
   def updatePurposeVersion(purposeId: UUID, versionId: UUID, seed: PurposeVersionUpdateContent)(implicit
     ec: ExecutionContext,
     actorSystem: actor.ActorSystem

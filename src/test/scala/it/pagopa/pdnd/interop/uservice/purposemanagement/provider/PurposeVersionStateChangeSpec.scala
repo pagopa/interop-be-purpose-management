@@ -28,6 +28,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         eserviceId = eServiceId,
         consumerId = consumerId,
         title = "Purpose",
+        description = "Purpose description",
         riskAnalysisForm = riskAnalysisFormSeed
       )
       val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
@@ -67,6 +68,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         eserviceId = eServiceId,
         consumerId = consumerId,
         title = "Purpose",
+        description = "Purpose description",
         riskAnalysisForm = riskAnalysisFormSeed
       )
       val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
@@ -126,6 +128,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         eserviceId = eServiceId,
         consumerId = consumerId,
         title = "Purpose",
+        description = "Purpose description",
         riskAnalysisForm = riskAnalysisFormSeed
       )
       val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
@@ -188,6 +191,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         eserviceId = eServiceId,
         consumerId = consumerId,
         title = "Purpose",
+        description = "Purpose description",
         riskAnalysisForm = riskAnalysisFormSeed
       )
       val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
@@ -235,6 +239,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         eserviceId = eServiceId,
         consumerId = consumerId,
         title = "Purpose",
+        description = "Purpose description",
         riskAnalysisForm = riskAnalysisFormSeed
       )
       val versionSeed = PurposeVersionSeed(riskAnalysis = None, dailyCalls = 100)
@@ -273,6 +278,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         eserviceId = eServiceId,
         consumerId = consumerId,
         title = "Purpose",
+        description = "Purpose description",
         riskAnalysisForm = riskAnalysisFormSeed
       )
       val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
@@ -315,6 +321,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         eserviceId = eServiceId,
         consumerId = consumerId,
         title = "Purpose",
+        description = "Purpose description",
         riskAnalysisForm = riskAnalysisFormSeed
       )
       val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
@@ -361,6 +368,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         eserviceId = eServiceId,
         consumerId = consumerId,
         title = "Purpose",
+        description = "Purpose description",
         riskAnalysisForm = riskAnalysisFormSeed
       )
       val versionSeed = PurposeVersionSeed(dailyCalls = 100)
@@ -401,6 +409,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         eserviceId = eServiceId,
         consumerId = consumerId,
         title = "Purpose",
+        description = "Purpose description",
         riskAnalysisForm = riskAnalysisFormSeed
       )
       val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
@@ -447,6 +456,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         eserviceId = eServiceId,
         consumerId = consumerId,
         title = "Purpose",
+        description = "Purpose description",
         riskAnalysisForm = riskAnalysisFormSeed
       )
       val versionSeed = PurposeVersionSeed(dailyCalls = 100)
@@ -479,6 +489,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         eserviceId = eServiceId,
         consumerId = consumerId,
         title = "Purpose",
+        description = "Purpose description",
         riskAnalysisForm = riskAnalysisFormSeed
       )
       val versionSeed = PurposeVersionSeed(riskAnalysis = None, dailyCalls = 100)
@@ -532,6 +543,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         eserviceId = eServiceId,
         consumerId = consumerId,
         title = "Purpose",
+        description = "Purpose description",
         riskAnalysisForm = riskAnalysisFormSeed
       )
       val versionSeed = PurposeVersionSeed(dailyCalls = 100, Some(riskAnalysisDoc))

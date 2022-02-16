@@ -1,6 +1,7 @@
 package it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose
 
 import it.pagopa.pdnd.interop.commons.utils.service.{OffsetDateTimeSupplier, UUIDSupplier}
+import it.pagopa.pdnd.interop.uservice.purposemanagement.model.decoupling.PurposeUpdate
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.{Purpose, PurposeSeed}
 
 import java.time.OffsetDateTime
@@ -14,7 +15,7 @@ final case class PersistentPurpose(
   suspendedByConsumer: Option[Boolean],
   suspendedByProducer: Option[Boolean],
   title: String,
-  description: Option[String],
+  description: String,
   riskAnalysisForm: PersistentRiskAnalysisForm,
   createdAt: OffsetDateTime,
   updatedAt: Option[OffsetDateTime]
@@ -34,6 +35,10 @@ final case class PersistentPurpose(
       updatedAt = updatedAt
     )
   }
+
+  def update(update: PurposeUpdate): PersistentPurpose =
+    copy(title = update.title, description = update.description, riskAnalysisForm = update.riskAnalysisForm)
+
 }
 
 object PersistentPurpose {

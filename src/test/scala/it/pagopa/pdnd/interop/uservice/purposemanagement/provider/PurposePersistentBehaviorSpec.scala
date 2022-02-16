@@ -34,7 +34,7 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
     suspendedByConsumer = None,
     suspendedByProducer = None,
     title = "Some title",
-    description = None,
+    description = "Some description",
     riskAnalysisForm = persistentRiskAnalysisForm,
     createdAt = timestamp,
     updatedAt = None

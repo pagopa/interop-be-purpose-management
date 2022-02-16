@@ -35,7 +35,7 @@ pipeline {
       agent { label 'sbt-template' }
       environment {
         NEXUS = 'gateway.interop.pdnd.dev'
-        DOCKER_REPO = 'ghcr.io'
+        DOCKER_REPO = 'ghcr.io/pagopa'
         MAVEN_REPO = 'gateway.interop.pdnd.dev'
         NEXUS_CREDENTIALS = credentials('pdnd-nexus')
         GITHUB_PAT = credentials('github-bot-rw')

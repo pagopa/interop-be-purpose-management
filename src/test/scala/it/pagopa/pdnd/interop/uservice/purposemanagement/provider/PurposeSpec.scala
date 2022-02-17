@@ -607,7 +607,7 @@ class PurposeSpec extends BaseIntegrationSpec {
       result.errors.map(_.code) shouldBe Seq("011-0042")
     }
 
-    "fail if a version not in draft exists" in {
+    "fail if other versions exist besides the one in draft" in {
       val purposeId      = UUID.randomUUID()
       val versionId1     = UUID.randomUUID()
       val versionId2     = UUID.randomUUID()

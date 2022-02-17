@@ -16,7 +16,7 @@ final case class PersistentPurpose(
   suspendedByProducer: Option[Boolean],
   title: String,
   description: String,
-  riskAnalysisForm: PersistentRiskAnalysisForm,
+  riskAnalysisForm: Option[PersistentRiskAnalysisForm],
   createdAt: OffsetDateTime,
   updatedAt: Option[OffsetDateTime]
 ) {
@@ -30,7 +30,7 @@ final case class PersistentPurpose(
       suspendedByProducer = suspendedByProducer,
       title = title,
       description = description,
-      riskAnalysisForm = riskAnalysisForm.toAPI,
+      riskAnalysisForm = riskAnalysisForm.map(_.toAPI),
       createdAt = createdAt,
       updatedAt = updatedAt
     )
@@ -56,7 +56,7 @@ object PersistentPurpose {
       suspendedByProducer = None,
       title = seed.title,
       description = seed.description,
-      riskAnalysisForm = PersistentRiskAnalysisForm.fromSeed(uuidSupplier)(seed.riskAnalysisForm),
+      riskAnalysisForm = seed.riskAnalysisForm.map(PersistentRiskAnalysisForm.fromSeed(uuidSupplier)),
       createdAt = dateTimeSupplier.get,
       updatedAt = None
     )

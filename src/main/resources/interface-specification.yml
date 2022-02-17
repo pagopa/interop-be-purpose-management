@@ -549,7 +549,6 @@ components:
         - consumerId
         - title
         - description
-        - riskAnalysisForm
     PurposeVersionSeed:
       type: object
       description: contains the expected payload for purpose version persistence.
@@ -610,7 +609,6 @@ components:
         - id
         - eserviceId
         - consumerId
-        - riskAnalysisForm
         - versions
         - title
         - description
@@ -638,7 +636,6 @@ components:
       required:
         - title
         - description
-        - riskAnalysisForm
     PurposeVersion:
       type: object
       properties:

@@ -25,7 +25,7 @@ object protobufUtils {
       eserviceId       <- protobufPurpose.eserviceId.toUUID
       consumerId       <- protobufPurpose.consumerId.toUUID
       versions         <- protobufPurpose.versions.traverse(toPersistentPurposeVersion).toTry
-      riskAnalysisForm <- toPersistentRiskAnalysis(protobufPurpose.riskAnalysisForm).toTry
+      riskAnalysisForm <- protobufPurpose.riskAnalysisForm.traverse(toPersistentRiskAnalysis).toTry
       createdAt        <- protobufPurpose.createdAt.toOffsetDateTime
       updatedAt        <- protobufPurpose.updatedAt.traverse(_.toOffsetDateTime)
     } yield PersistentPurpose(
@@ -55,7 +55,7 @@ object protobufUtils {
         suspendedByProducer = persistentPurpose.suspendedByProducer,
         title = persistentPurpose.title,
         description = persistentPurpose.description,
-        riskAnalysisForm = toProtobufRiskAnalysis(persistentPurpose.riskAnalysisForm),
+        riskAnalysisForm = persistentPurpose.riskAnalysisForm.map(toProtobufRiskAnalysis),
         createdAt = persistentPurpose.createdAt.toMillis,
         updatedAt = persistentPurpose.updatedAt.map(_.toMillis)
       )

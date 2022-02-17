@@ -4,13 +4,13 @@ import it.pagopa.pdnd.interop.commons.utils.service.UUIDSupplier
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.PurposeUpdateContent
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.PersistentRiskAnalysisForm
 
-final case class PurposeUpdate(title: String, description: String, riskAnalysisForm: PersistentRiskAnalysisForm)
+final case class PurposeUpdate(title: String, description: String, riskAnalysisForm: Option[PersistentRiskAnalysisForm])
 
 object PurposeUpdate {
   def fromApi(uuidSupplier: UUIDSupplier)(payload: PurposeUpdateContent): PurposeUpdate =
     PurposeUpdate(
       title = payload.title,
       description = payload.description,
-      riskAnalysisForm = PersistentRiskAnalysisForm.fromSeed(uuidSupplier)(payload.riskAnalysisForm)
+      riskAnalysisForm = payload.riskAnalysisForm.map(PersistentRiskAnalysisForm.fromSeed(uuidSupplier))
     )
 }

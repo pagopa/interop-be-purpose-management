@@ -22,7 +22,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
         consumerId = consumerId,
         title = "Purpose",
         description = "Purpose description",
-        riskAnalysisForm = riskAnalysisFormSeed
+        riskAnalysisForm = Some(riskAnalysisFormSeed)
       )
       val versionSeed = PurposeVersionSeed(dailyCalls = 100)
 
@@ -56,7 +56,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
         consumerId = consumerId,
         title = "Purpose",
         description = "Purpose description",
-        riskAnalysisForm = riskAnalysisFormSeed
+        riskAnalysisForm = Some(riskAnalysisFormSeed)
       )
       val riskAnalysisDoc = PurposeVersionDocument(
         id = riskAnalysisId,
@@ -112,7 +112,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
         consumerId = consumerId,
         title = "Purpose",
         description = "Purpose description",
-        riskAnalysisForm = riskAnalysisFormSeed
+        riskAnalysisForm = Some(riskAnalysisFormSeed)
       )
       val versionSeed = PurposeVersionSeed(dailyCalls = 100)
 
@@ -149,7 +149,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
         consumerId = consumerId,
         title = "Purpose",
         description = "Purpose description",
-        riskAnalysisForm = riskAnalysisFormSeed
+        riskAnalysisForm = Some(riskAnalysisFormSeed)
       )
       val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
 
@@ -182,7 +182,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
         consumerId = consumerId,
         title = "Purpose",
         description = "Purpose description",
-        riskAnalysisForm = riskAnalysisFormSeed
+        riskAnalysisForm = Some(riskAnalysisFormSeed)
       )
       val versionSeed = PurposeVersionSeed(dailyCalls = 100)
 
@@ -244,7 +244,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
         consumerId = consumerId,
         title = "Purpose",
         description = "Purpose description",
-        riskAnalysisForm = riskAnalysisFormSeed
+        riskAnalysisForm = Some(riskAnalysisFormSeed)
       )
       val versionSeed   = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 200)
       val updateContent = PurposeVersionUpdateContent(dailyCalls = 100)
@@ -279,7 +279,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
         consumerId = consumerId,
         title = "Purpose",
         description = "Purpose description",
-        riskAnalysisForm = riskAnalysisFormSeed
+        riskAnalysisForm = Some(riskAnalysisFormSeed)
       )
       val versionSeed = PurposeVersionSeed(dailyCalls = 100)
 
@@ -312,7 +312,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
         consumerId = consumerId,
         title = "Purpose",
         description = "Purpose description",
-        riskAnalysisForm = riskAnalysisFormSeed
+        riskAnalysisForm = Some(riskAnalysisFormSeed)
       )
       val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
 
@@ -346,7 +346,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
         consumerId = consumerId,
         title = "Purpose",
         description = "Purpose description",
-        riskAnalysisForm = riskAnalysisFormSeed
+        riskAnalysisForm = Some(riskAnalysisFormSeed)
       )
       val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
 
@@ -382,7 +382,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
         consumerId = consumerId,
         title = "Purpose",
         description = "Purpose description",
-        riskAnalysisForm = riskAnalysisFormSeed
+        riskAnalysisForm = Some(riskAnalysisFormSeed)
       )
       val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
 
@@ -419,7 +419,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
         consumerId = consumerId,
         title = "Purpose",
         description = "Purpose description",
-        riskAnalysisForm = riskAnalysisFormSeed
+        riskAnalysisForm = Some(riskAnalysisFormSeed)
       )
       val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
 

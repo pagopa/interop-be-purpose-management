@@ -27,7 +27,7 @@ import it.pagopa.pdnd.interop.uservice.purposemanagement.error.InternalErrors.{
 }
 import it.pagopa.pdnd.interop.uservice.purposemanagement.error.PurposeManagementErrors._
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model._
-import it.pagopa.pdnd.interop.uservice.purposemanagement.model.decoupling.PurposeVersionUpdate
+import it.pagopa.pdnd.interop.uservice.purposemanagement.model.decoupling.{PurposeUpdate, PurposeVersionUpdate}
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence._
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.{
   PersistentPurpose,
@@ -379,6 +379,41 @@ final case class PurposeApiServiceImpl(
         getPurposes400(problemOf(StatusCodes.BadRequest, GetPurposesBadRequest))
     }
 
+  }
+
+  override def updatePurpose(purposeId: String, payload: PurposeUpdateContent)(implicit
+    toEntityMarshallerPurpose: ToEntityMarshaller[Purpose],
+    toEntityMarshallerProblem: ToEntityMarshaller[Problem],
+    contexts: Seq[(String, String)]
+  ): Route = {
+    logger.info("Updating Purpose {}", purposeId)
+
+    val commander: EntityRef[Command] =
+      sharding.entityRefFor(PurposePersistentBehavior.TypeKey, AkkaUtils.getShard(purposeId, settings.numberOfShards))
+
+    val update = PurposeUpdate.fromApi(uuidSupplier)(payload)
+    val result: Future[StatusReply[PersistentPurpose]] =
+      commander.ask(ref => UpdatePurpose(purposeId, update, ref))
+
+    onComplete(result) {
+      case Success(statusReply) if statusReply.isSuccess =>
+        updatePurpose200(statusReply.getValue.toAPI)
+      case Success(statusReply) =>
+        logger.error("Error updating Purpose {}", purposeId, statusReply.getError)
+        statusReply.getError match {
+          case _: PurposeNotFound =>
+            updatePurpose404(problemOf(StatusCodes.NotFound, UpdatePurposeNotFound(purposeId)))
+          case _: PurposeVersionNotInDraft =>
+            updatePurpose403(problemOf(StatusCodes.Forbidden, UpdatePurposeNotInDraft(purposeId)))
+          case _ =>
+            val problem = problemOf(StatusCodes.InternalServerError, UpdatePurposeError(purposeId))
+            complete(problem.status, problem)
+        }
+      case Failure(ex) =>
+        logger.error("Error updating Purpose {}", purposeId, ex)
+        val problem = problemOf(StatusCodes.InternalServerError, UpdatePurposeError(purposeId))
+        complete(problem.status, problem)
+    }
   }
 
   override def updatePurposeVersion(purposeId: String, versionId: String, updateContent: PurposeVersionUpdateContent)(

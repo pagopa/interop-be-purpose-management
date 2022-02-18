@@ -106,6 +106,27 @@ object PurposePersistentBehavior {
             }
           }
 
+      case UpdatePurpose(purposeId, update, replyTo) =>
+        state.purposes
+          .get(purposeId)
+          .fold {
+            replyTo ! StatusReply.Error[PersistentPurpose](PurposeNotFound(purposeId))
+            Effect.none[PurposeUpdated, State]
+          } { purpose =>
+            val notDraftVersion = purpose.versions.map(isDraftVersion(purposeId, _)).find(_.isLeft)
+            notDraftVersion match {
+              case Some(_ @Left(ex)) =>
+                replyTo ! StatusReply.Error[PersistentPurpose](ex)
+                Effect.none[PurposeUpdated, State]
+              case _ =>
+                val updatedPurpose = purpose.update(update)
+                Effect
+                  .persist(PurposeUpdated(updatedPurpose))
+                  .thenRun((_: State) => replyTo ! StatusReply.Success(updatedPurpose))
+
+            }
+          }
+
       case UpdatePurposeVersion(purposeId, versionId, update, replyTo) =>
         state
           .getPurposeVersion(purposeId, versionId)
@@ -216,6 +237,7 @@ object PurposePersistentBehavior {
   val eventHandler: (State, Event) => State = (state, event) =>
     event match {
       case PurposeCreated(purpose)                     => state.addPurpose(purpose)
+      case PurposeUpdated(purpose)                     => state.updatePurpose(purpose)
       case PurposeDeleted(purposeId)                   => state.removePurpose(purposeId)
       case PurposeVersionCreated(purposeId, version)   => state.addPurposeVersion(purposeId, version)
       case PurposeVersionUpdated(purposeId, version)   => state.addPurposeVersion(purposeId, version)

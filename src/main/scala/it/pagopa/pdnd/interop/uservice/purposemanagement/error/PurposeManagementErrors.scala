@@ -135,4 +135,14 @@ object PurposeManagementErrors {
   final case class UnexpectedMissingVersion(purposeId: String, versionId: String)
       extends ComponentError("0040", s"Version $versionId not found in Purpose $purposeId")
 
+  final case class UpdatePurposeNotFound(purposeId: String)
+      extends ComponentError("0041", s"Error on purpose update - Purpose $purposeId not found")
+  final case class UpdatePurposeNotInDraft(purposeId: String)
+      extends ComponentError(
+        "0042",
+        s"Error on purpose update - Purpose $purposeId contains versions not in Draft state"
+      )
+  final case class UpdatePurposeError(purposeId: String)
+      extends ComponentError("0043", s"Error updating Purpose $purposeId - Unknown error")
+
 }

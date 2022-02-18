@@ -3,7 +3,7 @@ package it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence
 import akka.actor.typed.ActorRef
 import akka.pattern.StatusReply
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.{PurposeVersionDocument, StateChangeDetails}
-import it.pagopa.pdnd.interop.uservice.purposemanagement.model.decoupling.PurposeVersionUpdate
+import it.pagopa.pdnd.interop.uservice.purposemanagement.model.decoupling.{PurposeUpdate, PurposeVersionUpdate}
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.{
   PersistentPurpose,
   PersistentPurposeVersion,
@@ -25,6 +25,11 @@ final case class CreatePurposeVersion(
 ) extends Command
 final case class DeletePurposeVersion(purposeId: String, versionId: String, replyTo: ActorRef[StatusReply[Unit]])
     extends Command
+final case class UpdatePurpose(
+  purposeId: String,
+  update: PurposeUpdate,
+  replyTo: ActorRef[StatusReply[PersistentPurpose]]
+) extends Command
 final case class UpdatePurposeVersion(
   purposeId: String,
   versionId: String,

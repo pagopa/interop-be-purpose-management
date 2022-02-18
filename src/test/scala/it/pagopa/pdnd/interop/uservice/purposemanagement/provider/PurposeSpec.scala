@@ -20,7 +20,8 @@ class PurposeSpec extends BaseIntegrationSpec {
         eserviceId = eServiceId,
         consumerId = consumerId,
         title = "Purpose",
-        riskAnalysisForm = riskAnalysisFormSeed
+        description = "Purpose description",
+        riskAnalysisForm = Some(riskAnalysisFormSeed)
       )
 
       val response: Future[Purpose] = createPurpose(purposeId, purposeSeed)
@@ -34,7 +35,7 @@ class PurposeSpec extends BaseIntegrationSpec {
         suspendedByProducer = None,
         title = purposeSeed.title,
         description = purposeSeed.description,
-        riskAnalysisForm = riskAnalysisForm,
+        riskAnalysisForm = Some(riskAnalysisForm),
         createdAt = timestamp,
         updatedAt = None
       )
@@ -56,7 +57,8 @@ class PurposeSpec extends BaseIntegrationSpec {
         eserviceId = eServiceId,
         consumerId = consumerId,
         title = "Purpose",
-        riskAnalysisForm = riskAnalysisFormSeed
+        description = "Purpose description",
+        riskAnalysisForm = Some(riskAnalysisFormSeed)
       )
       val versionSeed = PurposeVersionSeed(dailyCalls = 100)
 
@@ -84,7 +86,7 @@ class PurposeSpec extends BaseIntegrationSpec {
         suspendedByProducer = None,
         title = purposeSeed.title,
         description = purposeSeed.description,
-        riskAnalysisForm = riskAnalysisForm,
+        riskAnalysisForm = Some(riskAnalysisForm),
         createdAt = timestamp,
         updatedAt = None
       )
@@ -118,13 +120,15 @@ class PurposeSpec extends BaseIntegrationSpec {
         eserviceId = eServiceId1,
         consumerId = consumerId1,
         title = "Purpose",
-        riskAnalysisForm = riskAnalysisFormSeed
+        description = "Purpose description",
+        riskAnalysisForm = Some(riskAnalysisFormSeed)
       )
       val purposeSeed2 = PurposeSeed(
         eserviceId = eServiceId2,
         consumerId = consumerId2,
         title = "Purpose",
-        riskAnalysisForm = riskAnalysisFormSeed
+        description = "Purpose description",
+        riskAnalysisForm = Some(riskAnalysisFormSeed)
       )
       val versionSeed = PurposeVersionSeed(dailyCalls = 100)
 
@@ -155,7 +159,7 @@ class PurposeSpec extends BaseIntegrationSpec {
             suspendedByProducer = None,
             title = purposeSeed1.title,
             description = purposeSeed1.description,
-            riskAnalysisForm = riskAnalysisForm,
+            riskAnalysisForm = Some(riskAnalysisForm),
             createdAt = timestamp,
             updatedAt = None
           ),
@@ -168,7 +172,7 @@ class PurposeSpec extends BaseIntegrationSpec {
             suspendedByProducer = None,
             title = purposeSeed2.title,
             description = purposeSeed2.description,
-            riskAnalysisForm = riskAnalysisForm,
+            riskAnalysisForm = Some(riskAnalysisForm),
             createdAt = timestamp,
             updatedAt = None
           )
@@ -190,13 +194,15 @@ class PurposeSpec extends BaseIntegrationSpec {
         eserviceId = eServiceId1,
         consumerId = consumerId1,
         title = "Purpose",
-        riskAnalysisForm = riskAnalysisFormSeed
+        description = "Purpose description",
+        riskAnalysisForm = Some(riskAnalysisFormSeed)
       )
       val purposeSeed2 = PurposeSeed(
         eserviceId = eServiceId2,
         consumerId = consumerId2,
         title = "Purpose",
-        riskAnalysisForm = riskAnalysisFormSeed
+        description = "Purpose description",
+        riskAnalysisForm = Some(riskAnalysisFormSeed)
       )
       val versionSeed = PurposeVersionSeed(dailyCalls = 100)
 
@@ -227,7 +233,7 @@ class PurposeSpec extends BaseIntegrationSpec {
             suspendedByProducer = None,
             title = purposeSeed1.title,
             description = purposeSeed1.description,
-            riskAnalysisForm = riskAnalysisForm,
+            riskAnalysisForm = Some(riskAnalysisForm),
             createdAt = timestamp,
             updatedAt = None
           )
@@ -249,13 +255,15 @@ class PurposeSpec extends BaseIntegrationSpec {
         eserviceId = eServiceId1,
         consumerId = consumerId1,
         title = "Purpose",
-        riskAnalysisForm = riskAnalysisFormSeed
+        description = "Purpose description",
+        riskAnalysisForm = Some(riskAnalysisFormSeed)
       )
       val purposeSeed2 = PurposeSeed(
         eserviceId = eServiceId2,
         consumerId = consumerId2,
         title = "Purpose",
-        riskAnalysisForm = riskAnalysisFormSeed
+        description = "Purpose description",
+        riskAnalysisForm = Some(riskAnalysisFormSeed)
       )
       val versionSeed = PurposeVersionSeed(dailyCalls = 100)
 
@@ -278,7 +286,7 @@ class PurposeSpec extends BaseIntegrationSpec {
             suspendedByProducer = None,
             title = purposeSeed2.title,
             description = purposeSeed2.description,
-            riskAnalysisForm = riskAnalysisForm,
+            riskAnalysisForm = Some(riskAnalysisForm),
             createdAt = timestamp,
             updatedAt = None
           )
@@ -310,19 +318,22 @@ class PurposeSpec extends BaseIntegrationSpec {
         eserviceId = eServiceId,
         consumerId = consumerId,
         title = "Purpose",
-        riskAnalysisForm = riskAnalysisFormSeed
+        description = "Purpose description",
+        riskAnalysisForm = Some(riskAnalysisFormSeed)
       )
       val purposeSeed2 = PurposeSeed(
         eserviceId = eServiceId,
         consumerId = consumerId,
         title = "Purpose",
-        riskAnalysisForm = riskAnalysisFormSeed
+        description = "Purpose description",
+        riskAnalysisForm = Some(riskAnalysisFormSeed)
       )
       val purposeSeed3 = PurposeSeed(
         eserviceId = eServiceId,
         consumerId = consumerId,
         title = "Purpose",
-        riskAnalysisForm = riskAnalysisFormSeed
+        description = "Purpose description",
+        riskAnalysisForm = Some(riskAnalysisFormSeed)
       )
       val versionSeed1_1 = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
       val versionSeed1_2 = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
@@ -380,7 +391,7 @@ class PurposeSpec extends BaseIntegrationSpec {
             suspendedByProducer = None,
             title = purposeSeed1.title,
             description = purposeSeed1.description,
-            riskAnalysisForm = riskAnalysisForm,
+            riskAnalysisForm = Some(riskAnalysisForm),
             createdAt = timestamp,
             updatedAt = Some(timestamp)
           ),
@@ -404,7 +415,7 @@ class PurposeSpec extends BaseIntegrationSpec {
             suspendedByProducer = None,
             title = purposeSeed2.title,
             description = purposeSeed2.description,
-            riskAnalysisForm = riskAnalysisForm,
+            riskAnalysisForm = Some(riskAnalysisForm),
             createdAt = timestamp,
             updatedAt = Some(timestamp)
           )
@@ -427,7 +438,8 @@ class PurposeSpec extends BaseIntegrationSpec {
         eserviceId = eServiceId,
         consumerId = consumerId,
         title = "Purpose",
-        riskAnalysisForm = riskAnalysisFormSeed
+        description = "Purpose description",
+        riskAnalysisForm = Some(riskAnalysisFormSeed)
       )
 
       val response: Future[Option[String]] =
@@ -449,7 +461,8 @@ class PurposeSpec extends BaseIntegrationSpec {
         eserviceId = eServiceId,
         consumerId = consumerId,
         title = "Purpose",
-        riskAnalysisForm = riskAnalysisFormSeed
+        description = "Purpose description",
+        riskAnalysisForm = Some(riskAnalysisFormSeed)
       )
       val versionSeed = PurposeVersionSeed(dailyCalls = 100)
 
@@ -464,6 +477,180 @@ class PurposeSpec extends BaseIntegrationSpec {
       result.status shouldBe 409
       result.errors.map(_.code) shouldBe Seq("011-0038")
     }
+  }
+
+  "Update of a purpose" must {
+
+    "succeed if no version exists" in {
+      val purposeId  = UUID.randomUUID()
+      val eServiceId = UUID.randomUUID()
+      val consumerId = UUID.randomUUID()
+
+      val purposeSeed = PurposeSeed(
+        eserviceId = eServiceId,
+        consumerId = consumerId,
+        title = "Purpose",
+        description = "Purpose description",
+        riskAnalysisForm = Some(riskAnalysisFormSeed)
+      )
+
+      val updateContent = PurposeUpdateContent(
+        title = "Another title",
+        description = "Another description",
+        riskAnalysisForm = Some(riskAnalysisFormSeed.copy(version = "2.0"))
+      )
+
+      val response: Future[Purpose] =
+        for {
+          _      <- createPurpose(purposeId, purposeSeed)
+          result <- updatePurpose(purposeId, updateContent)
+        } yield result
+
+      val updatedPurpose = response.futureValue
+      updatedPurpose.title shouldBe updateContent.title
+      updatedPurpose.description shouldBe updateContent.description
+      updatedPurpose.riskAnalysisForm.get.version shouldBe updateContent.riskAnalysisForm.get.version
+    }
+
+    "succeed if only one draft version exists" in {
+      val purposeId  = UUID.randomUUID()
+      val versionId  = UUID.randomUUID()
+      val eServiceId = UUID.randomUUID()
+      val consumerId = UUID.randomUUID()
+
+      val purposeSeed = PurposeSeed(
+        eserviceId = eServiceId,
+        consumerId = consumerId,
+        title = "Purpose",
+        description = "Purpose description",
+        riskAnalysisForm = Some(riskAnalysisFormSeed)
+      )
+      val versionSeed = PurposeVersionSeed(dailyCalls = 100)
+
+      val updateContent = PurposeUpdateContent(
+        title = "Another title",
+        description = "Another description",
+        riskAnalysisForm = Some(riskAnalysisFormSeed.copy(version = "2.0"))
+      )
+
+      val response: Future[Purpose] =
+        for {
+          _      <- createPurpose(purposeId, purposeSeed)
+          _      <- createPurposeVersion(purposeId, versionId, versionSeed)
+          result <- updatePurpose(purposeId, updateContent)
+        } yield result
+
+      val updatedPurpose = response.futureValue
+      updatedPurpose.title shouldBe updateContent.title
+      updatedPurpose.description shouldBe updateContent.description
+      updatedPurpose.riskAnalysisForm.get.version shouldBe updateContent.riskAnalysisForm.get.version
+    }
+
+    "fail if purpose does not exist" in {
+      val purposeId = UUID.randomUUID()
+
+      val updateContent = PurposeUpdateContent(
+        title = "Another title",
+        description = "Another description",
+        riskAnalysisForm = Some(riskAnalysisFormSeed.copy(version = "2.0"))
+      )
+
+      (() => mockUUIDSupplier.get).expects().returning(UUID.randomUUID()).once()
+
+      val response: Future[Problem] =
+        makeFailingRequest(s"purposes/$purposeId", HttpMethods.POST, updateContent)
+
+      val result = response.futureValue
+      result.status shouldBe 404
+      result.errors.map(_.code) shouldBe Seq("011-0041")
+    }
+
+    "fail if an active version exists" in {
+      val purposeId      = UUID.randomUUID()
+      val versionId      = UUID.randomUUID()
+      val riskAnalysisId = UUID.randomUUID()
+      val eServiceId     = UUID.randomUUID()
+      val consumerId     = UUID.randomUUID()
+
+      val riskAnalysisDoc = PurposeVersionDocument(
+        id = riskAnalysisId,
+        contentType = "a-content-type",
+        path = "a/store/path",
+        createdAt = timestamp
+      )
+
+      val purposeSeed = PurposeSeed(
+        eserviceId = eServiceId,
+        consumerId = consumerId,
+        title = "Purpose",
+        description = "Purpose description",
+        riskAnalysisForm = Some(riskAnalysisFormSeed)
+      )
+      val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 200)
+      val updateContent = PurposeUpdateContent(
+        title = "Another title",
+        description = "Another description",
+        riskAnalysisForm = Some(riskAnalysisFormSeed.copy(version = "2.0"))
+      )
+
+      val response: Future[Problem] =
+        for {
+          _ <- createPurpose(purposeId, purposeSeed)
+          _ <- createPurposeVersion(purposeId, versionId, versionSeed)
+          _ <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, versionSeed.riskAnalysis)
+          _ = (() => mockUUIDSupplier.get).expects().returning(UUID.randomUUID()).once()
+          result <- makeFailingRequest(s"purposes/$purposeId", HttpMethods.POST, updateContent)
+        } yield result
+
+      val result = response.futureValue
+      result.status shouldBe 403
+      result.errors.map(_.code) shouldBe Seq("011-0042")
+    }
+
+    "fail if other versions exist besides the one in draft" in {
+      val purposeId      = UUID.randomUUID()
+      val versionId1     = UUID.randomUUID()
+      val versionId2     = UUID.randomUUID()
+      val riskAnalysisId = UUID.randomUUID()
+      val eServiceId     = UUID.randomUUID()
+      val consumerId     = UUID.randomUUID()
+
+      val riskAnalysisDoc = PurposeVersionDocument(
+        id = riskAnalysisId,
+        contentType = "a-content-type",
+        path = "a/store/path",
+        createdAt = timestamp
+      )
+
+      val purposeSeed = PurposeSeed(
+        eserviceId = eServiceId,
+        consumerId = consumerId,
+        title = "Purpose",
+        description = "Purpose description",
+        riskAnalysisForm = Some(riskAnalysisFormSeed)
+      )
+      val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 200)
+      val updateContent = PurposeUpdateContent(
+        title = "Another title",
+        description = "Another description",
+        riskAnalysisForm = Some(riskAnalysisFormSeed.copy(version = "2.0"))
+      )
+
+      val response: Future[Problem] =
+        for {
+          _ <- createPurpose(purposeId, purposeSeed)
+          _ <- createPurposeVersion(purposeId, versionId1, versionSeed)
+          _ <- activateVersion(purposeId, versionId1, ChangedBy.CONSUMER, versionSeed.riskAnalysis)
+          _ <- createPurposeVersion(purposeId, versionId2, versionSeed)
+          _ = (() => mockUUIDSupplier.get).expects().returning(UUID.randomUUID()).once()
+          result <- makeFailingRequest(s"purposes/$purposeId", HttpMethods.POST, updateContent)
+        } yield result
+
+      val result = response.futureValue
+      result.status shouldBe 403
+      result.errors.map(_.code) shouldBe Seq("011-0042")
+    }
+
   }
 
   def purposesAreTheSame(a: Purpose, b: Purpose): Boolean =

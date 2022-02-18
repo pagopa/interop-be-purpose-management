@@ -151,6 +151,43 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
+    post:
+      tags:
+        - purpose
+      summary: Update a purpose
+      operationId: updatePurpose
+      requestBody:
+        description: Values to update in the purpose
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurposeUpdateContent'
+        required: true
+      responses:
+        '200':
+          description: Purpose updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Purpose'
+        '400':
+          description: Invalid input
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: Purpose cannot be updated
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: Purpose not found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
   /purposes/{purposeId}/versions:
     parameters:
       - name: purposeId
@@ -511,7 +548,7 @@ components:
         - eserviceId
         - consumerId
         - title
-        - riskAnalysisForm
+        - description
     PurposeVersionSeed:
       type: object
       description: contains the expected payload for purpose version persistence.
@@ -572,9 +609,9 @@ components:
         - id
         - eserviceId
         - consumerId
-        - riskAnalysisForm
         - versions
         - title
+        - description
         - createdAt
       description: business representation of a purpose
     Purposes:
@@ -586,6 +623,19 @@ components:
             $ref: '#/components/schemas/Purpose'
       required:
         - purposes
+    PurposeUpdateContent:
+      type: object
+      description: contains the expected payload for purpose update.
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        riskAnalysisForm:
+          $ref: '#/components/schemas/RiskAnalysisFormSeed'
+      required:
+        - title
+        - description
     PurposeVersion:
       type: object
       properties:

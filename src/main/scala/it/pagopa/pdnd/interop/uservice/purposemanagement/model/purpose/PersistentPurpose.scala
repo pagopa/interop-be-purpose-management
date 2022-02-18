@@ -1,6 +1,7 @@
 package it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose
 
 import it.pagopa.pdnd.interop.commons.utils.service.{OffsetDateTimeSupplier, UUIDSupplier}
+import it.pagopa.pdnd.interop.uservice.purposemanagement.model.decoupling.PurposeUpdate
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.{Purpose, PurposeSeed}
 
 import java.time.OffsetDateTime
@@ -14,8 +15,8 @@ final case class PersistentPurpose(
   suspendedByConsumer: Option[Boolean],
   suspendedByProducer: Option[Boolean],
   title: String,
-  description: Option[String],
-  riskAnalysisForm: PersistentRiskAnalysisForm,
+  description: String,
+  riskAnalysisForm: Option[PersistentRiskAnalysisForm],
   createdAt: OffsetDateTime,
   updatedAt: Option[OffsetDateTime]
 ) {
@@ -29,11 +30,15 @@ final case class PersistentPurpose(
       suspendedByProducer = suspendedByProducer,
       title = title,
       description = description,
-      riskAnalysisForm = riskAnalysisForm.toAPI,
+      riskAnalysisForm = riskAnalysisForm.map(_.toAPI),
       createdAt = createdAt,
       updatedAt = updatedAt
     )
   }
+
+  def update(update: PurposeUpdate): PersistentPurpose =
+    copy(title = update.title, description = update.description, riskAnalysisForm = update.riskAnalysisForm)
+
 }
 
 object PersistentPurpose {
@@ -51,7 +56,7 @@ object PersistentPurpose {
       suspendedByProducer = None,
       title = seed.title,
       description = seed.description,
-      riskAnalysisForm = PersistentRiskAnalysisForm.fromSeed(uuidSupplier)(seed.riskAnalysisForm),
+      riskAnalysisForm = seed.riskAnalysisForm.map(PersistentRiskAnalysisForm.fromSeed(uuidSupplier)),
       createdAt = dateTimeSupplier.get,
       updatedAt = None
     )

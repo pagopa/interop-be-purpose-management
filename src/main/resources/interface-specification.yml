@@ -157,7 +157,7 @@ paths:
       summary: Update a purpose
       operationId: updatePurpose
       requestBody:
-        description: New fields values
+        description: Values to update in the purpose
         content:
           application/json:
             schema:

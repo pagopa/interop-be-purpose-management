@@ -45,8 +45,19 @@ package object purposemanagement extends MockFactory {
   implicit def toEntityMarshallerActivateVersionSeed: ToEntityMarshaller[ActivatePurposeVersionPayload] =
     sprayJsonMarshaller[ActivatePurposeVersionPayload]
 
-  implicit def toEntityMarshallerPurposeVersionUpdateContent: ToEntityMarshaller[PurposeVersionUpdateContent] =
-    sprayJsonMarshaller[PurposeVersionUpdateContent]
+  implicit def fromEntityUnmarshallerDraftPurposeVersionUpdateContent
+    : FromEntityUnmarshaller[DraftPurposeVersionUpdateContent] = sprayJsonUnmarshaller[DraftPurposeVersionUpdateContent]
+
+  implicit def fromEntityUnmarshallerWaitingForApprovalPurposeVersionUpdateContent
+    : FromEntityUnmarshaller[WaitingForApprovalPurposeVersionUpdateContent] =
+    sprayJsonUnmarshaller[WaitingForApprovalPurposeVersionUpdateContent]
+
+  implicit def toEntityMarshallerDraftPurposeVersionUpdateContent
+    : ToEntityMarshaller[DraftPurposeVersionUpdateContent] = sprayJsonMarshaller[DraftPurposeVersionUpdateContent]
+
+  implicit def toEntityMarshallerWaitingForApprovalPurposeVersionUpdateContent
+    : ToEntityMarshaller[WaitingForApprovalPurposeVersionUpdateContent] =
+    sprayJsonMarshaller[WaitingForApprovalPurposeVersionUpdateContent]
 
   implicit def toEntityMarshallerPurposeUpdateContent: ToEntityMarshaller[PurposeUpdateContent] =
     sprayJsonMarshaller[PurposeUpdateContent]

@@ -51,14 +51,28 @@ trait SpecHelper {
         .to[Purpose]
     } yield purpose
 
-  def updatePurposeVersion(purposeId: UUID, versionId: UUID, seed: PurposeVersionUpdateContent)(implicit
+  def updateDraftPurposeVersion(purposeId: UUID, versionId: UUID, seed: DraftPurposeVersionUpdateContent)(implicit
     ec: ExecutionContext,
     actorSystem: actor.ActorSystem
   ): Future[PurposeVersion] =
     for {
       data <- Marshal(seed).to[MessageEntity].map(_.dataBytes)
       _ = (() => mockDateTimeSupplier.get).expects().returning(timestamp).once()
-      purpose <- Unmarshal(makeRequest(data, s"purposes/$purposeId/versions/$versionId", HttpMethods.POST))
+      purpose <- Unmarshal(makeRequest(data, s"purposes/$purposeId/versions/$versionId/update/draft", HttpMethods.POST))
+        .to[PurposeVersion]
+    } yield purpose
+
+  def updateWaitingForApprovalPurposeVersion(
+    purposeId: UUID,
+    versionId: UUID,
+    seed: WaitingForApprovalPurposeVersionUpdateContent
+  )(implicit ec: ExecutionContext, actorSystem: actor.ActorSystem): Future[PurposeVersion] =
+    for {
+      data <- Marshal(seed).to[MessageEntity].map(_.dataBytes)
+      _ = (() => mockDateTimeSupplier.get).expects().returning(timestamp).once()
+      purpose <- Unmarshal(
+        makeRequest(data, s"purposes/$purposeId/versions/$versionId/update/waitingForApproval", HttpMethods.POST)
+      )
         .to[PurposeVersion]
     } yield purpose
 

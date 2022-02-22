@@ -490,6 +490,12 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
+        '403':
+          description: Purpose version not in draft state
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
         '404':
           description: Not Found
           content:
@@ -530,6 +536,12 @@ paths:
                 $ref: '#/components/schemas/PurposeVersion'
         '400':
           description: Invalid input
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: Purpose version not in waiting for approval state
           content:
             application/problem+json:
               schema:

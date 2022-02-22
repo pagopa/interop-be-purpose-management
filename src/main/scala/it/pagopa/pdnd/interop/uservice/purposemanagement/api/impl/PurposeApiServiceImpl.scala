@@ -451,18 +451,20 @@ final case class PurposeApiServiceImpl(
               problemOf(StatusCodes.NotFound, UpdatePurposeVersionNotFound(purposeId, versionId))
             )
           case _: PurposeVersionNotInDraft =>
-            updateDraftPurposeVersion400(
+            updateDraftPurposeVersion403(
               problemOf(StatusCodes.BadRequest, UpdatePurposeVersionNotInDraft(purposeId, versionId))
             )
           case _ =>
-            updateDraftPurposeVersion400(
-              problemOf(StatusCodes.BadRequest, UpdatePurposeVersionBadRequest(purposeId, versionId))
+            complete(
+              StatusCodes.InternalServerError,
+              problemOf(StatusCodes.InternalServerError, UpdatePurposeVersionBadRequest(purposeId, versionId))
             )
         }
       case Failure(ex) =>
         logger.error("Error while updating version {} of purpose {}", versionId, purposeId, ex)
-        updateDraftPurposeVersion400(
-          problemOf(StatusCodes.BadRequest, UpdatePurposeVersionBadRequest(purposeId, versionId))
+        complete(
+          StatusCodes.InternalServerError,
+          problemOf(StatusCodes.InternalServerError, UpdatePurposeVersionBadRequest(purposeId, versionId))
         )
     }
   }
@@ -497,18 +499,20 @@ final case class PurposeApiServiceImpl(
               problemOf(StatusCodes.NotFound, UpdatePurposeVersionNotFound(purposeId, versionId))
             )
           case _: InternalErrors.PurposeVersionNotInWaitingForApproval =>
-            updateDraftPurposeVersion400(
+            updateDraftPurposeVersion403(
               problemOf(StatusCodes.BadRequest, UpdatePurposeVersionNotInWaitingForApproval(purposeId, versionId))
             )
           case _ =>
-            updateDraftPurposeVersion400(
-              problemOf(StatusCodes.BadRequest, UpdatePurposeVersionBadRequest(purposeId, versionId))
+            complete(
+              StatusCodes.InternalServerError,
+              problemOf(StatusCodes.InternalServerError, UpdatePurposeVersionBadRequest(purposeId, versionId))
             )
         }
       case Failure(ex) =>
         logger.error("Error while updating version {} of purpose {}", versionId, purposeId, ex)
-        updateDraftPurposeVersion400(
-          problemOf(StatusCodes.BadRequest, UpdatePurposeVersionBadRequest(purposeId, versionId))
+        complete(
+          StatusCodes.InternalServerError,
+          problemOf(StatusCodes.InternalServerError, UpdatePurposeVersionBadRequest(purposeId, versionId))
         )
     }
   }

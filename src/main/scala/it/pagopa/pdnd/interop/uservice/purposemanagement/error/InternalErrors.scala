@@ -8,6 +8,8 @@ object InternalErrors {
       extends Throwable(s"Version $versionId not found for purpose $purposeId")
   final case class PurposeVersionNotInDraft(purposeId: String, versionId: String)
       extends Throwable(s"Version $versionId of purpose $purposeId is not in DRAFT")
+  final case class PurposeVersionNotInWaitingForApproval(purposeId: String, versionId: String)
+      extends Throwable(s"Version $versionId of purpose $purposeId is not in WAITING FOR APPROVAL")
   final case class PurposeVersionNotInExpectedState(
     purposeId: String,
     versionId: String,

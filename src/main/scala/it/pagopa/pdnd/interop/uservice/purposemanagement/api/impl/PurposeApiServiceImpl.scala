@@ -27,7 +27,11 @@ import it.pagopa.pdnd.interop.uservice.purposemanagement.error.InternalErrors.{
 }
 import it.pagopa.pdnd.interop.uservice.purposemanagement.error.PurposeManagementErrors._
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model._
-import it.pagopa.pdnd.interop.uservice.purposemanagement.model.decoupling.{PurposeUpdate, PurposeVersionUpdate}
+import it.pagopa.pdnd.interop.uservice.purposemanagement.model.decoupling.{
+  PurposeUpdate,
+  WaitingForApprovalPurposeVersionUpdate,
+  DraftPurposeVersionUpdate
+}
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.persistence._
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.{
   PersistentPurpose,
@@ -38,6 +42,7 @@ import org.slf4j.LoggerFactory
 
 import scala.concurrent._
 import scala.util.{Failure, Success}
+import it.pagopa.pdnd.interop.uservice.purposemanagement.error.InternalErrors
 
 final case class PurposeApiServiceImpl(
   system: ActorSystem[_],
@@ -416,8 +421,11 @@ final case class PurposeApiServiceImpl(
     }
   }
 
-  override def updatePurposeVersion(purposeId: String, versionId: String, updateContent: PurposeVersionUpdateContent)(
-    implicit
+  override def updateDraftPurposeVersion(
+    purposeId: String,
+    versionId: String,
+    updateContent: DraftPurposeVersionUpdateContent
+  )(implicit
     toEntityMarshallerPurposeVersion: ToEntityMarshaller[PurposeVersion],
     toEntityMarshallerProblem: ToEntityMarshaller[Problem],
     contexts: Seq[(String, String)]
@@ -427,30 +435,85 @@ final case class PurposeApiServiceImpl(
     val commander: EntityRef[Command] =
       sharding.entityRefFor(PurposePersistentBehavior.TypeKey, AkkaUtils.getShard(purposeId, settings.numberOfShards))
 
-    val update = PurposeVersionUpdate.fromApi(updateContent, dateTimeSupplier)
+    val update = DraftPurposeVersionUpdate.fromApi(updateContent, dateTimeSupplier)
+
     val result: Future[StatusReply[PersistentPurposeVersion]] =
-      commander.ask(ref => UpdatePurposeVersion(purposeId, versionId, update, ref))
+      commander.ask(ref => UpdateDraftPurposeVersion(purposeId, versionId, update, ref))
 
     onComplete(result) {
       case Success(statusReply) if statusReply.isSuccess =>
-        updatePurposeVersion200(statusReply.getValue.toAPI)
+        updateDraftPurposeVersion200(statusReply.getValue.toAPI)
       case Success(statusReply) =>
         logger.error("Error while updating version {} of purpose {}", versionId, purposeId, statusReply.getError)
         statusReply.getError match {
           case _: PurposeVersionNotFound =>
-            updatePurposeVersion404(problemOf(StatusCodes.NotFound, UpdatePurposeVersionNotFound(purposeId, versionId)))
+            updateDraftPurposeVersion404(
+              problemOf(StatusCodes.NotFound, UpdatePurposeVersionNotFound(purposeId, versionId))
+            )
           case _: PurposeVersionNotInDraft =>
-            updatePurposeVersion400(
+            updateDraftPurposeVersion403(
               problemOf(StatusCodes.BadRequest, UpdatePurposeVersionNotInDraft(purposeId, versionId))
             )
           case _ =>
-            updatePurposeVersion400(
-              problemOf(StatusCodes.BadRequest, UpdatePurposeVersionBadRequest(purposeId, versionId))
+            complete(
+              StatusCodes.InternalServerError,
+              problemOf(StatusCodes.InternalServerError, UpdatePurposeVersionBadRequest(purposeId, versionId))
             )
         }
       case Failure(ex) =>
         logger.error("Error while updating version {} of purpose {}", versionId, purposeId, ex)
-        updatePurposeVersion400(problemOf(StatusCodes.BadRequest, UpdatePurposeVersionBadRequest(purposeId, versionId)))
+        complete(
+          StatusCodes.InternalServerError,
+          problemOf(StatusCodes.InternalServerError, UpdatePurposeVersionBadRequest(purposeId, versionId))
+        )
+    }
+  }
+
+  override def updateWaitingForApprovalPurposeVersion(
+    purposeId: String,
+    versionId: String,
+    updateContent: WaitingForApprovalPurposeVersionUpdateContent
+  )(implicit
+    toEntityMarshallerPurposeVersion: ToEntityMarshaller[PurposeVersion],
+    toEntityMarshallerProblem: ToEntityMarshaller[Problem],
+    contexts: Seq[(String, String)]
+  ): Route = {
+    logger.info("Updating version {} of purpose {}", versionId, purposeId)
+
+    val commander: EntityRef[Command] =
+      sharding.entityRefFor(PurposePersistentBehavior.TypeKey, AkkaUtils.getShard(purposeId, settings.numberOfShards))
+
+    val update = WaitingForApprovalPurposeVersionUpdate.fromApi(updateContent, dateTimeSupplier)
+
+    val result: Future[StatusReply[PersistentPurposeVersion]] =
+      commander.ask(ref => UpdateWaitingForApprovalPurposeVersion(purposeId, versionId, update, ref))
+
+    onComplete(result) {
+      case Success(statusReply) if statusReply.isSuccess =>
+        updateDraftPurposeVersion200(statusReply.getValue.toAPI)
+      case Success(statusReply) =>
+        logger.error("Error while updating version {} of purpose {}", versionId, purposeId, statusReply.getError)
+        statusReply.getError match {
+          case _: PurposeVersionNotFound =>
+            updateDraftPurposeVersion404(
+              problemOf(StatusCodes.NotFound, UpdatePurposeVersionNotFound(purposeId, versionId))
+            )
+          case _: InternalErrors.PurposeVersionNotInWaitingForApproval =>
+            updateDraftPurposeVersion403(
+              problemOf(StatusCodes.BadRequest, UpdatePurposeVersionNotInWaitingForApproval(purposeId, versionId))
+            )
+          case _ =>
+            complete(
+              StatusCodes.InternalServerError,
+              problemOf(StatusCodes.InternalServerError, UpdatePurposeVersionBadRequest(purposeId, versionId))
+            )
+        }
+      case Failure(ex) =>
+        logger.error("Error while updating version {} of purpose {}", versionId, purposeId, ex)
+        complete(
+          StatusCodes.InternalServerError,
+          problemOf(StatusCodes.InternalServerError, UpdatePurposeVersionBadRequest(purposeId, versionId))
+        )
     }
   }
 

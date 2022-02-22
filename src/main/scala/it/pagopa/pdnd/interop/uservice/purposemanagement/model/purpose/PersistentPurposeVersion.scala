@@ -5,7 +5,6 @@ import it.pagopa.pdnd.interop.uservice.purposemanagement.error.InternalErrors.{
   PurposeVersionMissingRiskAnalysis,
   PurposeVersionNotInExpectedState
 }
-import it.pagopa.pdnd.interop.uservice.purposemanagement.model.decoupling.PurposeVersionUpdate
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.purpose.PersistentPurposeVersion._
 import it.pagopa.pdnd.interop.uservice.purposemanagement.model.{PurposeVersion, PurposeVersionSeed}
 
@@ -22,8 +21,6 @@ final case class PersistentPurposeVersion(
   updatedAt: Option[OffsetDateTime],
   firstActivationAt: Option[OffsetDateTime]
 ) {
-  def update(update: PurposeVersionUpdate): PersistentPurposeVersion =
-    copy(dailyCalls = update.dailyCalls, updatedAt = Some(update.timestamp))
 
   def isActivable(purposeId: String): Either[Throwable, Unit] =
     for {

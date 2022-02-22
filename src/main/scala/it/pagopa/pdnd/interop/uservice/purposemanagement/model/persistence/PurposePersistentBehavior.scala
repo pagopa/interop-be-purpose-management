@@ -127,7 +127,7 @@ object PurposePersistentBehavior {
             }
           }
 
-      case UpdatePurposeVersion(purposeId, versionId, update, replyTo) =>
+      case UpdateDraftPurposeVersion(purposeId, versionId, update, replyTo) =>
         state
           .getPurposeVersion(purposeId, versionId)
           .fold {
@@ -136,7 +136,27 @@ object PurposePersistentBehavior {
           } { v =>
             isDraftVersion(purposeId, v) match {
               case Right(_) =>
-                val updatedVersion = v.update(update)
+                val updatedVersion = v.copy(dailyCalls = update.dailyCalls, updatedAt = Some(update.timestamp))
+                Effect
+                  .persist(PurposeVersionUpdated(purposeId, updatedVersion))
+                  .thenRun((_: State) => replyTo ! StatusReply.Success(updatedVersion))
+              case Left(ex) =>
+                replyTo ! StatusReply.Error[PersistentPurposeVersion](ex)
+                Effect.none[PurposeVersionUpdated, State]
+            }
+          }
+
+      case UpdateWaitingForApprovalPurposeVersion(purposeId, versionId, update, replyTo) =>
+        state
+          .getPurposeVersion(purposeId, versionId)
+          .fold {
+            replyTo ! StatusReply.Error[PersistentPurposeVersion](PurposeVersionNotFound(purposeId, versionId))
+            Effect.none[PurposeVersionUpdated, State]
+          } { v =>
+            isWaitingForApprovalVersion(purposeId, v) match {
+              case Right(_) =>
+                val updatedVersion =
+                  v.copy(expectedApprovalDate = Some(update.expectedApprovalDate), updatedAt = Some(update.timestamp))
                 Effect
                   .persist(PurposeVersionUpdated(purposeId, updatedVersion))
                   .thenRun((_: State) => replyTo ! StatusReply.Success(updatedVersion))
@@ -324,10 +344,16 @@ object PurposePersistentBehavior {
 
   def isDraftVersion(purposeId: String, version: PersistentPurposeVersion): Either[Throwable, Unit] =
     version.state match {
-      case PersistentPurposeVersionState.Draft =>
-        Right(())
+      case PersistentPurposeVersionState.Draft => Right(())
       case _ =>
         Left(PurposeVersionNotInDraft(purposeId, version.id.toString))
+    }
+
+  def isWaitingForApprovalVersion(purposeId: String, version: PersistentPurposeVersion): Either[Throwable, Unit] =
+    version.state match {
+      case PersistentPurposeVersionState.WaitingForApproval => Right(())
+      case _ =>
+        Left(PurposeVersionNotInWaitingForApproval(purposeId, version.id.toString))
     }
 
   def changeState[T <: Event](

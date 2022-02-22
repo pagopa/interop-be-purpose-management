@@ -145,4 +145,10 @@ object PurposeManagementErrors {
   final case class UpdatePurposeError(purposeId: String)
       extends ComponentError("0043", s"Error updating Purpose $purposeId - Unknown error")
 
+  final case class UpdatePurposeVersionNotInWaitingForApproval(purposeId: String, versionId: String)
+      extends ComponentError(
+        "0044",
+        s"Error on version update - Version $versionId of purpose $purposeId is not in Waiting for Approval state"
+      )
+
 }

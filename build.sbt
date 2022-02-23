@@ -106,7 +106,7 @@ lazy val root = (project in file("."))
       if (buildVersion == "latest")
         buildVersion
       else
-        s"v$buildVersion"
+        s"$buildVersion"
     }".toLowerCase,
     Docker / packageName := s"${name.value}",
     Docker / dockerExposedPorts := Seq(8080),

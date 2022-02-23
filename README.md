@@ -1,1 +1,1 @@
-# PDND Interoperability - Purpose Management Micro Service
+# Interoperability - Purpose Management Micro Service

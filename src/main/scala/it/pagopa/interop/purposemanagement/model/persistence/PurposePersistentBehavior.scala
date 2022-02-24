@@ -20,6 +20,7 @@ import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
 import scala.concurrent.duration.{DurationInt, DurationLong}
 import scala.language.postfixOps
+import akka.persistence.typed.scaladsl.EffectBuilder
 
 object PurposePersistentBehavior {
 
@@ -172,19 +173,6 @@ object PurposePersistentBehavior {
         Effect.none[Event, State]
 
       case ActivatePurposeVersion(purposeId, versionId, versionDocument, stateChangeDetails, replyTo) =>
-        def archiveOldVersion(purpose: PersistentPurpose, newActiveVersionId: String): PersistentPurpose = {
-          val updatedVersions = purpose.versions.map { v =>
-            v.state match {
-              case PersistentPurposeVersionState.Active if v.id.toString != newActiveVersionId =>
-                v.copy(state = PersistentPurposeVersionState.Archived)
-              case PersistentPurposeVersionState.Suspended =>
-                v.copy(state = PersistentPurposeVersionState.Archived)
-              case _ => v
-            }
-          }
-          purpose.copy(versions = updatedVersions)
-        }
-
         val purpose: Either[Throwable, PersistentPurpose] = getModifiedPurpose(
           state,
           purposeId,
@@ -195,17 +183,23 @@ object PurposePersistentBehavior {
           versionDocument
         )(dateTimeSupplier)
 
+        def archiveOldVersion(purpose: PersistentPurpose, newActiveVersionId: String): PersistentPurpose =
+          purpose.copy(versions = purpose.versions.map { v =>
+            v.state match {
+              case PersistentPurposeVersionState.Active if v.id.toString != newActiveVersionId =>
+                v.copy(state = PersistentPurposeVersionState.Archived)
+              case PersistentPurposeVersionState.Suspended =>
+                v.copy(state = PersistentPurposeVersionState.Archived)
+              case _ => v
+            }
+          })
+
         purpose
           .fold(
-            ex => {
-              replyTo ! StatusReply.Error[PersistentPurpose](ex)
-              Effect.none[PurposeVersionArchived, State]
-            },
-            updatedPurpose => {
-              val purposeToPersist: PersistentPurpose = archiveOldVersion(updatedPurpose, versionId)
-              Effect
-                .persist(PurposeVersionActivated(purposeToPersist))
-                .thenRun((_: State) => replyTo ! StatusReply.Success(purposeToPersist))
+            handleFailure[PurposeVersionActivated](_)(replyTo),
+            purpose => {
+              val updatedPurpose: PersistentPurpose = archiveOldVersion(purpose, versionId)
+              persistStateAndReply(updatedPurpose, PurposeVersionActivated)(replyTo)
             }
           )
 
@@ -221,14 +215,8 @@ object PurposePersistentBehavior {
 
         purpose
           .fold(
-            ex => {
-              replyTo ! StatusReply.Error[PersistentPurpose](ex)
-              Effect.none[PurposeVersionSuspended, State]
-            },
-            updatedPurpose =>
-              Effect
-                .persist(PurposeVersionSuspended(updatedPurpose))
-                .thenRun((_: State) => replyTo ! StatusReply.Success(updatedPurpose))
+            handleFailure[PurposeVersionSuspended](_)(replyTo),
+            persistStateAndReply(_, PurposeVersionSuspended)(replyTo)
           )
 
       case WaitForApprovalPurposeVersion(purposeId, versionId, stateChangeDetails, replyTo) =>
@@ -243,14 +231,8 @@ object PurposePersistentBehavior {
 
         purpose
           .fold(
-            ex => {
-              replyTo ! StatusReply.Error[PersistentPurpose](ex)
-              Effect.none[PurposeVersionWaitedForApproval, State]
-            },
-            updatedPurpose =>
-              Effect
-                .persist(PurposeVersionWaitedForApproval(updatedPurpose))
-                .thenRun((_: State) => replyTo ! StatusReply.Success(updatedPurpose))
+            handleFailure[PurposeVersionWaitedForApproval](_)(replyTo),
+            persistStateAndReply(_, PurposeVersionWaitedForApproval)(replyTo)
           )
 
       case ArchivePurposeVersion(purposeId, versionId, stateChangeDetails, replyTo) =>
@@ -265,14 +247,8 @@ object PurposePersistentBehavior {
 
         purpose
           .fold(
-            ex => {
-              replyTo ! StatusReply.Error[PersistentPurpose](ex)
-              Effect.none[PurposeVersionArchived, State]
-            },
-            updatedPurpose =>
-              Effect
-                .persist(PurposeVersionArchived(updatedPurpose))
-                .thenRun((_: State) => replyTo ! StatusReply.Success(updatedPurpose))
+            handleFailure[PurposeVersionArchived](_)(replyTo),
+            persistStateAndReply(_, PurposeVersionArchived)(replyTo)
           )
 
       case ListPurposes(from, to, consumerId, eserviceId, purposeStates, replyTo) =>
@@ -295,6 +271,17 @@ object PurposePersistentBehavior {
         Effect.none[Event, State]
     }
   }
+
+  def handleFailure[T](ex: Throwable)(replyTo: ActorRef[StatusReply[PersistentPurpose]]): EffectBuilder[T, State] = {
+    replyTo ! StatusReply.Error[PersistentPurpose](ex)
+    Effect.none[T, State]
+  }
+
+  def persistStateAndReply[T](purpose: PersistentPurpose, eventBuilder: PersistentPurpose => T)(
+    replyTo: ActorRef[StatusReply[PersistentPurpose]]
+  ) = Effect
+    .persist(eventBuilder(purpose))
+    .thenRun((_: State) => replyTo ! StatusReply.Success(purpose))
 
   val eventHandler: (State, Event) => State = (state, event) =>
     event match {

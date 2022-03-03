@@ -120,8 +120,11 @@ object PurposeManagementErrors {
         "0034",
         s"Error deleting Version $versionId of Purpose $purposeId - Purpose of Version not found"
       )
-  final case class DeletePurposeVersionNotInDraft(purposeId: String, versionId: String)
-      extends ComponentError("0035", s"Error deleting Version $versionId of Purpose $purposeId - Version not in Draft")
+  final case class DeletePurposeVersionNotInDeletableState(purposeId: String, versionId: String)
+      extends ComponentError(
+        "0035",
+        s"Error deleting Version $versionId of Purpose $purposeId - Version is not in a deletable state"
+      )
   final case class DeletePurposeVersionBadRequest(purposeId: String, versionId: String)
       extends ComponentError("0036", s"Error deleting Version $versionId of Purpose $purposeId - Bad Request")
 

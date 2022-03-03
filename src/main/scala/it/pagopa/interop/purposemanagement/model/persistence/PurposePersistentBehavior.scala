@@ -102,7 +102,7 @@ object PurposePersistentBehavior {
                   .persist(PurposeVersionDeleted(purposeId, versionId))
                   .thenRun((_: State) => replyTo ! StatusReply.Success(()))
               case _ =>
-                replyTo ! StatusReply.Error[Unit](PurposeVersionNotInDraft(purposeId, versionId))
+                replyTo ! StatusReply.Error[Unit](PurposeVersionNotInDeletableState(purposeId, versionId))
                 Effect.none[PurposeVersionDeleted, State]
             }
           }

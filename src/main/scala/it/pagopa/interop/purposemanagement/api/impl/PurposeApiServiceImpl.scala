@@ -171,8 +171,8 @@ final case class PurposeApiServiceImpl(
         statusReply.getError match {
           case PurposeVersionNotFound(pId, vId) =>
             deletePurposeVersion404(problemOf(StatusCodes.NotFound, DeletePurposeVersionNotFound(pId, vId)))
-          case PurposeVersionNotInDraft(pId, vId) =>
-            deletePurposeVersion409(problemOf(StatusCodes.Conflict, DeletePurposeVersionNotInDraft(pId, vId)))
+          case PurposeVersionNotInDeletableState(pId, vId) =>
+            deletePurposeVersion403(problemOf(StatusCodes.Conflict, DeletePurposeVersionNotInDeletableState(pId, vId)))
           case _ =>
             deletePurposeVersion400(
               problemOf(StatusCodes.BadRequest, DeletePurposeVersionBadRequest(purposeId, versionId))

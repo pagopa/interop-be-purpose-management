@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory
 
 import scala.concurrent._
 import scala.util.{Failure, Success}
-import org.checkerframework.checker.units.qual.s
 
 final case class PurposeApiServiceImpl(
   system: ActorSystem[_],

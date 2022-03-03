@@ -64,18 +64,12 @@ final case class PurposeApiServiceImpl(
         createPurpose201(statusReply.getValue.toAPI)
       case Success(statusReply) =>
         logger.error(
-          "Error while adding a purpose for consumer {} to e-service {}",
-          purposeSeed.consumerId,
-          purposeSeed.eserviceId,
-          statusReply.getError
+          s"Error while adding a purpose for consumer ${purposeSeed.consumerId} to e-service ${purposeSeed.eserviceId} - ${statusReply.getError.getMessage}"
         )
         createPurpose409(problemOf(StatusCodes.Conflict, CreatePurposeConflict))
       case Failure(ex) =>
         logger.error(
-          "Error while adding a purpose for consumer {} to e-service {}",
-          purposeSeed.consumerId,
-          purposeSeed.eserviceId,
-          ex
+          s"Error while adding a purpose for consumer ${purposeSeed.consumerId} to e-service ${purposeSeed.eserviceId} - ${ex.getMessage}"
         )
         createPurpose400(problemOf(StatusCodes.BadRequest, CreatePurposeBadRequest))
     }
@@ -96,7 +90,7 @@ final case class PurposeApiServiceImpl(
           getPurpose200(purpose.toAPI)
         )
       case statusReply if statusReply.isError =>
-        logger.error("Error retrieving purpose {}", purposeId, statusReply.getError)
+        logger.error(s"Error retrieving purpose ${purposeId} - ${statusReply.getError.getMessage}")
         getPurpose400(problemOf(StatusCodes.BadRequest, GetPurposeBadRequest))
     }
   }
@@ -114,7 +108,7 @@ final case class PurposeApiServiceImpl(
       case Success(statusReply) if statusReply.isSuccess =>
         deletePurpose204
       case Success(statusReply) =>
-        logger.error("Error while deleting purpose {}", purposeId, statusReply.getError)
+        logger.error(s"Error while deleting purpose ${purposeId} - ${statusReply.getError.getMessage}")
         statusReply.getError match {
           case PurposeNotFound(pId) =>
             deletePurpose404(problemOf(StatusCodes.NotFound, DeletePurposeNotFound(pId)))
@@ -124,7 +118,7 @@ final case class PurposeApiServiceImpl(
             deletePurpose400(problemOf(StatusCodes.BadRequest, DeletePurposeBadRequest(purposeId)))
         }
       case Failure(ex) =>
-        logger.error("Error while deleting purpose {}", purposeId, ex)
+        logger.error(s"Error while deleting purpose ${purposeId} - ${ex.getMessage}")
         deletePurpose400(problemOf(StatusCodes.BadRequest, DeletePurposeBadRequest(purposeId)))
     }
   }
@@ -142,7 +136,7 @@ final case class PurposeApiServiceImpl(
       case Success(statusReply) if statusReply.isSuccess =>
         createPurposeVersion201(statusReply.getValue.toAPI)
       case Success(statusReply) =>
-        logger.error("Error while adding a version to purpose {}", purposeId, statusReply.getError)
+        logger.error(s"Error while adding a version to purpose ${purposeId} - ${statusReply.getError.getMessage}")
         statusReply.getError match {
           case PurposeNotFound(pId) =>
             createPurposeVersion404(problemOf(StatusCodes.NotFound, CreatePurposeVersionNotFound(pId)))
@@ -152,7 +146,7 @@ final case class PurposeApiServiceImpl(
             createPurposeVersion400(problemOf(StatusCodes.BadRequest, CreatePurposeVersionBadRequest))
         }
       case Failure(ex) =>
-        logger.error("Error while adding a version to purpose {}", purposeId, ex)
+        logger.error(s"Error while adding a version to purpose ${purposeId} - ${ex.getMessage}")
         createPurposeVersion400(problemOf(StatusCodes.BadRequest, CreatePurposeVersionBadRequest))
     }
   }
@@ -171,7 +165,9 @@ final case class PurposeApiServiceImpl(
       case Success(statusReply) if statusReply.isSuccess =>
         deletePurposeVersion204
       case Success(statusReply) =>
-        logger.error("Error while deleting version {} of purpose {}", versionId, purposeId, statusReply.getError)
+        logger.error(
+          s"Error while deleting version ${versionId} of purpose ${purposeId} - ${statusReply.getError.getMessage}"
+        )
         statusReply.getError match {
           case PurposeVersionNotFound(pId, vId) =>
             deletePurposeVersion404(problemOf(StatusCodes.NotFound, DeletePurposeVersionNotFound(pId, vId)))
@@ -183,7 +179,7 @@ final case class PurposeApiServiceImpl(
             )
         }
       case Failure(ex) =>
-        logger.error("Error while deleting version {} of purpose {}", versionId, purposeId, ex)
+        logger.error(s"Error while deleting version ${versionId} of purpose ${purposeId} - ${ex.getMessage}")
         deletePurposeVersion400(problemOf(StatusCodes.BadRequest, DeletePurposeVersionBadRequest(purposeId, versionId)))
     }
   }
@@ -214,7 +210,7 @@ final case class PurposeApiServiceImpl(
             complete(problem.status, problem)
         }
       case statusReply if statusReply.isError =>
-        logger.error("Error activating purpose {} version {}", purposeId, versionId, statusReply.getError)
+        logger.error(s"Error activating purpose ${purposeId} version ${versionId} - ${statusReply.getError.getMessage}")
         statusReply.getError match {
           case PurposeNotFound(pId) =>
             activatePurposeVersion404(problemOf(StatusCodes.NotFound, ActivatePurposeNotFound(pId)))
@@ -250,7 +246,7 @@ final case class PurposeApiServiceImpl(
             complete(problem.status, problem)
         }
       case statusReply if statusReply.isError =>
-        logger.error("Error suspending purpose {} version {}", purposeId, versionId, statusReply.getError)
+        logger.error(s"Error suspending purpose ${purposeId} version ${versionId} - ${statusReply.getError.getMessage}")
         statusReply.getError match {
           case PurposeNotFound(pId) =>
             suspendPurposeVersion404(problemOf(StatusCodes.NotFound, SuspendPurposeNotFound(pId)))
@@ -285,7 +281,9 @@ final case class PurposeApiServiceImpl(
             complete(problem.status, problem)
         }
       case statusReply if statusReply.isError =>
-        logger.error("Error waiting for approval purpose {} version {}", purposeId, versionId, statusReply.getError)
+        logger.error(
+          s"Error waiting for approval purpose ${purposeId} version ${versionId} - ${statusReply.getError.getMessage}"
+        )
         statusReply.getError match {
           case PurposeNotFound(pId) =>
             waitForApprovalPurposeVersion404(problemOf(StatusCodes.NotFound, WaitForApprovalPurposeNotFound(pId)))
@@ -327,7 +325,7 @@ final case class PurposeApiServiceImpl(
             complete(problem.status, problem)
         }
       case statusReply if statusReply.isError =>
-        logger.error("Error archiving purpose {} version {}", purposeId, versionId, statusReply.getError)
+        logger.error(s"Error archiving purpose ${purposeId} version ${versionId} - ${statusReply.getError.getMessage}")
         statusReply.getError match {
           case PurposeNotFound(pId) =>
             archivePurposeVersion404(problemOf(StatusCodes.NotFound, ArchivePurposeNotFound(pId)))
@@ -365,13 +363,9 @@ final case class PurposeApiServiceImpl(
 
     result match {
       case Right(purposes) => getPurposes200(purposes)
-      case Left(error) =>
+      case Left(ex) =>
         logger.error(
-          "Error while getting purposes for consumer {} to e-service {} with states {}",
-          consumerId,
-          eserviceId,
-          states,
-          error
+          s"Error while getting purposes for consumer ${consumerId} to e-service ${eserviceId} with states ${states} - ${ex.getMessage}"
         )
         getPurposes400(problemOf(StatusCodes.BadRequest, GetPurposesBadRequest))
     }
@@ -396,7 +390,7 @@ final case class PurposeApiServiceImpl(
       case Success(statusReply) if statusReply.isSuccess =>
         updatePurpose200(statusReply.getValue.toAPI)
       case Success(statusReply) =>
-        logger.error("Error updating Purpose {}", purposeId, statusReply.getError)
+        logger.error(s"Error updating Purpose ${purposeId} - ${statusReply.getError.getMessage}")
         statusReply.getError match {
           case _: PurposeNotFound =>
             updatePurpose404(problemOf(StatusCodes.NotFound, UpdatePurposeNotFound(purposeId)))
@@ -407,7 +401,7 @@ final case class PurposeApiServiceImpl(
             complete(problem.status, problem)
         }
       case Failure(ex) =>
-        logger.error("Error updating Purpose {}", purposeId, ex)
+        logger.error(s"Error updating Purpose ${purposeId} - ${ex.getMessage}")
         val problem = problemOf(StatusCodes.InternalServerError, UpdatePurposeError(purposeId))
         complete(problem.status, problem)
     }
@@ -436,7 +430,9 @@ final case class PurposeApiServiceImpl(
       case Success(statusReply) if statusReply.isSuccess =>
         updateDraftPurposeVersion200(statusReply.getValue.toAPI)
       case Success(statusReply) =>
-        logger.error("Error while updating version {} of purpose {}", versionId, purposeId, statusReply.getError)
+        logger.error(
+          s"Error while updating version ${versionId} of purpose ${purposeId} - ${statusReply.getError.getMessage}"
+        )
         statusReply.getError match {
           case _: PurposeVersionNotFound =>
             updateDraftPurposeVersion404(
@@ -453,7 +449,7 @@ final case class PurposeApiServiceImpl(
             )
         }
       case Failure(ex) =>
-        logger.error("Error while updating version {} of purpose {}", versionId, purposeId, ex)
+        logger.error(s"Error while updating version ${versionId} of purpose ${purposeId} - ${ex.getMessage}")
         complete(
           StatusCodes.InternalServerError,
           problemOf(StatusCodes.InternalServerError, UpdatePurposeVersionBadRequest(purposeId, versionId))
@@ -484,7 +480,9 @@ final case class PurposeApiServiceImpl(
       case Success(statusReply) if statusReply.isSuccess =>
         updateDraftPurposeVersion200(statusReply.getValue.toAPI)
       case Success(statusReply) =>
-        logger.error("Error while updating version {} of purpose {}", versionId, purposeId, statusReply.getError)
+        logger.error(
+          s"Error while updating version ${versionId} of purpose ${purposeId} - ${statusReply.getError.getMessage}"
+        )
         statusReply.getError match {
           case _: PurposeVersionNotFound =>
             updateDraftPurposeVersion404(
@@ -501,7 +499,7 @@ final case class PurposeApiServiceImpl(
             )
         }
       case Failure(ex) =>
-        logger.error("Error while updating version {} of purpose {}", versionId, purposeId, ex)
+        logger.error(s"Error while updating version ${versionId} of purpose ${purposeId} - ${ex.getMessage}")
         complete(
           StatusCodes.InternalServerError,
           problemOf(StatusCodes.InternalServerError, UpdatePurposeVersionBadRequest(purposeId, versionId))

@@ -10,7 +10,7 @@ import scala.concurrent.Future
 class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
 
   "Activation of purpose" must {
-    "succeed" in {
+    "succeed when risk analysis is added at creation" in {
       val purposeId      = UUID.randomUUID()
       val versionId      = UUID.randomUUID()
       val eServiceId     = UUID.randomUUID()
@@ -37,14 +37,55 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         for {
           _       <- createPurpose(purposeId, purposeSeed)
           version <- createPurposeVersion(purposeId, versionId, versionSeed)
-          result  <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, versionSeed.riskAnalysis)
+          result  <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, None)
         } yield (version, result)
 
       val (version, result) = response.futureValue
       val expected = version.copy(
         state = PurposeVersionState.ACTIVE,
         updatedAt = Some(timestamp),
-        firstActivationAt = Some(timestamp)
+        firstActivationAt = Some(timestamp),
+        riskAnalysis = Some(riskAnalysisDoc)
+      )
+      result shouldBe expected
+    }
+
+    "succeed when risk analysis is added at activation" in {
+      val purposeId      = UUID.randomUUID()
+      val versionId      = UUID.randomUUID()
+      val eServiceId     = UUID.randomUUID()
+      val consumerId     = UUID.randomUUID()
+      val riskAnalysisId = UUID.randomUUID()
+
+      val riskAnalysisDoc = PurposeVersionDocument(
+        id = riskAnalysisId,
+        contentType = "a-content-type",
+        path = "a/store/path",
+        createdAt = timestamp
+      )
+
+      val purposeSeed = PurposeSeed(
+        eserviceId = eServiceId,
+        consumerId = consumerId,
+        title = "Purpose",
+        description = "Purpose description",
+        riskAnalysisForm = Some(riskAnalysisFormSeed)
+      )
+      val versionSeed = PurposeVersionSeed(riskAnalysis = None, dailyCalls = 100)
+
+      val response: Future[(PurposeVersion, PurposeVersion)] =
+        for {
+          _       <- createPurpose(purposeId, purposeSeed)
+          version <- createPurposeVersion(purposeId, versionId, versionSeed)
+          result  <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, Some(riskAnalysisDoc))
+        } yield (version, result)
+
+      val (version, result) = response.futureValue
+      val expected = version.copy(
+        state = PurposeVersionState.ACTIVE,
+        updatedAt = Some(timestamp),
+        firstActivationAt = Some(timestamp),
+        riskAnalysis = Some(riskAnalysisDoc)
       )
       result shouldBe expected
     }

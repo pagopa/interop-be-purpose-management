@@ -279,7 +279,7 @@ object PurposePersistentBehavior {
 
   def persistStateAndReply[T](purpose: PersistentPurpose, eventBuilder: PersistentPurpose => T)(
     replyTo: ActorRef[StatusReply[PersistentPurpose]]
-  ) = Effect
+  ): EffectBuilder[T, State] = Effect
     .persist(eventBuilder(purpose))
     .thenRun((_: State) => replyTo ! StatusReply.Success(purpose))
 
@@ -399,6 +399,6 @@ object PurposePersistentBehavior {
     riskAnalysisUpdated = riskAnalysisOpt.map(PersistentPurposeVersionDocument.fromAPI).orElse(version.riskAnalysis)
     versionWithRisk     = version.copy(riskAnalysis = riskAnalysisUpdated)
     _ <- versionValidation(versionWithRisk)
-  } yield updatePurposeFromState(purpose, version, newState, stateChangeDetails)(dateTimeSupplier)
+  } yield updatePurposeFromState(purpose, versionWithRisk, newState, stateChangeDetails)(dateTimeSupplier)
 
 }

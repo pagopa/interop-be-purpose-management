@@ -260,14 +260,14 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-        '404':
-          description: Not Found
+        '403':
+          description: Version State does not allow deletion
           content:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-        '409':
-          description: Version State Conflict
+        '404':
+          description: Not Found
           content:
             application/problem+json:
               schema:

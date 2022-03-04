@@ -10,6 +10,10 @@ object InternalErrors {
       extends Throwable(s"Version $versionId of purpose $purposeId is not in DRAFT")
   final case class PurposeVersionNotInWaitingForApproval(purposeId: String, versionId: String)
       extends Throwable(s"Version $versionId of purpose $purposeId is not in WAITING FOR APPROVAL")
+  final case class PurposeVersionNotInDeletableState(purposeId: String, versionId: String)
+      extends Throwable(
+        s"Version $versionId of purpose $purposeId cannot be deleted because state is not DRAFT or WAITING FOR APPROVAL"
+      )
   final case class PurposeVersionNotInExpectedState(
     purposeId: String,
     versionId: String,

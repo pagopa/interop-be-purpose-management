@@ -1,10 +1,10 @@
 package it.pagopa.interop.purposemanagement.server.impl
 
-import akka.actor.typed.ActorSystem
+import akka.actor.typed.{ActorSystem, Behavior}
 import akka.actor.typed.scaladsl.Behaviors
 import akka.cluster.ClusterEvent
-import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, Entity, ShardedDaemonProcess}
-import akka.cluster.sharding.typed.{ClusterShardingSettings, ShardingEnvelope}
+import akka.cluster.sharding.typed.ShardingEnvelope
+import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, Entity, EntityContext, ShardedDaemonProcess}
 import akka.cluster.typed.{Cluster, Subscribe}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.StatusCodes
@@ -26,6 +26,10 @@ import it.pagopa.interop.commons.utils.service.{OffsetDateTimeSupplier, UUIDSupp
 import it.pagopa.interop.purposemanagement.api.PurposeApi
 import it.pagopa.interop.purposemanagement.api.impl.{PurposeApiMarshallerImpl, PurposeApiServiceImpl, problemOf}
 import it.pagopa.interop.purposemanagement.common.system.ApplicationConfiguration
+import it.pagopa.interop.purposemanagement.common.system.ApplicationConfiguration.{
+  numberOfProjectionTags,
+  projectionTag
+}
 import it.pagopa.interop.purposemanagement.model.persistence.{
   Command,
   PurposePersistentBehavior,
@@ -55,14 +59,16 @@ object Main extends App {
 
   Kamon.init()
 
-  def buildPersistentEntity(dateTimeSupplier: OffsetDateTimeSupplier): Entity[Command, ShardingEnvelope[Command]] =
-    Entity(typeKey = PurposePersistentBehavior.TypeKey) { entityContext =>
+  def behaviorFactory(offsetDateTimeSupplier: OffsetDateTimeSupplier): EntityContext[Command] => Behavior[Command] = {
+    entityContext =>
+      val index = math.abs(entityContext.entityId.hashCode % numberOfProjectionTags)
       PurposePersistentBehavior(
         entityContext.shard,
         PersistenceId(entityContext.entityTypeKey.name, entityContext.entityId),
-        dateTimeSupplier
+        offsetDateTimeSupplier,
+        projectionTag(index)
       )
-    }
+  }
 
   locally {
     val _ = ActorSystem[Nothing](
@@ -82,14 +88,10 @@ object Main extends App {
         val dateTimeSupplier: OffsetDateTimeSupplier = OffsetDateTimeSupplierImpl
 
         val purposePersistenceEntity: Entity[Command, ShardingEnvelope[Command]] =
-          buildPersistentEntity(dateTimeSupplier)
+          Entity(PurposePersistentBehavior.TypeKey)(behaviorFactory(dateTimeSupplier))
 
         val _ = sharding.init(purposePersistenceEntity)
 
-        val settings: ClusterShardingSettings = purposePersistenceEntity.settings match {
-          case None    => ClusterShardingSettings(context.system)
-          case Some(s) => s
-        }
         val persistence =
           classicSystem.classicSystem.settings.config.getString("purpose-management.persistence")
         if (persistence == "jdbc-journal") {
@@ -97,12 +99,12 @@ object Main extends App {
             DatabaseConfig.forConfig("akka-persistence-jdbc.shared-databases.slick")
 
           val purposePersistentProjection =
-            new PurposePersistentProjection(context.system, purposePersistenceEntity, dbConfig)
+            new PurposePersistentProjection(context.system, dbConfig)
 
           ShardedDaemonProcess(context.system).init[ProjectionBehavior.Command](
             name = "purpose-projections",
-            numberOfInstances = settings.numberOfShards,
-            behaviorFactory = (i: Int) => ProjectionBehavior(purposePersistentProjection.projections(i)),
+            numberOfInstances = numberOfProjectionTags,
+            behaviorFactory = (i: Int) => ProjectionBehavior(purposePersistentProjection.projection(projectionTag(i))),
             stopMessage = ProjectionBehavior.Stop
           )
         }

@@ -4,15 +4,16 @@ import akka.actor
 import akka.actor.testkit.typed.scaladsl.{ActorTestKit, ScalaTestWithActorTestKit}
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
-import akka.cluster.sharding.typed.scaladsl.ClusterSharding
+import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, Entity}
 import akka.cluster.typed.{Cluster, Join}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.directives.{AuthenticationDirective, SecurityDirectives}
 import it.pagopa.interop.commons.utils.AkkaUtils.Authenticator
 import it.pagopa.interop.purposemanagement.api.PurposeApi
 import it.pagopa.interop.purposemanagement.api.impl.{PurposeApiMarshallerImpl, PurposeApiServiceImpl}
+import it.pagopa.interop.purposemanagement.model.persistence.PurposePersistentBehavior
 import it.pagopa.interop.purposemanagement.server.Controller
-import it.pagopa.interop.purposemanagement.server.impl.Main
+import it.pagopa.interop.purposemanagement.server.impl.Main.behaviorFactory
 import org.scalatest.wordspec.AnyWordSpecLike
 
 import scala.concurrent.duration.DurationInt
@@ -42,7 +43,7 @@ abstract class BaseIntegrationSpec
   implicit val classicSystem: actor.ActorSystem           = httpSystem.classicSystem
 
   override def beforeAll(): Unit = {
-    val persistentEntity = Main.buildPersistentEntity(mockDateTimeSupplier)
+    val persistentEntity = Entity(PurposePersistentBehavior.TypeKey)(behaviorFactory(mockDateTimeSupplier))
 
     Cluster(system).manager ! Join(Cluster(system).selfMember.address)
     sharding.init(persistentEntity)

@@ -303,7 +303,8 @@ object PurposePersistentBehavior {
   def apply(
     shard: ActorRef[ClusterSharding.ShardCommand],
     persistenceId: PersistenceId,
-    dateTimeSupplier: OffsetDateTimeSupplier
+    dateTimeSupplier: OffsetDateTimeSupplier,
+    persistenceTag: String
   ): Behavior[Command] = {
     Behaviors.setup { context =>
       context.log.info(s"Starting Purpose Shard ${persistenceId.id}")
@@ -316,7 +317,7 @@ object PurposePersistentBehavior {
         commandHandler = commandHandler(shard, context, dateTimeSupplier),
         eventHandler = eventHandler
       ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = numberOfEvents, keepNSnapshots = 1))
-        .withTagger(_ => Set(persistenceId.id))
+        .withTagger(_ => Set(persistenceTag))
         .onPersistFailure(SupervisorStrategy.restartWithBackoff(200 millis, 5 seconds, 0.1))
     }
   }

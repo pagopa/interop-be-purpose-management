@@ -21,7 +21,7 @@ trait SpecConfiguration {
     """)
 
   val config = ConfigFactory
-    .parseResourcesAnySyntax("test")
+    .parseResourcesAnySyntax("application-test")
     .withFallback(testData)
 }
 

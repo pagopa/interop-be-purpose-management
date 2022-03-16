@@ -28,7 +28,8 @@ import it.pagopa.interop.purposemanagement.api.impl.{PurposeApiMarshallerImpl, P
 import it.pagopa.interop.purposemanagement.common.system.ApplicationConfiguration
 import it.pagopa.interop.purposemanagement.common.system.ApplicationConfiguration.{
   numberOfProjectionTags,
-  projectionTag
+  projectionTag,
+  projectionsEnabled
 }
 import it.pagopa.interop.purposemanagement.model.persistence.{
   Command,
@@ -92,10 +93,7 @@ object Main extends App {
 
         val _ = sharding.init(purposePersistenceEntity)
 
-        val persistence =
-          classicSystem.classicSystem.settings.config.getString("purpose-management.persistence")
-        val enabled = false
-        if (persistence == "jdbc-journal" && enabled) {
+        if (projectionsEnabled) {
           val dbConfig: DatabaseConfig[JdbcProfile] =
             DatabaseConfig.forConfig("akka-persistence-jdbc.shared-databases.slick")
 

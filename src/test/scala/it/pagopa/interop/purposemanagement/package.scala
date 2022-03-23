@@ -3,16 +3,17 @@ package it.pagopa.interop
 import akka.NotUsed
 import akka.http.scaladsl.marshalling.ToEntityMarshaller
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.model.headers.{Authorization, OAuth2BearerToken}
+import akka.http.scaladsl.model.headers.OAuth2BearerToken
 import akka.http.scaladsl.unmarshalling.FromEntityUnmarshaller
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import it.pagopa.interop.commons.utils.service.{OffsetDateTimeSupplier, UUIDSupplier}
 import it.pagopa.interop.purposemanagement.api.impl._
-import it.pagopa.interop.purposemanagement.model.purpose.PersistentRiskAnalysisForm
 import it.pagopa.interop.purposemanagement.model._
+import it.pagopa.interop.purposemanagement.model.purpose.PersistentRiskAnalysisForm
 import org.scalamock.scalatest.MockFactory
 
+import java.net.InetAddress
 import java.time.{OffsetDateTime, ZoneOffset}
 import java.util.UUID
 
@@ -20,7 +21,12 @@ package object purposemanagement extends MockFactory {
 
   final lazy val url: String =
     s"http://localhost:18088/purpose-management/${buildinfo.BuildInfo.interfaceVersion}"
-  final val authorization: Seq[Authorization] = Seq(headers.Authorization(OAuth2BearerToken("token")))
+  final val requestHeaders: Seq[HttpHeader] =
+    Seq(
+      headers.Authorization(OAuth2BearerToken("token")),
+      headers.RawHeader("X-Correlation-Id", "test-id"),
+      headers.`X-Forwarded-For`(RemoteAddress(InetAddress.getByName("127.0.0.1")))
+    )
 
   final val timestamp            = OffsetDateTime.of(2022, 12, 31, 11, 22, 33, 44, ZoneOffset.UTC)
   final val riskAnalysisFormSeed = RiskAnalysisFormSeed(version = "1.0", Seq.empty, Seq.empty)

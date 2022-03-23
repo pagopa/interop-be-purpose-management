@@ -182,7 +182,7 @@ trait SpecHelper {
           uri = s"$url/$path",
           method = verb,
           entity = HttpEntity(ContentTypes.`application/json`, data),
-          headers = authorization
+          headers = requestHeaders
         )
       ),
       Duration.Inf

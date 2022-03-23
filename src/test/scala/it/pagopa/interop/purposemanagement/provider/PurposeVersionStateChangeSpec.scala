@@ -41,7 +41,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         } yield (version, result)
 
       val (version, result) = response.futureValue
-      val expected = version.copy(
+      val expected          = version.copy(
         state = PurposeVersionState.ACTIVE,
         updatedAt = Some(timestamp),
         firstActivationAt = Some(timestamp),
@@ -81,7 +81,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         } yield (version, result)
 
       val (version, result) = response.futureValue
-      val expected = version.copy(
+      val expected          = version.copy(
         state = PurposeVersionState.ACTIVE,
         updatedAt = Some(timestamp),
         firstActivationAt = Some(timestamp),
@@ -241,13 +241,13 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         for {
           _       <- createPurpose(purposeId, purposeSeed)
           version <- createPurposeVersion(purposeId, versionId, versionSeed)
-          _       <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, versionSeed.riskAnalysis, firstActivationAt)
-          _       <- suspendVersion(purposeId, versionId, ChangedBy.CONSUMER)
-          result  <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, None, secondActivationAt)
+          _ <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, versionSeed.riskAnalysis, firstActivationAt)
+          _ <- suspendVersion(purposeId, versionId, ChangedBy.CONSUMER)
+          result <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, None, secondActivationAt)
         } yield (version, result)
 
       val (version, result) = response.futureValue
-      val expected = version.copy(
+      val expected          = version.copy(
         state = PurposeVersionState.ACTIVE,
         updatedAt = Some(secondActivationAt),
         firstActivationAt = Some(firstActivationAt)
@@ -287,8 +287,8 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
 
       val response: Future[Problem] =
         for {
-          _ <- createPurpose(purposeId, purposeSeed)
-          _ <- createPurposeVersion(purposeId, versionId, versionSeed)
+          _      <- createPurpose(purposeId, purposeSeed)
+          _      <- createPurposeVersion(purposeId, versionId, versionSeed)
           result <- makeFailingRequest(
             s"purposes/$purposeId/versions/$versionId/activate",
             HttpMethods.POST,
@@ -326,10 +326,10 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
 
       val response: Future[Problem] =
         for {
-          _ <- createPurpose(purposeId, purposeSeed)
-          _ <- createPurposeVersion(purposeId, versionId, versionSeed)
-          _ <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, versionSeed.riskAnalysis)
-          _ <- archiveVersion(purposeId, versionId, ChangedBy.CONSUMER)
+          _      <- createPurpose(purposeId, purposeSeed)
+          _      <- createPurposeVersion(purposeId, versionId, versionSeed)
+          _      <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, versionSeed.riskAnalysis)
+          _      <- archiveVersion(purposeId, versionId, ChangedBy.CONSUMER)
           result <- makeFailingRequest(
             s"purposes/$purposeId/versions/$versionId/activate",
             HttpMethods.POST,
@@ -376,7 +376,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         } yield (version, result)
 
       val (version, result) = response.futureValue
-      val expected = version.copy(
+      val expected          = version.copy(
         state = PurposeVersionState.SUSPENDED,
         updatedAt = Some(timestamp),
         firstActivationAt = Some(timestamp)
@@ -416,8 +416,8 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
 
       val response: Future[Problem] =
         for {
-          _ <- createPurpose(purposeId, purposeSeed)
-          _ <- createPurposeVersion(purposeId, versionId, versionSeed)
+          _      <- createPurpose(purposeId, purposeSeed)
+          _      <- createPurposeVersion(purposeId, versionId, versionSeed)
           result <- makeFailingRequest(
             s"purposes/$purposeId/versions/$versionId/suspend",
             HttpMethods.POST,
@@ -464,7 +464,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         } yield (version, result)
 
       val (version, result) = response.futureValue
-      val expected = version.copy(
+      val expected          = version.copy(
         state = PurposeVersionState.ARCHIVED,
         updatedAt = Some(timestamp),
         firstActivationAt = Some(timestamp)
@@ -504,8 +504,8 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
 
       val response: Future[Problem] =
         for {
-          _ <- createPurpose(purposeId, purposeSeed)
-          _ <- createPurposeVersion(purposeId, versionId, versionSeed)
+          _      <- createPurpose(purposeId, purposeSeed)
+          _      <- createPurposeVersion(purposeId, versionId, versionSeed)
           result <- makeFailingRequest(
             s"purposes/$purposeId/versions/$versionId/archive",
             HttpMethods.POST,
@@ -543,7 +543,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         } yield (version, result)
 
       val (version, result) = response.futureValue
-      val expected = version.copy(
+      val expected          = version.copy(
         state = PurposeVersionState.WAITING_FOR_APPROVAL,
         updatedAt = Some(timestamp),
         firstActivationAt = Some(timestamp)
@@ -591,9 +591,9 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
 
       val response: Future[Problem] =
         for {
-          _ <- createPurpose(purposeId, purposeSeed)
-          _ <- createPurposeVersion(purposeId, versionId, versionSeed)
-          _ <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, versionSeed.riskAnalysis)
+          _      <- createPurpose(purposeId, purposeSeed)
+          _      <- createPurposeVersion(purposeId, versionId, versionSeed)
+          _      <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, versionSeed.riskAnalysis)
           result <- makeFailingRequest(
             s"purposes/$purposeId/versions/$versionId/waitForApproval",
             HttpMethods.POST,

@@ -130,7 +130,7 @@ class PurposeSpec extends BaseIntegrationSpec {
         description = "Purpose description",
         riskAnalysisForm = Some(riskAnalysisFormSeed)
       )
-      val versionSeed = PurposeVersionSeed(dailyCalls = 100)
+      val versionSeed  = PurposeVersionSeed(dailyCalls = 100)
 
       val response: Future[Purposes] =
         for {
@@ -204,7 +204,7 @@ class PurposeSpec extends BaseIntegrationSpec {
         description = "Purpose description",
         riskAnalysisForm = Some(riskAnalysisFormSeed)
       )
-      val versionSeed = PurposeVersionSeed(dailyCalls = 100)
+      val versionSeed  = PurposeVersionSeed(dailyCalls = 100)
 
       val response: Future[Purposes] =
         for {
@@ -265,7 +265,7 @@ class PurposeSpec extends BaseIntegrationSpec {
         description = "Purpose description",
         riskAnalysisForm = Some(riskAnalysisFormSeed)
       )
-      val versionSeed = PurposeVersionSeed(dailyCalls = 100)
+      val versionSeed  = PurposeVersionSeed(dailyCalls = 100)
 
       val response: Future[Purposes] =
         for {
@@ -314,21 +314,21 @@ class PurposeSpec extends BaseIntegrationSpec {
         createdAt = timestamp
       )
 
-      val purposeSeed1 = PurposeSeed(
+      val purposeSeed1   = PurposeSeed(
         eserviceId = eServiceId,
         consumerId = consumerId,
         title = "Purpose",
         description = "Purpose description",
         riskAnalysisForm = Some(riskAnalysisFormSeed)
       )
-      val purposeSeed2 = PurposeSeed(
+      val purposeSeed2   = PurposeSeed(
         eserviceId = eServiceId,
         consumerId = consumerId,
         title = "Purpose",
         description = "Purpose description",
         riskAnalysisForm = Some(riskAnalysisFormSeed)
       )
-      val purposeSeed3 = PurposeSeed(
+      val purposeSeed3   = PurposeSeed(
         eserviceId = eServiceId,
         consumerId = consumerId,
         title = "Purpose",
@@ -342,18 +342,18 @@ class PurposeSpec extends BaseIntegrationSpec {
 
       val response: Future[Purposes] =
         for {
-          _ <- createPurpose(purposeId1, purposeSeed1)
-          _ <- createPurposeVersion(purposeId1, versionId1_1, versionSeed1_1)
-          _ <- activateVersion(purposeId1, versionId1_1, ChangedBy.CONSUMER, versionSeed1_1.riskAnalysis)
-          _ <- createPurposeVersion(purposeId1, versionId1_2, versionSeed1_2)
-          _ <- createPurpose(purposeId2, purposeSeed2)
-          _ <- createPurposeVersion(purposeId2, versionId2_1, versionSeed2_1)
-          _ <- activateVersion(purposeId2, versionId2_1, ChangedBy.CONSUMER, versionSeed2_1.riskAnalysis)
-          _ <- suspendVersion(purposeId2, versionId2_1, ChangedBy.CONSUMER)
-          _ <- createPurpose(purposeId3, purposeSeed3)
-          _ <- createPurposeVersion(purposeId3, versionId3_1, versionSeed3_1)
-          _ <- activateVersion(purposeId3, versionId3_1, ChangedBy.CONSUMER, versionSeed3_1.riskAnalysis)
-          _ <- archiveVersion(purposeId3, versionId3_1, ChangedBy.CONSUMER)
+          _        <- createPurpose(purposeId1, purposeSeed1)
+          _        <- createPurposeVersion(purposeId1, versionId1_1, versionSeed1_1)
+          _        <- activateVersion(purposeId1, versionId1_1, ChangedBy.CONSUMER, versionSeed1_1.riskAnalysis)
+          _        <- createPurposeVersion(purposeId1, versionId1_2, versionSeed1_2)
+          _        <- createPurpose(purposeId2, purposeSeed2)
+          _        <- createPurposeVersion(purposeId2, versionId2_1, versionSeed2_1)
+          _        <- activateVersion(purposeId2, versionId2_1, ChangedBy.CONSUMER, versionSeed2_1.riskAnalysis)
+          _        <- suspendVersion(purposeId2, versionId2_1, ChangedBy.CONSUMER)
+          _        <- createPurpose(purposeId3, purposeSeed3)
+          _        <- createPurposeVersion(purposeId3, versionId3_1, versionSeed3_1)
+          _        <- activateVersion(purposeId3, versionId3_1, ChangedBy.CONSUMER, versionSeed3_1.riskAnalysis)
+          _        <- archiveVersion(purposeId3, versionId3_1, ChangedBy.CONSUMER)
           response <- getPurposes(
             eServiceId = Some(eServiceId),
             consumerId = Some(consumerId),
@@ -579,14 +579,14 @@ class PurposeSpec extends BaseIntegrationSpec {
         createdAt = timestamp
       )
 
-      val purposeSeed = PurposeSeed(
+      val purposeSeed   = PurposeSeed(
         eserviceId = eServiceId,
         consumerId = consumerId,
         title = "Purpose",
         description = "Purpose description",
         riskAnalysisForm = Some(riskAnalysisFormSeed)
       )
-      val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 200)
+      val versionSeed   = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 200)
       val updateContent = PurposeUpdateContent(
         title = "Another title",
         description = "Another description",
@@ -622,14 +622,14 @@ class PurposeSpec extends BaseIntegrationSpec {
         createdAt = timestamp
       )
 
-      val purposeSeed = PurposeSeed(
+      val purposeSeed   = PurposeSeed(
         eserviceId = eServiceId,
         consumerId = consumerId,
         title = "Purpose",
         description = "Purpose description",
         riskAnalysisForm = Some(riskAnalysisFormSeed)
       )
-      val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 200)
+      val versionSeed   = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 200)
       val updateContent = PurposeUpdateContent(
         title = "Another title",
         description = "Another description",

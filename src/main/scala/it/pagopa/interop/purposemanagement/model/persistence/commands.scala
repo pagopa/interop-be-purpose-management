@@ -16,7 +16,7 @@ import it.pagopa.interop.purposemanagement.model.{PurposeVersionDocument, StateC
 
 sealed trait Command
 
-case object Idle extends Command
+case object Idle                                                                        extends Command
 final case class CreatePurpose(purpose: PersistentPurpose, replyTo: ActorRef[StatusReply[PersistentPurpose]])
     extends Command
 final case class GetPurpose(purposeId: String, replyTo: ActorRef[StatusReply[Option[PersistentPurpose]]])

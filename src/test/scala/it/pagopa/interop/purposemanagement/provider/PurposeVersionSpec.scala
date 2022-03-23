@@ -54,7 +54,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
       val eServiceId     = UUID.randomUUID()
       val consumerId     = UUID.randomUUID()
 
-      val purposeSeed = PurposeSeed(
+      val purposeSeed     = PurposeSeed(
         eserviceId = eServiceId,
         consumerId = consumerId,
         title = "Purpose",
@@ -67,7 +67,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
         path = "a/store/path",
         createdAt = timestamp
       )
-      val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
+      val versionSeed     = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
 
       val response: Future[PurposeVersion] =
         for {
@@ -242,7 +242,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
         createdAt = timestamp
       )
 
-      val purposeSeed = PurposeSeed(
+      val purposeSeed   = PurposeSeed(
         eserviceId = eServiceId,
         consumerId = consumerId,
         title = "Purpose",
@@ -256,9 +256,9 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
 
       val response: Future[Problem] =
         for {
-          _ <- createPurpose(purposeId, purposeSeed)
-          _ <- createPurposeVersion(purposeId, versionId, versionSeed)
-          _ <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, versionSeed.riskAnalysis)
+          _      <- createPurpose(purposeId, purposeSeed)
+          _      <- createPurposeVersion(purposeId, versionId, versionSeed)
+          _      <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, versionSeed.riskAnalysis)
           result <- makeFailingRequest(
             s"purposes/$purposeId/versions/$versionId/update/draft",
             HttpMethods.POST,
@@ -348,7 +348,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
         createdAt = timestamp
       )
 
-      val purposeSeed = PurposeSeed(
+      val purposeSeed   = PurposeSeed(
         eserviceId = eServiceId,
         consumerId = consumerId,
         title = "Purpose",
@@ -362,9 +362,9 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
 
       val response: Future[Problem] =
         for {
-          _ <- createPurpose(purposeId, purposeSeed)
-          _ <- createPurposeVersion(purposeId, versionId, versionSeed)
-          _ <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, versionSeed.riskAnalysis)
+          _      <- createPurpose(purposeId, purposeSeed)
+          _      <- createPurposeVersion(purposeId, versionId, versionSeed)
+          _      <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, versionSeed.riskAnalysis)
           result <- makeFailingRequest(
             s"purposes/$purposeId/versions/$versionId/update/waitingForApproval",
             HttpMethods.POST,

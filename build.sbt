@@ -1,15 +1,10 @@
 import ProjectSettings.ProjectFrom
 import com.typesafe.sbt.packager.docker.Cmd
 
-ThisBuild / scalaVersion := "2.13.6"
-ThisBuild / organization := "it.pagopa"
-ThisBuild / organizationName := "Pagopa S.p.A."
-ThisBuild / libraryDependencies := Dependencies.Jars.`server`.map(m =>
-  if (scalaVersion.value.startsWith("3.0"))
-    m.withDottyCompat(scalaVersion.value)
-  else
-    m
-)
+ThisBuild / scalaVersion        := "2.13.8"
+ThisBuild / organization        := "it.pagopa"
+ThisBuild / organizationName    := "Pagopa S.p.A."
+ThisBuild / libraryDependencies := Dependencies.Jars.`server`
 
 ThisBuild / dependencyOverrides ++= Dependencies.Jars.overrides
 ThisBuild / version := ComputeVersion.version
@@ -59,7 +54,7 @@ generateCode := {
 }
 
 (Compile / compile) := ((Compile / compile) dependsOn generateCode).value
-(Test / test) := ((Test / test) dependsOn generateCode).value
+(Test / test)       := ((Test / test) dependsOn generateCode).value
 
 Compile / PB.targets := Seq(scalapb.gen() -> (Compile / sourceManaged).value / "protobuf")
 
@@ -81,18 +76,13 @@ lazy val generated = project
 lazy val client = project
   .in(file("client"))
   .settings(
-    name := "interop-be-purpose-management-client",
-    scalacOptions := Seq(),
-    scalafmtOnCompile := true,
-    libraryDependencies := Dependencies.Jars.client.map(m =>
-      if (scalaVersion.value.startsWith("3.0"))
-        m.withDottyCompat(scalaVersion.value)
-      else
-        m
-    ),
-    updateOptions := updateOptions.value.withGigahorse(false),
-    Docker / publish := {},
-    publishTo := {
+    name                := "interop-be-purpose-management-client",
+    scalacOptions       := Seq(),
+    scalafmtOnCompile   := true,
+    libraryDependencies := Dependencies.Jars.client,
+    updateOptions       := updateOptions.value.withGigahorse(false),
+    Docker / publish    := {},
+    publishTo           := {
       val nexus = s"https://${System.getenv("MAVEN_REPO")}/nexus/repository/"
 
       if (isSnapshot.value)
@@ -104,17 +94,17 @@ lazy val client = project
 
 lazy val root = (project in file("."))
   .settings(
-    name := "interop-be-purpose-management",
-    Test / parallelExecution := false,
-    scalafmtOnCompile := true,
+    name                        := "interop-be-purpose-management",
+    Test / parallelExecution    := false,
+    scalafmtOnCompile           := true,
     dockerBuildOptions ++= Seq("--network=host"),
-    dockerRepository := Some(System.getenv("DOCKER_REPO")),
-    dockerBaseImage := "adoptopenjdk:11-jdk-hotspot",
-    daemonUser := "daemon",
-    Docker / version := (ThisBuild / version).value.replace("-SNAPSHOT", "-latest").toLowerCase,
-    Docker / packageName := s"${name.value}",
+    dockerRepository            := Some(System.getenv("DOCKER_REPO")),
+    dockerBaseImage             := "adoptopenjdk:11-jdk-hotspot",
+    daemonUser                  := "daemon",
+    Docker / version            := (ThisBuild / version).value.replace("-SNAPSHOT", "-latest").toLowerCase,
+    Docker / packageName        := s"${name.value}",
     Docker / dockerExposedPorts := Seq(8080),
-    Docker / maintainer := "https://pagopa.it",
+    Docker / maintainer         := "https://pagopa.it",
     dockerCommands += Cmd("LABEL", s"org.opencontainers.image.source https://github.com/pagopa/${name.value}")
   )
   .aggregate(client)
@@ -122,7 +112,7 @@ lazy val root = (project in file("."))
   .enablePlugins(JavaAppPackaging, JavaAgent)
   .setupBuildInfo
 
-javaAgents += "io.kamon" % "kanela-agent" % "1.0.11"
+javaAgents += "io.kamon" % "kanela-agent" % "1.0.14"
 
 Test / fork := true
 Test / javaOptions += "-Dconfig.file=src/test/resources/application-test.conf"

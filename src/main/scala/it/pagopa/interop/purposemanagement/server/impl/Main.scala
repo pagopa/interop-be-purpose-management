@@ -56,7 +56,7 @@ object Main extends App {
   } yield jwtValidator
 
   val jwtValidator =
-    dependenciesLoaded.get //THIS IS THE END OF THE WORLD. Exceptions are welcomed here.
+    dependenciesLoaded.get // THIS IS THE END OF THE WORLD. Exceptions are welcomed here.
 
   Kamon.init()
 

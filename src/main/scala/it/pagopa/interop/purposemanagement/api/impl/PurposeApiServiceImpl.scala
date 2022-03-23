@@ -57,17 +57,17 @@ final case class PurposeApiServiceImpl(
     contexts: Seq[(String, String)]
   ): Route = {
     logger.info("Adding a purpose for consumer {} to e-service {}", purposeSeed.consumerId, purposeSeed.eserviceId)
-    val purpose: PersistentPurpose                     = PersistentPurpose.fromSeed(purposeSeed, uuidSupplier, dateTimeSupplier)
+    val purpose: PersistentPurpose = PersistentPurpose.fromSeed(purposeSeed, uuidSupplier, dateTimeSupplier)
     val result: Future[StatusReply[PersistentPurpose]] = createPurpose(purpose)
     onComplete(result) {
       case Success(statusReply) if statusReply.isSuccess =>
         createPurpose201(statusReply.getValue.toAPI)
-      case Success(statusReply) =>
+      case Success(statusReply)                          =>
         logger.error(
           s"Error while adding a purpose for consumer ${purposeSeed.consumerId} to e-service ${purposeSeed.eserviceId} - ${statusReply.getError.getMessage}"
         )
         createPurpose409(problemOf(StatusCodes.Conflict, CreatePurposeConflict))
-      case Failure(ex) =>
+      case Failure(ex)                                   =>
         logger.error(
           s"Error while adding a purpose for consumer ${purposeSeed.consumerId} to e-service ${purposeSeed.eserviceId} - ${ex.getMessage}"
         )
@@ -81,7 +81,7 @@ final case class PurposeApiServiceImpl(
     contexts: Seq[(String, String)]
   ): Route = {
     logger.info("Retrieving purpose {}", purposeId)
-    val commander: EntityRef[Command] =
+    val commander: EntityRef[Command]                          =
       sharding.entityRefFor(PurposePersistentBehavior.TypeKey, AkkaUtils.getShard(purposeId, settings.numberOfShards))
     val result: Future[StatusReply[Option[PersistentPurpose]]] = commander.ask(ref => GetPurpose(purposeId, ref))
     onSuccess(result) {
@@ -89,7 +89,7 @@ final case class PurposeApiServiceImpl(
         statusReply.getValue.fold(getPurpose404(problemOf(StatusCodes.NotFound, GetPurposeNotFound)))(purpose =>
           getPurpose200(purpose.toAPI)
         )
-      case statusReply if statusReply.isError =>
+      case statusReply                          =>
         logger.error(s"Error retrieving purpose ${purposeId} - ${statusReply.getError.getMessage}")
         getPurpose400(problemOf(StatusCodes.BadRequest, GetPurposeBadRequest))
     }
@@ -99,7 +99,7 @@ final case class PurposeApiServiceImpl(
     purposeId: String
   )(implicit toEntityMarshallerProblem: ToEntityMarshaller[Problem], contexts: Seq[(String, String)]): Route = {
     logger.info("Deleting purpose {}", purposeId)
-    val commander: EntityRef[Command] =
+    val commander: EntityRef[Command]     =
       sharding.entityRefFor(PurposePersistentBehavior.TypeKey, AkkaUtils.getShard(purposeId, settings.numberOfShards))
     val result: Future[StatusReply[Unit]] =
       commander.ask(ref => DeletePurpose(purposeId, ref))
@@ -107,17 +107,17 @@ final case class PurposeApiServiceImpl(
     onComplete(result) {
       case Success(statusReply) if statusReply.isSuccess =>
         deletePurpose204
-      case Success(statusReply) =>
+      case Success(statusReply)                          =>
         logger.error(s"Error while deleting purpose ${purposeId} - ${statusReply.getError.getMessage}")
         statusReply.getError match {
-          case PurposeNotFound(pId) =>
+          case PurposeNotFound(pId)    =>
             deletePurpose404(problemOf(StatusCodes.NotFound, DeletePurposeNotFound(pId)))
           case PurposeHasVersions(pId) =>
             deletePurpose409(problemOf(StatusCodes.Conflict, DeletePurposeVersionsNotEmpty(pId)))
-          case _ =>
+          case _                       =>
             deletePurpose400(problemOf(StatusCodes.BadRequest, DeletePurposeBadRequest(purposeId)))
         }
-      case Failure(ex) =>
+      case Failure(ex)                                   =>
         logger.error(s"Error while deleting purpose ${purposeId} - ${ex.getMessage}")
         deletePurpose400(problemOf(StatusCodes.BadRequest, DeletePurposeBadRequest(purposeId)))
     }
@@ -129,23 +129,23 @@ final case class PurposeApiServiceImpl(
     contexts: Seq[(String, String)]
   ): Route = {
     logger.info("Adding a version to purpose {}", purposeId)
-    val purposeVersion: PersistentPurposeVersion =
+    val purposeVersion: PersistentPurposeVersion              =
       PersistentPurposeVersion.fromSeed(purposeVersionSeed, uuidSupplier, dateTimeSupplier)
     val result: Future[StatusReply[PersistentPurposeVersion]] = createPurposeVersion(purposeId, purposeVersion)
     onComplete(result) {
       case Success(statusReply) if statusReply.isSuccess =>
         createPurposeVersion201(statusReply.getValue.toAPI)
-      case Success(statusReply) =>
+      case Success(statusReply)                          =>
         logger.error(s"Error while adding a version to purpose ${purposeId} - ${statusReply.getError.getMessage}")
         statusReply.getError match {
-          case PurposeNotFound(pId) =>
+          case PurposeNotFound(pId)                     =>
             createPurposeVersion404(problemOf(StatusCodes.NotFound, CreatePurposeVersionNotFound(pId)))
           case PurposeVersionStateConflict(pId, vId, s) =>
             createPurposeVersion409(problemOf(StatusCodes.Conflict, CreatePurposeVersionStateConflict(pId, vId, s)))
-          case _ =>
+          case _                                        =>
             createPurposeVersion400(problemOf(StatusCodes.BadRequest, CreatePurposeVersionBadRequest))
         }
-      case Failure(ex) =>
+      case Failure(ex)                                   =>
         logger.error(s"Error while adding a version to purpose ${purposeId} - ${ex.getMessage}")
         createPurposeVersion400(problemOf(StatusCodes.BadRequest, CreatePurposeVersionBadRequest))
     }
@@ -156,7 +156,7 @@ final case class PurposeApiServiceImpl(
     contexts: Seq[(String, String)]
   ): Route = {
     logger.info("Deleting version {} of purpose {}", versionId, purposeId)
-    val commander: EntityRef[Command] =
+    val commander: EntityRef[Command]     =
       sharding.entityRefFor(PurposePersistentBehavior.TypeKey, AkkaUtils.getShard(purposeId, settings.numberOfShards))
     val result: Future[StatusReply[Unit]] =
       commander.ask(ref => DeletePurposeVersion(purposeId, versionId, ref))
@@ -164,21 +164,21 @@ final case class PurposeApiServiceImpl(
     onComplete(result) {
       case Success(statusReply) if statusReply.isSuccess =>
         deletePurposeVersion204
-      case Success(statusReply) =>
+      case Success(statusReply)                          =>
         logger.error(
           s"Error while deleting version ${versionId} of purpose ${purposeId} - ${statusReply.getError.getMessage}"
         )
         statusReply.getError match {
-          case PurposeVersionNotFound(pId, vId) =>
+          case PurposeVersionNotFound(pId, vId)            =>
             deletePurposeVersion404(problemOf(StatusCodes.NotFound, DeletePurposeVersionNotFound(pId, vId)))
           case PurposeVersionNotInDeletableState(pId, vId) =>
             deletePurposeVersion403(problemOf(StatusCodes.Conflict, DeletePurposeVersionNotInDeletableState(pId, vId)))
-          case _ =>
+          case _                                           =>
             deletePurposeVersion400(
               problemOf(StatusCodes.BadRequest, DeletePurposeVersionBadRequest(purposeId, versionId))
             )
         }
-      case Failure(ex) =>
+      case Failure(ex)                                   =>
         logger.error(s"Error while deleting version ${versionId} of purpose ${purposeId} - ${ex.getMessage}")
         deletePurposeVersion400(problemOf(StatusCodes.BadRequest, DeletePurposeVersionBadRequest(purposeId, versionId)))
     }
@@ -205,22 +205,22 @@ final case class PurposeApiServiceImpl(
       case statusReply if statusReply.isSuccess =>
         statusReply.getValue.versions.find(_.id.toString == versionId) match {
           case Some(version) => activatePurposeVersion200(version.toAPI)
-          case None =>
+          case None          =>
             val problem = problemOf(StatusCodes.InternalServerError, UnexpectedMissingVersion(purposeId, versionId))
             complete(problem.status, problem)
         }
-      case statusReply if statusReply.isError =>
+      case statusReply                          =>
         logger.error(s"Error activating purpose ${purposeId} version ${versionId} - ${statusReply.getError.getMessage}")
         statusReply.getError match {
-          case PurposeNotFound(pId) =>
+          case PurposeNotFound(pId)                          =>
             activatePurposeVersion404(problemOf(StatusCodes.NotFound, ActivatePurposeNotFound(pId)))
-          case PurposeVersionNotFound(pId, vId) =>
+          case PurposeVersionNotFound(pId, vId)              =>
             activatePurposeVersion404(problemOf(StatusCodes.NotFound, ActivatePurposeVersionNotFound(pId, vId)))
           case PurposeVersionNotInExpectedState(pId, vId, s) =>
             activatePurposeVersion400(problemOf(StatusCodes.BadRequest, ActivatePurposeUnexpectedState(pId, vId, s)))
-          case PurposeVersionMissingRiskAnalysis(pId, vId) =>
+          case PurposeVersionMissingRiskAnalysis(pId, vId)   =>
             activatePurposeVersion400(problemOf(StatusCodes.BadRequest, ActivatePurposeMissingRiskAnalysis(pId, vId)))
-          case _ =>
+          case _                                             =>
             activatePurposeVersion400(
               problemOf(StatusCodes.BadRequest, ActivatePurposeBadRequest(purposeId, versionId))
             )
@@ -241,20 +241,20 @@ final case class PurposeApiServiceImpl(
       case statusReply if statusReply.isSuccess =>
         statusReply.getValue.versions.find(_.id.toString == versionId) match {
           case Some(version) => suspendPurposeVersion200(version.toAPI)
-          case None =>
+          case None          =>
             val problem = problemOf(StatusCodes.InternalServerError, UnexpectedMissingVersion(purposeId, versionId))
             complete(problem.status, problem)
         }
-      case statusReply if statusReply.isError =>
+      case statusReply                          =>
         logger.error(s"Error suspending purpose ${purposeId} version ${versionId} - ${statusReply.getError.getMessage}")
         statusReply.getError match {
-          case PurposeNotFound(pId) =>
+          case PurposeNotFound(pId)                          =>
             suspendPurposeVersion404(problemOf(StatusCodes.NotFound, SuspendPurposeNotFound(pId)))
-          case PurposeVersionNotFound(pId, vId) =>
+          case PurposeVersionNotFound(pId, vId)              =>
             suspendPurposeVersion404(problemOf(StatusCodes.NotFound, SuspendPurposeVersionNotFound(pId, vId)))
           case PurposeVersionNotInExpectedState(pId, vId, s) =>
             suspendPurposeVersion400(problemOf(StatusCodes.BadRequest, SuspendPurposeUnexpectedState(pId, vId, s)))
-          case _ =>
+          case _                                             =>
             suspendPurposeVersion400(problemOf(StatusCodes.BadRequest, SuspendPurposeBadRequest(purposeId, versionId)))
         }
     }
@@ -276,18 +276,18 @@ final case class PurposeApiServiceImpl(
       case statusReply if statusReply.isSuccess =>
         statusReply.getValue.versions.find(_.id.toString == versionId) match {
           case Some(version) => waitForApprovalPurposeVersion200(version.toAPI)
-          case None =>
+          case None          =>
             val problem = problemOf(StatusCodes.InternalServerError, UnexpectedMissingVersion(purposeId, versionId))
             complete(problem.status, problem)
         }
-      case statusReply if statusReply.isError =>
+      case statusReply                          =>
         logger.error(
           s"Error waiting for approval purpose ${purposeId} version ${versionId} - ${statusReply.getError.getMessage}"
         )
         statusReply.getError match {
-          case PurposeNotFound(pId) =>
+          case PurposeNotFound(pId)                          =>
             waitForApprovalPurposeVersion404(problemOf(StatusCodes.NotFound, WaitForApprovalPurposeNotFound(pId)))
-          case PurposeVersionNotFound(pId, vId) =>
+          case PurposeVersionNotFound(pId, vId)              =>
             waitForApprovalPurposeVersion404(
               problemOf(StatusCodes.NotFound, WaitForApprovalPurposeVersionNotFound(pId, vId))
             )
@@ -295,11 +295,11 @@ final case class PurposeApiServiceImpl(
             waitForApprovalPurposeVersion400(
               problemOf(StatusCodes.BadRequest, WaitForApprovalPurposeUnexpectedState(pId, vId, s))
             )
-          case PurposeVersionMissingRiskAnalysis(pId, vId) =>
+          case PurposeVersionMissingRiskAnalysis(pId, vId)   =>
             waitForApprovalPurposeVersion400(
               problemOf(StatusCodes.BadRequest, WaitForApprovalPurposeMissingRiskAnalysis(pId, vId))
             )
-          case _ =>
+          case _                                             =>
             waitForApprovalPurposeVersion400(
               problemOf(StatusCodes.BadRequest, WaitForApprovalPurposeBadRequest(purposeId, versionId))
             )
@@ -320,20 +320,20 @@ final case class PurposeApiServiceImpl(
       case statusReply if statusReply.isSuccess =>
         statusReply.getValue.versions.find(_.id.toString == versionId) match {
           case Some(version) => archivePurposeVersion200(version.toAPI)
-          case None =>
+          case None          =>
             val problem = problemOf(StatusCodes.InternalServerError, UnexpectedMissingVersion(purposeId, versionId))
             complete(problem.status, problem)
         }
-      case statusReply if statusReply.isError =>
+      case statusReply                          =>
         logger.error(s"Error archiving purpose ${purposeId} version ${versionId} - ${statusReply.getError.getMessage}")
         statusReply.getError match {
-          case PurposeNotFound(pId) =>
+          case PurposeNotFound(pId)                          =>
             archivePurposeVersion404(problemOf(StatusCodes.NotFound, ArchivePurposeNotFound(pId)))
-          case PurposeVersionNotFound(pId, vId) =>
+          case PurposeVersionNotFound(pId, vId)              =>
             archivePurposeVersion404(problemOf(StatusCodes.NotFound, ArchivePurposeVersionNotFound(pId, vId)))
           case PurposeVersionNotInExpectedState(pId, vId, s) =>
             archivePurposeVersion400(problemOf(StatusCodes.BadRequest, ArchivePurposeUnexpectedState(pId, vId, s)))
-          case _ =>
+          case _                                             =>
             archivePurposeVersion400(problemOf(StatusCodes.BadRequest, ArchivePurposeBadRequest(purposeId, versionId)))
         }
     }
@@ -363,7 +363,7 @@ final case class PurposeApiServiceImpl(
 
     result match {
       case Right(purposes) => getPurposes200(purposes)
-      case Left(ex) =>
+      case Left(ex)        =>
         logger.error(
           s"Error while getting purposes for consumer ${consumerId} to e-service ${eserviceId} with states ${states} - ${ex.getMessage}"
         )
@@ -382,25 +382,25 @@ final case class PurposeApiServiceImpl(
     val commander: EntityRef[Command] =
       sharding.entityRefFor(PurposePersistentBehavior.TypeKey, AkkaUtils.getShard(purposeId, settings.numberOfShards))
 
-    val update = PurposeUpdate.fromApi(uuidSupplier)(payload)
+    val update                                         = PurposeUpdate.fromApi(uuidSupplier)(payload)
     val result: Future[StatusReply[PersistentPurpose]] =
       commander.ask(ref => UpdatePurpose(purposeId, update, ref))
 
     onComplete(result) {
       case Success(statusReply) if statusReply.isSuccess =>
         updatePurpose200(statusReply.getValue.toAPI)
-      case Success(statusReply) =>
+      case Success(statusReply)                          =>
         logger.error(s"Error updating Purpose ${purposeId} - ${statusReply.getError.getMessage}")
         statusReply.getError match {
-          case _: PurposeNotFound =>
+          case _: PurposeNotFound          =>
             updatePurpose404(problemOf(StatusCodes.NotFound, UpdatePurposeNotFound(purposeId)))
           case _: PurposeVersionNotInDraft =>
             updatePurpose403(problemOf(StatusCodes.Forbidden, UpdatePurposeNotInDraft(purposeId)))
-          case _ =>
+          case _                           =>
             val problem = problemOf(StatusCodes.InternalServerError, UpdatePurposeError(purposeId))
             complete(problem.status, problem)
         }
-      case Failure(ex) =>
+      case Failure(ex)                                   =>
         logger.error(s"Error updating Purpose ${purposeId} - ${ex.getMessage}")
         val problem = problemOf(StatusCodes.InternalServerError, UpdatePurposeError(purposeId))
         complete(problem.status, problem)
@@ -429,12 +429,12 @@ final case class PurposeApiServiceImpl(
     onComplete(result) {
       case Success(statusReply) if statusReply.isSuccess =>
         updateDraftPurposeVersion200(statusReply.getValue.toAPI)
-      case Success(statusReply) =>
+      case Success(statusReply)                          =>
         logger.error(
           s"Error while updating version ${versionId} of purpose ${purposeId} - ${statusReply.getError.getMessage}"
         )
         statusReply.getError match {
-          case _: PurposeVersionNotFound =>
+          case _: PurposeVersionNotFound   =>
             updateDraftPurposeVersion404(
               problemOf(StatusCodes.NotFound, UpdatePurposeVersionNotFound(purposeId, versionId))
             )
@@ -442,13 +442,13 @@ final case class PurposeApiServiceImpl(
             updateDraftPurposeVersion403(
               problemOf(StatusCodes.BadRequest, UpdatePurposeVersionNotInDraft(purposeId, versionId))
             )
-          case _ =>
+          case _                           =>
             complete(
               StatusCodes.InternalServerError,
               problemOf(StatusCodes.InternalServerError, UpdatePurposeVersionBadRequest(purposeId, versionId))
             )
         }
-      case Failure(ex) =>
+      case Failure(ex)                                   =>
         logger.error(s"Error while updating version ${versionId} of purpose ${purposeId} - ${ex.getMessage}")
         complete(
           StatusCodes.InternalServerError,
@@ -479,12 +479,12 @@ final case class PurposeApiServiceImpl(
     onComplete(result) {
       case Success(statusReply) if statusReply.isSuccess =>
         updateDraftPurposeVersion200(statusReply.getValue.toAPI)
-      case Success(statusReply) =>
+      case Success(statusReply)                          =>
         logger.error(
           s"Error while updating version ${versionId} of purpose ${purposeId} - ${statusReply.getError.getMessage}"
         )
         statusReply.getError match {
-          case _: PurposeVersionNotFound =>
+          case _: PurposeVersionNotFound                               =>
             updateDraftPurposeVersion404(
               problemOf(StatusCodes.NotFound, UpdatePurposeVersionNotFound(purposeId, versionId))
             )
@@ -492,13 +492,13 @@ final case class PurposeApiServiceImpl(
             updateDraftPurposeVersion403(
               problemOf(StatusCodes.BadRequest, UpdatePurposeVersionNotInWaitingForApproval(purposeId, versionId))
             )
-          case _ =>
+          case _                                                       =>
             complete(
               StatusCodes.InternalServerError,
               problemOf(StatusCodes.InternalServerError, UpdatePurposeVersionBadRequest(purposeId, versionId))
             )
         }
-      case Failure(ex) =>
+      case Failure(ex)                                   =>
         logger.error(s"Error while updating version ${versionId} of purpose ${purposeId} - ${ex.getMessage}")
         complete(
           StatusCodes.InternalServerError,

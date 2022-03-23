@@ -14,7 +14,7 @@ import it.pagopa.interop.purposemanagement.model.purpose.PersistentPurpose
 
 package object v1 {
 
-  //type alias for traverse type inference
+  // type alias for traverse type inference
   type ThrowableOr[A] = Either[Throwable, A]
 
   implicit def stateV1PersistEventDeserializer: PersistEventDeserializer[StateV1, State] =

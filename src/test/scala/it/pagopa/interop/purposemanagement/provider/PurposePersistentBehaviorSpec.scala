@@ -27,7 +27,7 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
     updatedAt = None,
     firstActivationAt = None
   )
-  val purposeTemplate: PersistentPurpose = PersistentPurpose(
+  val purposeTemplate: PersistentPurpose        = PersistentPurpose(
     id = UUID.randomUUID(),
     eserviceId = UUID.randomUUID(),
     consumerId = UUID.randomUUID(),
@@ -63,7 +63,7 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
         updatedAt = Some(newTimestamp),
         firstActivationAt = Some(newTimestamp)
       )
-      val expected =
+      val expected        =
         purpose.copy(versions = Seq(expectedVersion), suspendedByConsumer = Some(false), updatedAt = Some(newTimestamp))
 
       result shouldBe expected
@@ -84,7 +84,7 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
 
       val expectedVersion =
         version.copy(state = PersistentPurposeVersionState.Suspended, updatedAt = Some(newTimestamp))
-      val expected =
+      val expected        =
         purpose.copy(
           versions = Seq(expectedVersion),
           suspendedByConsumer = Some(true),
@@ -110,7 +110,7 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
 
       val expectedVersion =
         version.copy(state = PersistentPurposeVersionState.Suspended, updatedAt = Some(newTimestamp))
-      val expected =
+      val expected        =
         purpose.copy(
           versions = Seq(expectedVersion),
           suspendedByConsumer = None,
@@ -136,7 +136,7 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
 
       val expectedVersion =
         version.copy(state = PersistentPurposeVersionState.Suspended, updatedAt = Some(newTimestamp))
-      val expected =
+      val expected        =
         purpose.copy(
           versions = Seq(expectedVersion),
           suspendedByConsumer = Some(true),
@@ -162,7 +162,7 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
 
       val expectedVersion =
         version.copy(state = PersistentPurposeVersionState.Suspended, updatedAt = Some(newTimestamp))
-      val expected =
+      val expected        =
         purpose.copy(
           versions = Seq(expectedVersion),
           suspendedByConsumer = Some(true),
@@ -188,7 +188,7 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
 
       val expectedVersion =
         version.copy(state = PersistentPurposeVersionState.Suspended, updatedAt = Some(newTimestamp))
-      val expected =
+      val expected        =
         purpose.copy(
           versions = Seq(expectedVersion),
           suspendedByConsumer = Some(false),
@@ -214,7 +214,7 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
 
       val expectedVersion =
         version.copy(state = PersistentPurposeVersionState.Active, updatedAt = Some(newTimestamp))
-      val expected =
+      val expected        =
         purpose.copy(
           versions = Seq(expectedVersion),
           suspendedByConsumer = Some(false),
@@ -240,7 +240,7 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
 
       val expectedVersion =
         version.copy(state = PersistentPurposeVersionState.Active, updatedAt = Some(newTimestamp))
-      val expected =
+      val expected        =
         purpose.copy(
           versions = Seq(expectedVersion),
           suspendedByConsumer = Some(false),

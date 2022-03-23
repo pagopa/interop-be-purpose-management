@@ -29,8 +29,8 @@ abstract class BaseIntegrationSpec
     with SpecConfiguration
     with SpecHelper {
 
-  private var controller: Option[Controller]                 = None
-  private var bindServer: Option[Future[Http.ServerBinding]] = None
+  private var controller: Option[Controller]                                    = None
+  private var bindServer: Option[Future[Http.ServerBinding]]                    = None
   private val wrappingDirective: AuthenticationDirective[Seq[(String, String)]] =
     SecurityDirectives.authenticateOAuth2("SecurityRealm", Authenticator)
 

@@ -114,7 +114,7 @@ object protobufUtils {
       case PurposeStateV1.SUSPENDED            => Success(PersistentPurposeVersionState.Suspended)
       case PurposeStateV1.ARCHIVED             => Success(PersistentPurposeVersionState.Archived)
       case PurposeStateV1.WAITING_FOR_APPROVAL => Success(PersistentPurposeVersionState.WaitingForApproval)
-      case PurposeStateV1.Unrecognized(value) =>
+      case PurposeStateV1.Unrecognized(value)  =>
         Failure(new RuntimeException(s"Protobuf PurposeStatus deserialization failed. Unrecognized value: $value"))
     }
 

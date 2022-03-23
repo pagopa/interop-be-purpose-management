@@ -81,7 +81,7 @@ object PurposePersistentBehavior {
                   PurposeVersionStateConflict(purposeId, version.id.toString, version.state)
                 )
                 Effect.none[PurposeVersionCreated, State]
-              case None =>
+              case None          =>
                 Effect
                   .persist(PurposeVersionCreated(purposeId, newVersion))
                   .thenRun((_: State) => replyTo ! StatusReply.Success(newVersion))
@@ -101,7 +101,7 @@ object PurposePersistentBehavior {
                 Effect
                   .persist(PurposeVersionDeleted(purposeId, versionId))
                   .thenRun((_: State) => replyTo ! StatusReply.Success(()))
-              case _ =>
+              case _                                                                                      =>
                 replyTo ! StatusReply.Error[Unit](PurposeVersionNotInDeletableState(purposeId, versionId))
                 Effect.none[PurposeVersionDeleted, State]
             }
@@ -119,7 +119,7 @@ object PurposePersistentBehavior {
               case Some(_ @Left(ex)) =>
                 replyTo ! StatusReply.Error[PersistentPurpose](ex)
                 Effect.none[PurposeUpdated, State]
-              case _ =>
+              case _                 =>
                 val updatedPurpose = purpose.update(update)
                 Effect
                   .persist(PurposeUpdated(updatedPurpose))
@@ -188,9 +188,9 @@ object PurposePersistentBehavior {
             v.state match {
               case PersistentPurposeVersionState.Active if v.id.toString != newActiveVersionId =>
                 v.copy(state = PersistentPurposeVersionState.Archived)
-              case PersistentPurposeVersionState.Suspended =>
+              case PersistentPurposeVersionState.Suspended                                     =>
                 v.copy(state = PersistentPurposeVersionState.Archived)
-              case _ => v
+              case _                                                                           => v
             }
           })
 
@@ -375,14 +375,14 @@ object PurposePersistentBehavior {
   def isDraftVersion(purposeId: String, version: PersistentPurposeVersion): Either[Throwable, Unit] =
     version.state match {
       case PersistentPurposeVersionState.Draft => Right(())
-      case _ =>
+      case _                                   =>
         Left(PurposeVersionNotInDraft(purposeId, version.id.toString))
     }
 
   def isWaitingForApprovalVersion(purposeId: String, version: PersistentPurposeVersion): Either[Throwable, Unit] =
     version.state match {
       case PersistentPurposeVersionState.WaitingForApproval => Right(())
-      case _ =>
+      case _                                                =>
         Left(PurposeVersionNotInWaitingForApproval(purposeId, version.id.toString))
     }
 

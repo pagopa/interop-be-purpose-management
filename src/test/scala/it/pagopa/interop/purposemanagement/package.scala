@@ -18,13 +18,13 @@ import java.util.UUID
 
 package object purposemanagement extends MockFactory {
 
-  final lazy val url: String =
+  final lazy val url: String                  =
     s"http://localhost:18088/purpose-management/${buildinfo.BuildInfo.interfaceVersion}"
   final val authorization: Seq[Authorization] = Seq(headers.Authorization(OAuth2BearerToken("token")))
 
-  final val timestamp            = OffsetDateTime.of(2022, 12, 31, 11, 22, 33, 44, ZoneOffset.UTC)
-  final val riskAnalysisFormSeed = RiskAnalysisFormSeed(version = "1.0", Seq.empty, Seq.empty)
-  final val riskAnalysisForm     = RiskAnalysisForm(id = UUID.randomUUID(), version = "1.0", Seq.empty, Seq.empty)
+  final val timestamp                  = OffsetDateTime.of(2022, 12, 31, 11, 22, 33, 44, ZoneOffset.UTC)
+  final val riskAnalysisFormSeed       = RiskAnalysisFormSeed(version = "1.0", Seq.empty, Seq.empty)
+  final val riskAnalysisForm           = RiskAnalysisForm(id = UUID.randomUUID(), version = "1.0", Seq.empty, Seq.empty)
   final val persistentRiskAnalysisForm =
     PersistentRiskAnalysisForm(id = riskAnalysisForm.id, version = riskAnalysisForm.version, Seq.empty, Seq.empty)
 

@@ -60,7 +60,7 @@ final case class PersistentPurposeVersion(
 }
 
 object PersistentPurposeVersion {
-  val ACTIVABLE_STATES = Seq(
+  val ACTIVABLE_STATES             = Seq(
     PersistentPurposeVersionState.Draft,
     PersistentPurposeVersionState.Suspended,
     PersistentPurposeVersionState.WaitingForApproval

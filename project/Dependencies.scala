@@ -9,18 +9,18 @@ object Dependencies {
     lazy val akkaManagementNamespace = "com.lightbend.akka.management"
     lazy val akkaDiscoveryNamespace  = "com.lightbend.akka.discovery"
 
-    lazy val actorTyped             = namespace                       %% "akka-actor-typed"                  % akkaVersion
-    lazy val clusterBootstrap       = akkaManagementNamespace         %% "akka-management-cluster-bootstrap" % akkaManagementVersion
-    lazy val clusterHttp            = akkaManagementNamespace         %% "akka-management-cluster-http"      % akkaManagementVersion
-    lazy val clusterSharding        = namespace                       %% "akka-cluster-sharding-typed"       % akkaVersion
-    lazy val clusterTools           = namespace                       %% "akka-cluster-tools"                % akkaVersion
-    lazy val clusterTyped           = namespace                       %% "akka-cluster-typed"                % akkaVersion
-    lazy val discovery              = namespace                       %% "akka-discovery"                    % akkaVersion
-    lazy val discoveryKubernetesApi = akkaDiscoveryNamespace          %% "akka-discovery-kubernetes-api"     % akkaManagementVersion
-    lazy val http                   = namespace                       %% "akka-http"                         % akkaHttpVersion
-    lazy val httpJson               = namespace                       %% "akka-http-spray-json"              % akkaHttpVersion
-    lazy val httpJson4s             = "de.heikoseeberger"             %% "akka-http-json4s"                  % httpJson4sVersion
-    lazy val management             = "com.lightbend.akka.management" %% "akka-management"                   % akkaManagementVersion
+    lazy val actorTyped       = namespace               %% "akka-actor-typed"                  % akkaVersion
+    lazy val clusterBootstrap = akkaManagementNamespace %% "akka-management-cluster-bootstrap" % akkaManagementVersion
+    lazy val clusterHttp      = akkaManagementNamespace %% "akka-management-cluster-http"      % akkaManagementVersion
+    lazy val clusterSharding  = namespace               %% "akka-cluster-sharding-typed"       % akkaVersion
+    lazy val clusterTools     = namespace               %% "akka-cluster-tools"                % akkaVersion
+    lazy val clusterTyped     = namespace               %% "akka-cluster-typed"                % akkaVersion
+    lazy val discovery        = namespace               %% "akka-discovery"                    % akkaVersion
+    lazy val discoveryKubernetesApi = akkaDiscoveryNamespace %% "akka-discovery-kubernetes-api" % akkaManagementVersion
+    lazy val http                   = namespace              %% "akka-http"                     % akkaHttpVersion
+    lazy val httpJson               = namespace              %% "akka-http-spray-json"          % akkaHttpVersion
+    lazy val httpJson4s             = "de.heikoseeberger"    %% "akka-http-json4s"              % httpJson4sVersion
+    lazy val management          = "com.lightbend.akka.management" %% "akka-management" % akkaManagementVersion
     lazy val managementLogLevels =
       "com.lightbend.akka.management" %% "akka-management-loglevels-logback" % akkaManagementVersion
     lazy val persistence      = namespace            %% "akka-persistence-typed"       % akkaVersion
@@ -104,9 +104,9 @@ object Dependencies {
   object Jars {
     lazy val overrides: Seq[ModuleID] =
       Seq(jackson.annotations % Compile, jackson.core % Compile, jackson.databind % Compile)
-    lazy val `server`: Seq[ModuleID] = Seq(
+    lazy val `server`: Seq[ModuleID]  = Seq(
       // For making Java 12 happy
-      "javax.annotation" % "javax.annotation-api" % "1.3.2" % "compile",
+      "javax.annotation"          % "javax.annotation-api" % "1.3.2" % "compile",
       //
       akka.actorTyped             % Compile,
       akka.clusterBootstrap       % Compile,
@@ -143,7 +143,7 @@ object Dependencies {
       scalamock.core              % Test,
       akka.testkit                % Test
     )
-    lazy val client: Seq[ModuleID] = Seq(
+    lazy val client: Seq[ModuleID]    = Seq(
       akka.stream     % Compile,
       akka.http       % Compile,
       akka.httpJson4s % Compile,

@@ -19,7 +19,7 @@ import java.util.UUID
 
 package object purposemanagement extends MockFactory {
 
-  final lazy val url: String                  =
+  final lazy val url: String                =
     s"http://localhost:18088/purpose-management/${buildinfo.BuildInfo.interfaceVersion}"
   final val requestHeaders: Seq[HttpHeader] =
     Seq(

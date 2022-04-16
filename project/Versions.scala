@@ -12,7 +12,7 @@ object Versions {
   lazy val kamonVersion                = "2.5.1"
   lazy val logbackVersion              = "1.2.11"
   lazy val mustacheVersion             = "0.9.10"
-  lazy val postgresVersion             = "42.3.3"
+  lazy val postgresVersion             = "42.3.4"
   lazy val projectionVersion           = "1.2.1"
   lazy val s3Persistence               = "1.0.27"
   lazy val scalaMockVersion            = "5.2.0"

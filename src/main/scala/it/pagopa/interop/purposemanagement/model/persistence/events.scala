@@ -1,8 +1,9 @@
 package it.pagopa.interop.purposemanagement.model.persistence
 
 import it.pagopa.interop.purposemanagement.model.purpose.{PersistentPurpose, PersistentPurposeVersion}
+import it.pagopa.interop.commons.queue.message.ProjectableEvent
 
-sealed trait Event extends Persistable
+sealed trait Event extends Persistable with ProjectableEvent
 
 final case class PurposeCreated(purpose: PersistentPurpose)                                  extends Event
 final case class PurposeUpdated(purpose: PersistentPurpose)                                  extends Event

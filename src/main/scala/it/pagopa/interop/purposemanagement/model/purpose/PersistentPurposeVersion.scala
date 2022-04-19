@@ -16,7 +16,7 @@ final case class PersistentPurposeVersion(
   state: PersistentPurposeVersionState,
   expectedApprovalDate: Option[OffsetDateTime],
   riskAnalysis: Option[PersistentPurposeVersionDocument],
-  dailyCalls: Integer,
+  dailyCalls: Int,
   createdAt: OffsetDateTime,
   updatedAt: Option[OffsetDateTime],
   firstActivationAt: Option[OffsetDateTime]

@@ -26,6 +26,7 @@ import it.pagopa.interop.commons.utils.service.{OffsetDateTimeSupplier, UUIDSupp
 import it.pagopa.interop.purposemanagement.api.PurposeApi
 import it.pagopa.interop.purposemanagement.api.impl.{PurposeApiMarshallerImpl, PurposeApiServiceImpl, problemOf}
 import it.pagopa.interop.purposemanagement.common.system.ApplicationConfiguration
+import it.pagopa.interop.purposemanagement.model.persistence.PurposeEventsSerde
 import it.pagopa.interop.purposemanagement.common.system.ApplicationConfiguration.{
   numberOfProjectionTags,
   projectionTag,
@@ -42,6 +43,10 @@ import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
 import scala.util.Try
+import scala.concurrent.ExecutionContext
+import java.util.concurrent.Executors
+import scala.concurrent.ExecutionContextExecutor
+import it.pagopa.interop.commons.queue.QueueWriter
 
 object Main extends App {
 
@@ -57,6 +62,10 @@ object Main extends App {
 
   val jwtValidator =
     dependenciesLoaded.get // THIS IS THE END OF THE WORLD. Exceptions are welcomed here.
+
+  val ec: ExecutionContextExecutor = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(4))
+  val queueWriter: QueueWriter     =
+    QueueWriter.get(ApplicationConfiguration.queueUrl)(PurposeEventsSerde.purposeToJson)(ec)
 
   Kamon.init()
 
@@ -97,8 +106,7 @@ object Main extends App {
           val dbConfig: DatabaseConfig[JdbcProfile] =
             DatabaseConfig.forConfig("akka-persistence-jdbc.shared-databases.slick")
 
-          val purposePersistentProjection =
-            new PurposePersistentProjection(context.system, dbConfig)
+          val purposePersistentProjection = new PurposePersistentProjection(dbConfig, queueWriter, ec)(context.system)
 
           ShardedDaemonProcess(context.system).init[ProjectionBehavior.Command](
             name = "purpose-projections",

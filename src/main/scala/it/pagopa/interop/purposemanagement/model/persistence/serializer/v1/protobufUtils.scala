@@ -98,25 +98,23 @@ object protobufUtils {
       riskAnalysis = persistentPurposeVersion.riskAnalysis.map(toProtobufPurposeVersionDocument)
     )
 
-  def toProtobufPurposeState(status: PersistentPurposeVersionState): PurposeStateV1 =
-    status match {
-      case PersistentPurposeVersionState.Draft              => PurposeStateV1.DRAFT
-      case PersistentPurposeVersionState.Active             => PurposeStateV1.ACTIVE
-      case PersistentPurposeVersionState.Suspended          => PurposeStateV1.SUSPENDED
-      case PersistentPurposeVersionState.Archived           => PurposeStateV1.ARCHIVED
-      case PersistentPurposeVersionState.WaitingForApproval => PurposeStateV1.WAITING_FOR_APPROVAL
-    }
+  def toProtobufPurposeState(status: PersistentPurposeVersionState): PurposeStateV1 = status match {
+    case Draft              => PurposeStateV1.DRAFT
+    case Active             => PurposeStateV1.ACTIVE
+    case Suspended          => PurposeStateV1.SUSPENDED
+    case Archived           => PurposeStateV1.ARCHIVED
+    case WaitingForApproval => PurposeStateV1.WAITING_FOR_APPROVAL
+  }
 
-  def fromProtobufPurposeState(status: PurposeStateV1): Try[PersistentPurposeVersionState] =
-    status match {
-      case PurposeStateV1.DRAFT                => Success(PersistentPurposeVersionState.Draft)
-      case PurposeStateV1.ACTIVE               => Success(PersistentPurposeVersionState.Active)
-      case PurposeStateV1.SUSPENDED            => Success(PersistentPurposeVersionState.Suspended)
-      case PurposeStateV1.ARCHIVED             => Success(PersistentPurposeVersionState.Archived)
-      case PurposeStateV1.WAITING_FOR_APPROVAL => Success(PersistentPurposeVersionState.WaitingForApproval)
-      case PurposeStateV1.Unrecognized(value)  =>
-        Failure(new RuntimeException(s"Protobuf PurposeStatus deserialization failed. Unrecognized value: $value"))
-    }
+  def fromProtobufPurposeState(status: PurposeStateV1): Try[PersistentPurposeVersionState] = status match {
+    case PurposeStateV1.DRAFT                => Success(Draft)
+    case PurposeStateV1.ACTIVE               => Success(Active)
+    case PurposeStateV1.SUSPENDED            => Success(Suspended)
+    case PurposeStateV1.ARCHIVED             => Success(Archived)
+    case PurposeStateV1.WAITING_FOR_APPROVAL => Success(WaitingForApproval)
+    case PurposeStateV1.Unrecognized(value)  =>
+      Failure(new RuntimeException(s"Protobuf PurposeStatus deserialization failed. Unrecognized value: $value"))
+  }
 
   def toPersistentPurposeVersionDocument(
     protobufDocument: PurposeVersionDocumentV1

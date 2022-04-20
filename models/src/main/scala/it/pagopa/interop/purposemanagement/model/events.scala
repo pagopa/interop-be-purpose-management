@@ -1,6 +1,6 @@
 package it.pagopa.interop.purposemanagement.model.persistence
 
-import it.pagopa.interop.purposemanagement.model.purpose.{PersistentPurpose, PersistentPurposeVersion}
+import it.pagopa.interop.purposemanagement.model.purpose._
 import it.pagopa.interop.commons.queue.message.ProjectableEvent
 
 sealed trait Event extends Persistable with ProjectableEvent

@@ -4,7 +4,6 @@ import spray.json._
 import spray.json.DefaultJsonProtocol._
 import it.pagopa.interop.purposemanagement.model.purpose._
 import it.pagopa.interop.commons.utils.SprayCommonFormats._
-import it.pagopa.interop.purposemanagement.model.purpose.PersistentPurposeVersionState
 import it.pagopa.interop.commons.queue.message.ProjectableEvent
 
 object PurposeEventsSerde {
@@ -48,23 +47,34 @@ object PurposeEventsSerde {
     case PurposeDeleted(_)                  => `purposeDeleted`
   }
 
+  private val purposeCreated: String                  = "purpose_created"
+  private val purposeUpdated: String                  = "purpose_updated"
+  private val purposeVersionCreated: String           = "purpose_version_created"
+  private val purposeVersionActivated: String         = "purpose_version_activated"
+  private val purposeVersionSuspended: String         = "purpose_version_suspended"
+  private val purposeVersionWaitedForApproval: String = "purpose_version_waited_for_approval"
+  private val purposeVersionArchived: String          = "purpose_version_archived"
+  private val purposeVersionUpdated: String           = "purpose_version_updated"
+  private val purposeVersionDeleted: String           = "purpose_version_deleted"
+  private val purposeDeleted: String                  = "purpose_deleted"
+
   private implicit val ppvsFormat: RootJsonFormat[PersistentPurposeVersionState] =
     new RootJsonFormat[PersistentPurposeVersionState] {
       override def read(json: JsValue): PersistentPurposeVersionState = json match {
-        case JsString("Draft")              => PersistentPurposeVersionState.Draft
-        case JsString("Active")             => PersistentPurposeVersionState.Active
-        case JsString("Suspended")          => PersistentPurposeVersionState.Suspended
-        case JsString("Archived")           => PersistentPurposeVersionState.Archived
-        case JsString("WaitingForApproval") => PersistentPurposeVersionState.WaitingForApproval
+        case JsString("Draft")              => Draft
+        case JsString("Active")             => Active
+        case JsString("Suspended")          => Suspended
+        case JsString("Archived")           => Archived
+        case JsString("WaitingForApproval") => WaitingForApproval
         case _ => deserializationError("Unable to deserialize json as a PersistentPurposeVersionState")
       }
 
       override def write(obj: PersistentPurposeVersionState): JsValue = obj match {
-        case PersistentPurposeVersionState.Archived           => JsString("Archived")
-        case PersistentPurposeVersionState.Suspended          => JsString("Suspended")
-        case PersistentPurposeVersionState.Draft              => JsString("Draft")
-        case PersistentPurposeVersionState.WaitingForApproval => JsString("WaitingForApproval")
-        case PersistentPurposeVersionState.Active             => JsString("Active")
+        case Archived           => JsString("Archived")
+        case Suspended          => JsString("Suspended")
+        case Draft              => JsString("Draft")
+        case WaitingForApproval => JsString("WaitingForApproval")
+        case Active             => JsString("Active")
       }
     }
 
@@ -100,15 +110,4 @@ object PurposeEventsSerde {
   private implicit val pvuFormat: RootJsonFormat[PurposeVersionUpdated]   = jsonFormat2(PurposeVersionUpdated.apply)
   private implicit val pvdFormat: RootJsonFormat[PurposeVersionDeleted]   = jsonFormat2(PurposeVersionDeleted.apply)
   private implicit val pdFormat: RootJsonFormat[PurposeDeleted]           = jsonFormat1(PurposeDeleted.apply)
-
-  private val purposeCreated: String                  = "purpose_created"
-  private val purposeUpdated: String                  = "purpose_updated"
-  private val purposeVersionCreated: String           = "purpose_version_created"
-  private val purposeVersionActivated: String         = "purpose_version_activated"
-  private val purposeVersionSuspended: String         = "purpose_version_suspended"
-  private val purposeVersionWaitedForApproval: String = "purpose_version_waited_for_approval"
-  private val purposeVersionArchived: String          = "purpose_version_archived"
-  private val purposeVersionUpdated: String           = "purpose_version_updated"
-  private val purposeVersionDeleted: String           = "purpose_version_deleted"
-  private val purposeDeleted: String                  = "purpose_deleted"
 }

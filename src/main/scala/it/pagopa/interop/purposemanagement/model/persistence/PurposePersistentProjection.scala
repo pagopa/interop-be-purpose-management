@@ -16,6 +16,8 @@ import it.pagopa.interop.commons.queue.QueueWriter
 import it.pagopa.interop.commons.queue.message.ProjectableEvent
 import java.util.UUID
 import it.pagopa.interop.commons.queue.message.Message
+import it.pagopa.interop.purposemanagement.model.persistence.Event
+
 import scala.concurrent.ExecutionContext
 import cats.syntax.all._
 
@@ -29,14 +31,12 @@ class PurposePersistentProjection(
     EventSourcedProvider
       .eventsByTag[Event](system, readJournalPluginId = JdbcReadJournal.Identifier, tag = tag)
 
-  def projection(tag: String): ExactlyOnceProjection[Offset, EventEnvelope[Event]] =
-    SlickProjection.exactlyOnce(
-      projectionId = ProjectionId("purpose-projections", tag),
-      sourceProvider = sourceProvider(tag),
-      handler = () => new ProjectionHandler(queueWriter)(queueWriterEc),
-      databaseConfig = dbConfig
-    )
-
+  def projection(tag: String): ExactlyOnceProjection[Offset, EventEnvelope[Event]] = SlickProjection.exactlyOnce(
+    projectionId = ProjectionId("purpose-projections", tag),
+    sourceProvider = sourceProvider(tag),
+    handler = () => new ProjectionHandler(queueWriter)(queueWriterEc),
+    databaseConfig = dbConfig
+  )
 }
 
 class ProjectionHandler(queueWriter: QueueWriter)(implicit ec: ExecutionContext)

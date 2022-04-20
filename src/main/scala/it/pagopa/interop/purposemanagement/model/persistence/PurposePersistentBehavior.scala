@@ -8,12 +8,8 @@ import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior, RetentionCriteria}
 import it.pagopa.interop.commons.utils.service.OffsetDateTimeSupplier
 import it.pagopa.interop.purposemanagement.error.InternalErrors._
-import it.pagopa.interop.purposemanagement.model.purpose.{
-  PersistentPurpose,
-  PersistentPurposeVersion,
-  PersistentPurposeVersionDocument,
-  PersistentPurposeVersionState
-}
+import it.pagopa.interop.purposemanagement.model.purpose._
+import it.pagopa.interop.purposemanagement.model.persistence.Adapters._
 import it.pagopa.interop.purposemanagement.model.{ChangedBy, PurposeVersionDocument, StateChangeDetails}
 
 import java.time.OffsetDateTime
@@ -71,10 +67,7 @@ object PurposePersistentBehavior {
             replyTo ! StatusReply.Error[PersistentPurposeVersion](PurposeNotFound(purposeId))
             Effect.none[PurposeVersionCreated, State]
           } { p =>
-            val conflictVersion = p.versions.find(v =>
-              v.state == PersistentPurposeVersionState.Draft ||
-                v.state == PersistentPurposeVersionState.WaitingForApproval
-            )
+            val conflictVersion = p.versions.find(v => v.state == Draft || v.state == WaitingForApproval)
             conflictVersion match {
               case Some(version) =>
                 replyTo ! StatusReply.Error[PersistentPurposeVersion](
@@ -97,11 +90,11 @@ object PurposePersistentBehavior {
             Effect.none[PurposeVersionDeleted, State]
           } { v =>
             v.state match {
-              case PersistentPurposeVersionState.Draft | PersistentPurposeVersionState.WaitingForApproval =>
+              case Draft | WaitingForApproval =>
                 Effect
                   .persist(PurposeVersionDeleted(purposeId, versionId))
                   .thenRun((_: State) => replyTo ! StatusReply.Success(()))
-              case _                                                                                      =>
+              case _                          =>
                 replyTo ! StatusReply.Error[Unit](PurposeVersionNotInDeletableState(purposeId, versionId))
                 Effect.none[PurposeVersionDeleted, State]
             }
@@ -178,7 +171,7 @@ object PurposePersistentBehavior {
           purposeId,
           versionId,
           stateChangeDetails,
-          PersistentPurposeVersionState.Active,
+          Active,
           _.isActivable(purposeId),
           versionDocument
         )(dateTimeSupplier)
@@ -186,11 +179,9 @@ object PurposePersistentBehavior {
         def archiveOldVersion(purpose: PersistentPurpose, newActiveVersionId: String): PersistentPurpose =
           purpose.copy(versions = purpose.versions.map { v =>
             v.state match {
-              case PersistentPurposeVersionState.Active if v.id.toString != newActiveVersionId =>
-                v.copy(state = PersistentPurposeVersionState.Archived)
-              case PersistentPurposeVersionState.Suspended                                     =>
-                v.copy(state = PersistentPurposeVersionState.Archived)
-              case _                                                                           => v
+              case Active if v.id.toString != newActiveVersionId => v.copy(state = Archived)
+              case Suspended                                     => v.copy(state = Archived)
+              case _                                             => v
             }
           })
 
@@ -204,14 +195,10 @@ object PurposePersistentBehavior {
           )
 
       case SuspendPurposeVersion(purposeId, versionId, stateChangeDetails, replyTo) =>
-        val purpose: Either[Throwable, PersistentPurpose] = getModifiedPurpose(
-          state,
-          purposeId,
-          versionId,
-          stateChangeDetails,
-          PersistentPurposeVersionState.Suspended,
-          _.isSuspendable(purposeId)
-        )(dateTimeSupplier)
+        val purpose: Either[Throwable, PersistentPurpose] =
+          getModifiedPurpose(state, purposeId, versionId, stateChangeDetails, Suspended, _.isSuspendable(purposeId))(
+            dateTimeSupplier
+          )
 
         purpose
           .fold(
@@ -225,7 +212,7 @@ object PurposePersistentBehavior {
           purposeId,
           versionId,
           stateChangeDetails,
-          PersistentPurposeVersionState.WaitingForApproval,
+          WaitingForApproval,
           _.canWaitForApproval(purposeId)
         )(dateTimeSupplier)
 
@@ -236,14 +223,10 @@ object PurposePersistentBehavior {
           )
 
       case ArchivePurposeVersion(purposeId, versionId, stateChangeDetails, replyTo) =>
-        val purpose: Either[Throwable, PersistentPurpose] = getModifiedPurpose(
-          state,
-          purposeId,
-          versionId,
-          stateChangeDetails,
-          PersistentPurposeVersionState.Archived,
-          _.isArchivable(purposeId)
-        )(dateTimeSupplier)
+        val purpose: Either[Throwable, PersistentPurpose] =
+          getModifiedPurpose(state, purposeId, versionId, stateChangeDetails, Archived, _.isArchivable(purposeId))(
+            dateTimeSupplier
+          )
 
         purpose
           .fold(
@@ -329,12 +312,11 @@ object PurposePersistentBehavior {
     stateChangeDetails: StateChangeDetails
   )(dateTimeSupplier: OffsetDateTimeSupplier): PersistentPurpose = {
 
-    def isSuspended = newVersionState == PersistentPurposeVersionState.Suspended
+    def isSuspended = newVersionState == Suspended
 
     val timestamp = dateTimeSupplier.get
 
     def updateVersions(newState: PersistentPurposeVersionState): Seq[PersistentPurposeVersion] = {
-      import PersistentPurposeVersionState._
       val firstActivationAt: Option[OffsetDateTime] = version.state match {
         case Draft | WaitingForApproval => Some(timestamp)
         case _                          => version.firstActivationAt
@@ -363,27 +345,22 @@ object PurposePersistentBehavior {
     suspendedByProducer: Option[Boolean],
     suspendedByConsumer: Option[Boolean],
     newState: PersistentPurposeVersionState
-  ): PersistentPurposeVersionState = {
-    import PersistentPurposeVersionState._
-    (newState, suspendedByProducer, suspendedByConsumer) match {
-      case (Active, Some(true), _) => Suspended
-      case (Active, _, Some(true)) => Suspended
-      case _                       => newState
-    }
+  ): PersistentPurposeVersionState = (newState, suspendedByProducer, suspendedByConsumer) match {
+    case (Active, Some(true), _) => Suspended
+    case (Active, _, Some(true)) => Suspended
+    case _                       => newState
   }
 
   def isDraftVersion(purposeId: String, version: PersistentPurposeVersion): Either[Throwable, Unit] =
     version.state match {
-      case PersistentPurposeVersionState.Draft => Right(())
-      case _                                   =>
-        Left(PurposeVersionNotInDraft(purposeId, version.id.toString))
+      case Draft => Right(())
+      case _     => Left(PurposeVersionNotInDraft(purposeId, version.id.toString))
     }
 
   def isWaitingForApprovalVersion(purposeId: String, version: PersistentPurposeVersion): Either[Throwable, Unit] =
     version.state match {
-      case PersistentPurposeVersionState.WaitingForApproval => Right(())
-      case _                                                =>
-        Left(PurposeVersionNotInWaitingForApproval(purposeId, version.id.toString))
+      case WaitingForApproval => Right(())
+      case _                  => Left(PurposeVersionNotInWaitingForApproval(purposeId, version.id.toString))
     }
 
   def getModifiedPurpose[T <: Event](

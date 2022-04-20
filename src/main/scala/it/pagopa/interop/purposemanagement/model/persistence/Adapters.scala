@@ -1,10 +1,10 @@
 package it.pagopa.interop.purposemanagement.model.persistence
 
+import it.pagopa.interop.purposemanagement.model._
 import it.pagopa.interop.purposemanagement.model.purpose._
 import it.pagopa.interop.purposemanagement.model.decoupling._
 import it.pagopa.interop.commons.utils.service._
 import it.pagopa.interop.purposemanagement.error.InternalErrors._
-import it.pagopa.interop.purposemanagement.model._
 
 object Adapters {
 
@@ -16,11 +16,8 @@ object Adapters {
 
   implicit class PersistentRiskAnalysisSingleAnswerObjectWrapper(private val p: PersistentRiskAnalysisSingleAnswer.type)
       extends AnyVal {
-    def fromSeed(uuidSupplier: UUIDSupplier)(
-      seed: RiskAnalysisSingleAnswerSeed
-    ): it.pagopa.interop.purposemanagement.model.purpose.PersistentRiskAnalysisSingleAnswer =
-      it.pagopa.interop.purposemanagement.model.purpose
-        .PersistentRiskAnalysisSingleAnswer(id = uuidSupplier.get, key = seed.key, value = seed.value)
+    def fromSeed(uuidSupplier: UUIDSupplier)(seed: RiskAnalysisSingleAnswerSeed): PersistentRiskAnalysisSingleAnswer =
+      PersistentRiskAnalysisSingleAnswer(id = uuidSupplier.get, key = seed.key, value = seed.value)
   }
 
   implicit class PersistentRiskAnalysisMultiAnswerWrapper(private val p: PersistentRiskAnalysisMultiAnswer)
@@ -45,10 +42,8 @@ object Adapters {
 
   implicit class PersistentRiskAnalysisFormObjectWrapper(private val p: PersistentRiskAnalysisForm.type)
       extends AnyVal {
-    def fromSeed(
-      uuidSupplier: UUIDSupplier
-    )(seed: RiskAnalysisFormSeed): it.pagopa.interop.purposemanagement.model.purpose.PersistentRiskAnalysisForm =
-      it.pagopa.interop.purposemanagement.model.purpose.PersistentRiskAnalysisForm(
+    def fromSeed(uuidSupplier: UUIDSupplier)(seed: RiskAnalysisFormSeed): PersistentRiskAnalysisForm =
+      PersistentRiskAnalysisForm(
         id = uuidSupplier.get,
         version = seed.version,
         singleAnswers = seed.singleAnswers.map(PersistentRiskAnalysisSingleAnswer.fromSeed(uuidSupplier)),
@@ -85,15 +80,12 @@ object Adapters {
 
   implicit class PersistentPurposeVersionDocumentObjectWrapper(private val p: PersistentPurposeVersionDocument.type)
       extends AnyVal {
-    def fromAPI(
-      document: PurposeVersionDocument
-    ): it.pagopa.interop.purposemanagement.model.purpose.PersistentPurposeVersionDocument =
-      it.pagopa.interop.purposemanagement.model.purpose.PersistentPurposeVersionDocument(
-        id = document.id,
-        contentType = document.contentType,
-        path = document.path,
-        createdAt = document.createdAt
-      )
+    def fromAPI(document: PurposeVersionDocument): PersistentPurposeVersionDocument = PersistentPurposeVersionDocument(
+      id = document.id,
+      contentType = document.contentType,
+      path = document.path,
+      createdAt = document.createdAt
+    )
   }
 
   implicit class PersistentPurposeVersionWrapper(private val p: PersistentPurposeVersion) {
@@ -148,17 +140,16 @@ object Adapters {
       seed: PurposeVersionSeed,
       uuidSupplier: UUIDSupplier,
       dateTimeSupplier: OffsetDateTimeSupplier
-    ): it.pagopa.interop.purposemanagement.model.purpose.PersistentPurposeVersion =
-      it.pagopa.interop.purposemanagement.model.purpose.PersistentPurposeVersion(
-        id = uuidSupplier.get,
-        state = it.pagopa.interop.purposemanagement.model.purpose.Draft,
-        dailyCalls = seed.dailyCalls,
-        createdAt = dateTimeSupplier.get,
-        updatedAt = None,
-        firstActivationAt = None,
-        riskAnalysis = seed.riskAnalysis.map(PersistentPurposeVersionDocument.fromAPI),
-        expectedApprovalDate = None
-      )
+    ): PersistentPurposeVersion = PersistentPurposeVersion(
+      id = uuidSupplier.get,
+      state = Draft,
+      dailyCalls = seed.dailyCalls,
+      createdAt = dateTimeSupplier.get,
+      updatedAt = None,
+      firstActivationAt = None,
+      riskAnalysis = seed.riskAnalysis.map(PersistentPurposeVersionDocument.fromAPI),
+      expectedApprovalDate = None
+    )
   }
 
   implicit class PersistentPurposeWrapper(private val p: PersistentPurpose) extends AnyVal {
@@ -185,20 +176,19 @@ object Adapters {
       seed: PurposeSeed,
       uuidSupplier: UUIDSupplier,
       dateTimeSupplier: OffsetDateTimeSupplier
-    ): it.pagopa.interop.purposemanagement.model.purpose.PersistentPurpose =
-      it.pagopa.interop.purposemanagement.model.purpose.PersistentPurpose(
-        id = uuidSupplier.get,
-        eserviceId = seed.eserviceId,
-        consumerId = seed.consumerId,
-        versions = Seq.empty,
-        suspendedByConsumer = None,
-        suspendedByProducer = None,
-        title = seed.title,
-        description = seed.description,
-        riskAnalysisForm = seed.riskAnalysisForm.map(PersistentRiskAnalysisForm.fromSeed(uuidSupplier)),
-        createdAt = dateTimeSupplier.get,
-        updatedAt = None
-      )
+    ): PersistentPurpose = PersistentPurpose(
+      id = uuidSupplier.get,
+      eserviceId = seed.eserviceId,
+      consumerId = seed.consumerId,
+      versions = Seq.empty,
+      suspendedByConsumer = None,
+      suspendedByProducer = None,
+      title = seed.title,
+      description = seed.description,
+      riskAnalysisForm = seed.riskAnalysisForm.map(PersistentRiskAnalysisForm.fromSeed(uuidSupplier)),
+      createdAt = dateTimeSupplier.get,
+      updatedAt = None
+    )
   }
 
 }

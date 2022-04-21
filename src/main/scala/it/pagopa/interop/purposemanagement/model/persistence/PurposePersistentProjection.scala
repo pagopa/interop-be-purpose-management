@@ -20,12 +20,13 @@ import it.pagopa.interop.purposemanagement.model.persistence.Event
 
 import scala.concurrent.ExecutionContext
 import cats.syntax.all._
+import org.slf4j.LoggerFactory
+import scala.util.{Success, Failure}
 
-class PurposePersistentProjection(
-  dbConfig: DatabaseConfig[JdbcProfile],
-  queueWriter: QueueWriter,
-  queueWriterEc: ExecutionContext
-)(implicit system: ActorSystem[_]) {
+class PurposePersistentProjection(dbConfig: DatabaseConfig[JdbcProfile], queueWriter: QueueWriter)(implicit
+  system: ActorSystem[_],
+  ec: ExecutionContext
+) {
 
   def sourceProvider(tag: String): SourceProvider[Offset, EventEnvelope[Event]] =
     EventSourcedProvider
@@ -34,7 +35,7 @@ class PurposePersistentProjection(
   def projection(tag: String): ExactlyOnceProjection[Offset, EventEnvelope[Event]] = SlickProjection.exactlyOnce(
     projectionId = ProjectionId("purpose-projections", tag),
     sourceProvider = sourceProvider(tag),
-    handler = () => new ProjectionHandler(queueWriter)(queueWriterEc),
+    handler = () => new ProjectionHandler(queueWriter),
     databaseConfig = dbConfig
   )
 }
@@ -42,7 +43,16 @@ class PurposePersistentProjection(
 class ProjectionHandler(queueWriter: QueueWriter)(implicit ec: ExecutionContext)
     extends SlickHandler[EventEnvelope[Event]] {
 
-  def innerSend(message: Message): DBIO[Done] = DBIOAction.from(queueWriter.send(message).as(Done))
+  private val logger = LoggerFactory.getLogger(getClass)
+
+  def innerSend(message: Message): DBIO[Done] = DBIOAction.from {
+    val future = queueWriter.send(message)
+    future.onComplete {
+      case Failure(e) => logger.error(e.getMessage())
+      case Success(x) => logger.debug(s"Wrote on queue: $x")
+    }
+    future.as(Done)
+  }
 
   val message: EventEnvelope[Event] => ((String, ProjectableEvent) => Message) = envelope => { case (kind, event) =>
     Message(UUID.randomUUID(), envelope.persistenceId, envelope.sequenceNr, envelope.timestamp, kind, event)

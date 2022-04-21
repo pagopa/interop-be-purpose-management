@@ -35,16 +35,16 @@ object PurposeEventsSerde {
   }
 
   def getKind(e: Event): String = e match {
-    case PurposeCreated(_)                  => `purposeCreated`
-    case PurposeUpdated(_)                  => `purposeUpdated`
-    case PurposeVersionCreated(_, _)        => `purposeVersionCreated`
-    case PurposeVersionActivated(_)         => `purposeVersionActivated`
-    case PurposeVersionSuspended(_)         => `purposeVersionSuspended`
-    case PurposeVersionWaitedForApproval(_) => `purposeVersionWaitedForApproval`
-    case PurposeVersionArchived(_)          => `purposeVersionArchived`
-    case PurposeVersionUpdated(_, _)        => `purposeVersionUpdated`
-    case PurposeVersionDeleted(_, _)        => `purposeVersionDeleted`
-    case PurposeDeleted(_)                  => `purposeDeleted`
+    case PurposeCreated(_)                  => purposeCreated
+    case PurposeUpdated(_)                  => purposeUpdated
+    case PurposeVersionCreated(_, _)        => purposeVersionCreated
+    case PurposeVersionActivated(_)         => purposeVersionActivated
+    case PurposeVersionSuspended(_)         => purposeVersionSuspended
+    case PurposeVersionWaitedForApproval(_) => purposeVersionWaitedForApproval
+    case PurposeVersionArchived(_)          => purposeVersionArchived
+    case PurposeVersionUpdated(_, _)        => purposeVersionUpdated
+    case PurposeVersionDeleted(_, _)        => purposeVersionDeleted
+    case PurposeDeleted(_)                  => purposeDeleted
   }
 
   private val purposeCreated: String                  = "purpose_created"
@@ -78,7 +78,7 @@ object PurposeEventsSerde {
       }
     }
 
-  private implicit val ppvd: RootJsonFormat[PersistentPurposeVersionDocument] = jsonFormat4(
+  private implicit val ppvdFormat: RootJsonFormat[PersistentPurposeVersionDocument] = jsonFormat4(
     PersistentPurposeVersionDocument.apply
   )
 

@@ -5,7 +5,7 @@ import com.typesafe.config.{Config, ConfigFactory}
 object ApplicationConfiguration {
   val config: Config = ConfigFactory.load()
 
-  lazy val queueUrl: String    = config.getString("purpose-management.queue-url")
+  lazy val queueUrl: String    = config.getString("purpose-management.persistence-events-queue-url")
   lazy val serverPort: Int     = config.getInt("purpose-management.port")
   val jwtAudience: Set[String] = config.getString("purpose-management.jwt.audience").split(",").toSet.filter(_.nonEmpty)
 

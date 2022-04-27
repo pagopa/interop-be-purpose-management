@@ -49,7 +49,7 @@ class ProjectionHandler(queueWriter: QueueWriter)(implicit ec: ExecutionContext)
     val future = queueWriter.send(message)
     future.onComplete {
       case Failure(e) => logger.error(e.getMessage())
-      case Success(x) => logger.debug(s"Wrote on queue: $x")
+      case Success(_) => logger.debug(s"Wrote on queue: $message")
     }
     future.as(Done)
   }

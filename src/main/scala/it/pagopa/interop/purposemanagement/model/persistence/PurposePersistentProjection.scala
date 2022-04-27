@@ -46,10 +46,15 @@ class ProjectionHandler(queueWriter: QueueWriter)(implicit ec: ExecutionContext)
   private val logger = LoggerFactory.getLogger(getClass)
 
   def innerSend(message: Message): DBIO[Done] = DBIOAction.from {
+    def show(m: Message): String = {
+      val (persId, persNr, time) = (m.eventJournalPersistenceId, m.eventJournalSequenceNumber, m.eventTimestamp)
+      s"message with persistenceId ${persId}, sequenceNr ${persNr} and timestamp ${time}"
+    }
+
     val future = queueWriter.send(message)
     future.onComplete {
-      case Failure(e) => logger.error(e.getMessage())
-      case Success(_) => logger.debug(s"Wrote on queue: $message")
+      case Failure(e) => logger.error(s"Error sending ${show(message)} with reason ${e.getMessage()}")
+      case Success(_) => logger.debug(s"Wrote on queue ${show(message)}")
     }
     future.as(Done)
   }

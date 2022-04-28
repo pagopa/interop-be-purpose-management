@@ -96,9 +96,10 @@ object Dependencies {
   }
 
   private[this] object pagopa {
-    lazy val namespace  = "it.pagopa"
-    lazy val commons    = namespace %% "interop-commons-utils" % commonsVersion
-    lazy val commonsJWT = namespace %% "interop-commons-jwt"   % commonsVersion
+    lazy val namespace    = "it.pagopa"
+    lazy val commons      = namespace %% "interop-commons-utils"         % commonsVersion
+    lazy val commonsJWT   = namespace %% "interop-commons-jwt"           % commonsVersion
+    lazy val commonsQueue = namespace %% "interop-commons-queue-manager" % commonsVersion
   }
 
   object Jars {
@@ -137,6 +138,7 @@ object Dependencies {
       mustache.mustache           % Compile,
       pagopa.commons              % Compile,
       pagopa.commonsJWT           % Compile,
+      pagopa.commonsQueue         % Compile,
       postgres.jdbc               % Compile,
       scalaprotobuf.core          % Protobuf,
       scalatest.core              % Test,

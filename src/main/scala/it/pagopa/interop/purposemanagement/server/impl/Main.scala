@@ -26,6 +26,7 @@ import it.pagopa.interop.commons.utils.service.{OffsetDateTimeSupplier, UUIDSupp
 import it.pagopa.interop.purposemanagement.api.PurposeApi
 import it.pagopa.interop.purposemanagement.api.impl.{PurposeApiMarshallerImpl, PurposeApiServiceImpl, problemOf}
 import it.pagopa.interop.purposemanagement.common.system.ApplicationConfiguration
+import it.pagopa.interop.purposemanagement.model.persistence.PurposeEventsSerde
 import it.pagopa.interop.purposemanagement.common.system.ApplicationConfiguration.{
   numberOfProjectionTags,
   projectionTag,
@@ -42,6 +43,8 @@ import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
 import scala.util.Try
+import scala.concurrent.ExecutionContext
+import it.pagopa.interop.commons.queue.QueueWriter
 
 object Main extends App {
 
@@ -76,8 +79,12 @@ object Main extends App {
       Behaviors.setup[Nothing] { context =>
         import akka.actor.typed.scaladsl.adapter._
         implicit val classicSystem: classic.ActorSystem = context.system.toClassic
+        implicit val ec: ExecutionContext               = context.executionContext
 
         val cluster = Cluster(context.system)
+
+        val queueWriter: QueueWriter =
+          QueueWriter.get(ApplicationConfiguration.queueUrl)(PurposeEventsSerde.purposeToJson)
 
         context.log.info(
           "Started [" + context.system + "], cluster.selfAddress = " + cluster.selfMember.address + ", build info = " + buildinfo.BuildInfo.toString + ")"
@@ -97,8 +104,7 @@ object Main extends App {
           val dbConfig: DatabaseConfig[JdbcProfile] =
             DatabaseConfig.forConfig("akka-persistence-jdbc.shared-databases.slick")
 
-          val purposePersistentProjection =
-            new PurposePersistentProjection(context.system, dbConfig)
+          val purposePersistentProjection = new PurposePersistentProjection(dbConfig, queueWriter)(context.system, ec)
 
           ShardedDaemonProcess(context.system).init[ProjectionBehavior.Command](
             name = "purpose-projections",

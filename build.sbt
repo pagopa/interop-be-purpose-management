@@ -73,6 +73,23 @@ lazy val generated = project
   .settings(scalacOptions := Seq(), scalafmtOnCompile := true)
   .setupBuildInfo
 
+lazy val models = project
+  .in(file("models"))
+  .settings(
+    name              := "interop-be-purpose-management-models",
+    scalacOptions     := Seq(),
+    scalafmtOnCompile := true,
+    Docker / publish  := {},
+    publishTo         := {
+      val nexus = s"https://${System.getenv("MAVEN_REPO")}/nexus/repository/"
+
+      if (isSnapshot.value)
+        Some("snapshots" at nexus + "maven-snapshots/")
+      else
+        Some("releases" at nexus + "maven-releases/")
+    }
+  )
+
 lazy val client = project
   .in(file("client"))
   .settings(
@@ -91,6 +108,7 @@ lazy val client = project
         Some("releases" at nexus + "maven-releases/")
     }
   )
+  .dependsOn(models)
 
 lazy val root = (project in file("."))
   .settings(
@@ -107,8 +125,8 @@ lazy val root = (project in file("."))
     Docker / maintainer         := "https://pagopa.it",
     dockerCommands += Cmd("LABEL", s"org.opencontainers.image.source https://github.com/pagopa/${name.value}")
   )
-  .aggregate(client)
-  .dependsOn(generated)
+  .aggregate(client, models)
+  .dependsOn(generated, models)
   .enablePlugins(JavaAppPackaging, JavaAgent)
   .setupBuildInfo
 

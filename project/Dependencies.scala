@@ -71,6 +71,10 @@ object Dependencies {
     lazy val prometheus = namespace %% "kamon-prometheus" % kamonVersion
   }
 
+  private[this] object spray {
+    lazy val core = "io.spray" %% "spray-json" % sprayVersion
+  }
+
   private[this] object mustache {
     lazy val mustache = "com.github.spullara.mustache.java" % "compiler" % mustacheVersion
   }
@@ -140,18 +144,27 @@ object Dependencies {
       pagopa.commonsJWT           % Compile,
       pagopa.commonsQueue         % Compile,
       postgres.jdbc               % Compile,
+      scalaprotobuf.core          % Compile,
       scalaprotobuf.core          % Protobuf,
       scalatest.core              % Test,
       scalamock.core              % Test,
       akka.testkit                % Test
     )
-    lazy val client: Seq[ModuleID]    = Seq(
-      akka.stream     % Compile,
-      akka.http       % Compile,
-      akka.httpJson4s % Compile,
-      akka.slf4j      % Compile,
-      json4s.jackson  % Compile,
-      json4s.ext      % Compile
-    )
+
+    val models: Seq[ModuleID] = Seq(spray.core, cats.core, pagopa.commons, pagopa.commonsQueue).map(_ % Compile)
+
+    lazy val generated: Seq[ModuleID] = Seq(
+      akka.stream,
+      akka.http,
+      akka.httpJson4s,
+      akka.slf4j,
+      pagopa.commons,
+      logback.classic,
+      spray.core,
+      mustache.mustache
+    ).map(_ % Compile)
+
+    lazy val client: Seq[ModuleID] =
+      Seq(akka.stream, akka.http, akka.httpJson4s, akka.slf4j, json4s.jackson, json4s.ext).map(_ % Compile)
   }
 }

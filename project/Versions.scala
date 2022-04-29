@@ -19,6 +19,7 @@ object Versions {
   lazy val scalapbVersion              = "0.11.1"
   lazy val scalatestVersion            = "3.2.11"
   lazy val slickProjectionVersion      = "1.2.2"
+  lazy val sprayVersion                = "1.3.6"
 }
 
 object PagopaVersions {

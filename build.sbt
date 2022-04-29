@@ -1,10 +1,9 @@
 import ProjectSettings.ProjectFrom
 import com.typesafe.sbt.packager.docker.Cmd
 
-ThisBuild / scalaVersion        := "2.13.8"
-ThisBuild / organization        := "it.pagopa"
-ThisBuild / organizationName    := "Pagopa S.p.A."
-ThisBuild / libraryDependencies := Dependencies.Jars.`server`
+ThisBuild / scalaVersion     := "2.13.8"
+ThisBuild / organization     := "it.pagopa"
+ThisBuild / organizationName := "Pagopa S.p.A."
 
 ThisBuild / dependencyOverrides ++= Dependencies.Jars.overrides
 ThisBuild / version := ComputeVersion.version
@@ -70,17 +69,23 @@ ThisBuild / credentials += Credentials(Path.userHome / ".sbt" / ".credentials")
 
 lazy val generated = project
   .in(file("generated"))
-  .settings(scalacOptions := Seq(), scalafmtOnCompile := true, publish / skip := true)
+  .settings(
+    scalacOptions       := Seq(),
+    libraryDependencies := Dependencies.Jars.generated,
+    scalafmtOnCompile   := true,
+    publish / skip      := true
+  )
   .setupBuildInfo
 
 lazy val models = project
   .in(file("models"))
   .settings(
-    name              := "interop-be-purpose-management-models",
-    scalacOptions     := Seq(),
-    scalafmtOnCompile := true,
-    Docker / publish  := {},
-    publishTo         := {
+    name                := "interop-be-purpose-management-models",
+    scalacOptions       := Seq(),
+    libraryDependencies := Dependencies.Jars.models,
+    scalafmtOnCompile   := true,
+    Docker / publish    := {},
+    publishTo           := {
       val nexus = s"https://${System.getenv("MAVEN_REPO")}/nexus/repository/"
 
       if (isSnapshot.value)
@@ -108,13 +113,13 @@ lazy val client = project
         Some("releases" at nexus + "maven-releases/")
     }
   )
-  .dependsOn(models)
 
 lazy val root = (project in file("."))
   .settings(
     name                        := "interop-be-purpose-management",
     Test / parallelExecution    := false,
     scalafmtOnCompile           := true,
+    libraryDependencies         := Dependencies.Jars.`server`,
     dockerBuildOptions ++= Seq("--network=host"),
     dockerRepository            := Some(System.getenv("DOCKER_REPO")),
     dockerBaseImage             := "adoptopenjdk:11-jdk-hotspot",

@@ -1,26 +1,29 @@
 package it.pagopa.interop.purposemanagement.model.persistence
 
 import spray.json._
-import spray.json.DefaultJsonProtocol._
-import it.pagopa.interop.purposemanagement.model.purpose._
-import it.pagopa.interop.commons.utils.SprayCommonFormats._
 import it.pagopa.interop.commons.queue.message.ProjectableEvent
+import JsonFormats._
 
 object PurposeEventsSerde {
 
-  val purposeToJson: PartialFunction[ProjectableEvent, JsValue] = {
-    case x @ PurposeCreated(_)                  => x.toJson
-    case x @ PurposeUpdated(_)                  => x.toJson
-    case x @ PurposeVersionCreated(_, _)        => x.toJson
-    case x @ PurposeVersionActivated(_)         => x.toJson
-    case x @ PurposeVersionSuspended(_)         => x.toJson
-    case x @ PurposeVersionWaitedForApproval(_) => x.toJson
-    case x @ PurposeVersionArchived(_)          => x.toJson
-    case x @ PurposeVersionUpdated(_, _)        => x.toJson
-    case x @ PurposeVersionDeleted(_, _)        => x.toJson
-    case x @ PurposeDeleted(_)                  => x.toJson
+  val projectablePurposeToJson: PartialFunction[ProjectableEvent, JsValue] = { case event: Event =>
+    purposeToJson(event)
   }
 
+  def purposeToJson(event: Event): JsValue                                =
+    event match {
+      case x: PurposeCreated                  => x.toJson
+      case x: PurposeUpdated                  => x.toJson
+      case x: PurposeVersionCreated           => x.toJson
+      case x: PurposeVersionActivated         => x.toJson
+      case x: PurposeVersionSuspended         => x.toJson
+      case x: PurposeVersionWaitedForApproval => x.toJson
+      case x: PurposeVersionArchived          => x.toJson
+      case x: PurposeVersionUpdated           => x.toJson
+      case x: PurposeVersionDeleted           => x.toJson
+      case x: PurposeDeleted                  => x.toJson
+    }
+// TODO Use enumeration for an exhaustive pattern matching?
   val jsonToPurpose: PartialFunction[String, JsValue => ProjectableEvent] = {
     case `purposeCreated`                  => _.convertTo[PurposeCreated]
     case `purposeUpdated`                  => _.convertTo[PurposeUpdated]
@@ -58,56 +61,4 @@ object PurposeEventsSerde {
   private val purposeVersionDeleted: String           = "purpose_version_deleted"
   private val purposeDeleted: String                  = "purpose_deleted"
 
-  private implicit val ppvsFormat: RootJsonFormat[PersistentPurposeVersionState] =
-    new RootJsonFormat[PersistentPurposeVersionState] {
-      override def read(json: JsValue): PersistentPurposeVersionState = json match {
-        case JsString("Draft")              => Draft
-        case JsString("Active")             => Active
-        case JsString("Suspended")          => Suspended
-        case JsString("Archived")           => Archived
-        case JsString("WaitingForApproval") => WaitingForApproval
-        case _ => deserializationError("Unable to deserialize json as a PersistentPurposeVersionState")
-      }
-
-      override def write(obj: PersistentPurposeVersionState): JsValue = obj match {
-        case Archived           => JsString("Archived")
-        case Suspended          => JsString("Suspended")
-        case Draft              => JsString("Draft")
-        case WaitingForApproval => JsString("WaitingForApproval")
-        case Active             => JsString("Active")
-      }
-    }
-
-  private implicit val ppvdFormat: RootJsonFormat[PersistentPurposeVersionDocument] = jsonFormat4(
-    PersistentPurposeVersionDocument.apply
-  )
-
-  private implicit val ppvFormat: RootJsonFormat[PersistentPurposeVersion] = jsonFormat8(PersistentPurposeVersion.apply)
-
-  private implicit val pramaFormat: RootJsonFormat[PersistentRiskAnalysisMultiAnswer] = jsonFormat3(
-    PersistentRiskAnalysisMultiAnswer.apply
-  )
-
-  private implicit val prasaFormat: RootJsonFormat[PersistentRiskAnalysisSingleAnswer] = jsonFormat3(
-    PersistentRiskAnalysisSingleAnswer.apply
-  )
-
-  private implicit val prafFormat: RootJsonFormat[PersistentRiskAnalysisForm] = jsonFormat4(
-    PersistentRiskAnalysisForm.apply
-  )
-
-  private implicit val ppFormat: RootJsonFormat[PersistentPurpose] = jsonFormat11(PersistentPurpose.apply)
-
-  private implicit val pcFormat: RootJsonFormat[PurposeCreated]           = jsonFormat1(PurposeCreated.apply)
-  private implicit val puFormat: RootJsonFormat[PurposeUpdated]           = jsonFormat1(PurposeUpdated.apply)
-  private implicit val pvcFormat: RootJsonFormat[PurposeVersionCreated]   = jsonFormat2(PurposeVersionCreated.apply)
-  private implicit val pvaFormat: RootJsonFormat[PurposeVersionActivated] = jsonFormat1(PurposeVersionActivated.apply)
-  private implicit val pvsFormat: RootJsonFormat[PurposeVersionSuspended] = jsonFormat1(PurposeVersionSuspended.apply)
-  private implicit val pvwfaFormat: RootJsonFormat[PurposeVersionWaitedForApproval] = jsonFormat1(
-    PurposeVersionWaitedForApproval.apply
-  )
-  private implicit val pvarFormat: RootJsonFormat[PurposeVersionArchived] = jsonFormat1(PurposeVersionArchived.apply)
-  private implicit val pvuFormat: RootJsonFormat[PurposeVersionUpdated]   = jsonFormat2(PurposeVersionUpdated.apply)
-  private implicit val pvdFormat: RootJsonFormat[PurposeVersionDeleted]   = jsonFormat2(PurposeVersionDeleted.apply)
-  private implicit val pdFormat: RootJsonFormat[PurposeDeleted]           = jsonFormat1(PurposeDeleted.apply)
 }

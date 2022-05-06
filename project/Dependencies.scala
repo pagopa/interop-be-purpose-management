@@ -76,7 +76,7 @@ object Dependencies {
   }
 
   private[this] object mongodb {
-    lazy val scalaDriver = "org.mongodb.scala" %% "mongo-scala-driver" % mongoScalaDriverVersion
+    lazy val scalaDriver = "org.mongodb.scala" %% "mongo-scala-driver" % mongodbScalaDriverVersion
   }
 
   private[this] object mustache {

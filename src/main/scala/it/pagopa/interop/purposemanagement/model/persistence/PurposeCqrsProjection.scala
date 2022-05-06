@@ -12,9 +12,11 @@ import akka.projection.slick.{SlickHandler, SlickProjection}
 import cats.syntax.all._
 import it.pagopa.interop.purposemanagement.model.persistence.JsonFormats._
 import it.pagopa.interop.purposemanagement.model.purpose.PersistentPurpose
-import org.mongodb.scala.model.{Filters, UpdateOptions, Updates}
+import org.mongodb.scala.MongoClient.DEFAULT_CODEC_REGISTRY
+import org.mongodb.scala._
+import org.mongodb.scala.connection.NettyStreamFactoryFactory
+import org.mongodb.scala.model._
 import org.mongodb.scala.result.UpdateResult
-import org.mongodb.scala.{Document, MongoClient, MongoCollection, SingleObservable}
 import org.slf4j.LoggerFactory
 import slick.basic.DatabaseConfig
 import slick.dbio._
@@ -29,9 +31,16 @@ final case class PurposeCqrsProjection(offsetDbConfig: DatabaseConfig[JdbcProfil
 ) {
 
   // TODO User needs to be created in the default database, or else and auth error is received upon connection
-  private val uri: String         = "mongodb://root:password@localhost/admin?retryWrites=true&w=majority"
-  System.setProperty("org.mongodb.async.type", "netty")
-  private val client: MongoClient = MongoClient(uri)
+  private val uri: String = "mongodb://root:password@localhost/admin?retryWrites=true&w=majority"
+
+  private val client: MongoClient = MongoClient(
+    MongoClientSettings
+      .builder()
+      .applyConnectionString(new ConnectionString(uri))
+      .codecRegistry(DEFAULT_CODEC_REGISTRY)
+      .streamFactoryFactory(NettyStreamFactoryFactory())
+      .build()
+  )
 
   def sourceProvider(tag: String): SourceProvider[Offset, EventEnvelope[Event]] =
     EventSourcedProvider

@@ -10,6 +10,7 @@ import akka.projection.eventsourced.scaladsl.EventSourcedProvider
 import akka.projection.scaladsl.{ExactlyOnceProjection, SourceProvider}
 import akka.projection.slick.{SlickHandler, SlickProjection}
 import cats.syntax.all._
+import it.pagopa.interop.purposemanagement.common.system.MongoDbConfig
 import it.pagopa.interop.purposemanagement.model.persistence.JsonFormats._
 import it.pagopa.interop.purposemanagement.model.purpose.PersistentPurpose
 import org.mongodb.scala.MongoClient.DEFAULT_CODEC_REGISTRY
@@ -25,18 +26,16 @@ import spray.json._
 
 import scala.concurrent.ExecutionContext
 
-final case class PurposeCqrsProjection(offsetDbConfig: DatabaseConfig[JdbcProfile])(implicit
+final case class PurposeCqrsProjection(offsetDbConfig: DatabaseConfig[JdbcProfile], mongoDbConfig: MongoDbConfig)(
+  implicit
   system: ActorSystem[_],
   ec: ExecutionContext
 ) {
 
-  // TODO User needs to be created in the default database, or else and auth error is received upon connection
-  private val uri: String = "mongodb://root:password@localhost/admin?retryWrites=true&w=majority"
-
   private val client: MongoClient = MongoClient(
     MongoClientSettings
       .builder()
-      .applyConnectionString(new ConnectionString(uri))
+      .applyConnectionString(new ConnectionString(mongoDbConfig.connectionString))
       .codecRegistry(DEFAULT_CODEC_REGISTRY)
       .streamFactoryFactory(NettyStreamFactoryFactory())
       .build()
@@ -49,13 +48,13 @@ final case class PurposeCqrsProjection(offsetDbConfig: DatabaseConfig[JdbcProfil
   def projection(tag: String): ExactlyOnceProjection[Offset, EventEnvelope[Event]] = SlickProjection.exactlyOnce(
     projectionId = ProjectionId("purpose-cqrs-projections", tag),
     sourceProvider = sourceProvider(tag),
-    handler = () => new CqrsProjectionHandler(client, "myTestDatabase", "purposes"),
+    handler = () => CqrsProjectionHandler(client, mongoDbConfig.dbName, mongoDbConfig.collectionName),
     databaseConfig = offsetDbConfig
   )
 }
 
 // TODO pass db config object for db and collection names
-final class CqrsProjectionHandler(client: MongoClient, dbName: String, collectionName: String)(implicit
+final case class CqrsProjectionHandler(client: MongoClient, dbName: String, collectionName: String)(implicit
   ec: ExecutionContext
 ) extends SlickHandler[EventEnvelope[Event]] {
 

@@ -13,5 +13,13 @@ object ApplicationConfiguration {
   def projectionTag(index: Int)   = s"interop-be-purpose-management-persistence|$index"
   val projectionsEnabled: Boolean = config.getBoolean("akka.projection.enabled")
 
+  val mongoDb: MongoDbConfig = {
+    val connectionString: String = config.getString("purpose-management.cqrs-projection.db.connection-string")
+    val dbName: String           = config.getString("purpose-management.cqrs-projection.db.name")
+    val collectionName: String   = config.getString("purpose-management.cqrs-projection.db.collection-name")
+
+    MongoDbConfig(connectionString, dbName, collectionName)
+  }
+
   require(jwtAudience.nonEmpty, "Audience cannot be empty")
 }

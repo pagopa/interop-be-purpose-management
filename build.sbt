@@ -73,8 +73,6 @@ runStandalone := {
   (Compile / run).evaluated
 }
 
-scalacOptions -= "-Xfatal-warnings"
-
 lazy val generated = project
   .in(file("generated"))
   .settings(

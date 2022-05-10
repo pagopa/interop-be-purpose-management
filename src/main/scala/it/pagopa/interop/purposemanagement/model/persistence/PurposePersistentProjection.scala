@@ -9,19 +9,18 @@ import akka.projection.eventsourced.EventEnvelope
 import akka.projection.eventsourced.scaladsl.EventSourcedProvider
 import akka.projection.scaladsl.{ExactlyOnceProjection, SourceProvider}
 import akka.projection.slick.{SlickHandler, SlickProjection}
+import cats.syntax.all._
+import com.typesafe.scalalogging.Logger
+import it.pagopa.interop.commons.queue.QueueWriter
+import it.pagopa.interop.commons.queue.message.{Message, ProjectableEvent}
+import it.pagopa.interop.purposemanagement.model.persistence.Event
 import slick.basic.DatabaseConfig
 import slick.dbio._
 import slick.jdbc.JdbcProfile
-import it.pagopa.interop.commons.queue.QueueWriter
-import it.pagopa.interop.commons.queue.message.ProjectableEvent
-import java.util.UUID
-import it.pagopa.interop.commons.queue.message.Message
-import it.pagopa.interop.purposemanagement.model.persistence.Event
 
+import java.util.UUID
 import scala.concurrent.ExecutionContext
-import cats.syntax.all._
-import com.typesafe.scalalogging.Logger
-import scala.util.{Success, Failure}
+import scala.util.{Failure, Success}
 
 class PurposePersistentProjection(dbConfig: DatabaseConfig[JdbcProfile], queueWriter: QueueWriter)(implicit
   system: ActorSystem[_],

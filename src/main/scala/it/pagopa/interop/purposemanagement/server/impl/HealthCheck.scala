@@ -1,6 +1,7 @@
 package it.pagopa.interop.purposemanagement.server.impl
 
 import com.typesafe.scalalogging.Logger
+
 import scala.concurrent.Future
 
 // Enabled in reference.conf

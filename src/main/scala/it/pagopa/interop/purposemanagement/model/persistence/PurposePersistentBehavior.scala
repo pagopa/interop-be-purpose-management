@@ -5,18 +5,17 @@ import akka.actor.typed.{ActorRef, Behavior, SupervisorStrategy}
 import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityTypeKey}
 import akka.pattern.StatusReply
 import akka.persistence.typed.PersistenceId
-import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior, RetentionCriteria}
+import akka.persistence.typed.scaladsl.{Effect, EffectBuilder, EventSourcedBehavior, RetentionCriteria}
 import it.pagopa.interop.commons.utils.service.OffsetDateTimeSupplier
 import it.pagopa.interop.purposemanagement.error.InternalErrors._
-import it.pagopa.interop.purposemanagement.model.purpose._
 import it.pagopa.interop.purposemanagement.model.persistence.Adapters._
+import it.pagopa.interop.purposemanagement.model.purpose._
 import it.pagopa.interop.purposemanagement.model.{ChangedBy, PurposeVersionDocument, StateChangeDetails}
 
 import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
 import scala.concurrent.duration.{DurationInt, DurationLong}
 import scala.language.postfixOps
-import akka.persistence.typed.scaladsl.EffectBuilder
 
 object PurposePersistentBehavior {
 

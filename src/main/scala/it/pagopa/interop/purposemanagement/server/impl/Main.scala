@@ -1,56 +1,23 @@
 package it.pagopa.interop.purposemanagement.server.impl
 
-import cats.syntax.all._
-import akka.actor.typed.{ActorSystem, Behavior}
+import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.cluster.ClusterEvent
-import akka.cluster.sharding.typed.ShardingEnvelope
-import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, Entity, EntityContext, ShardedDaemonProcess}
+import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.cluster.typed.{Cluster, Subscribe}
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.server.Directives.complete
 import akka.management.cluster.bootstrap.ClusterBootstrap
 import akka.management.scaladsl.AkkaManagement
-import akka.persistence.typed.PersistenceId
-import akka.projection.ProjectionBehavior
-import akka.{actor => classic}
-import com.nimbusds.jose.proc.SecurityContext
-import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier
-import it.pagopa.interop.commons.jwt.service.JWTReader
-import it.pagopa.interop.commons.jwt.service.impl.{DefaultJWTReader, getClaimsVerifier}
-import it.pagopa.interop.commons.jwt.{JWTConfiguration, KID, PublicKeysHolder, SerializedKey}
-import it.pagopa.interop.commons.utils.OpenapiUtils
-import it.pagopa.interop.commons.utils.errors.GenericComponentErrors.ValidationRequestError
-import it.pagopa.interop.commons.utils.service.impl.{OffsetDateTimeSupplierImpl, UUIDSupplierImpl}
-import it.pagopa.interop.commons.utils.service.{OffsetDateTimeSupplier, UUIDSupplier}
-import it.pagopa.interop.purposemanagement.api.PurposeApi
-import it.pagopa.interop.purposemanagement.api.impl.{PurposeApiMarshallerImpl, PurposeApiServiceImpl, problemOf}
+import buildinfo.BuildInfo
+import cats.syntax.all._
+import com.typesafe.scalalogging.Logger
+import it.pagopa.interop.commons.logging.renderBuildInfo
 import it.pagopa.interop.purposemanagement.common.system.ApplicationConfiguration
-import it.pagopa.interop.purposemanagement.model.persistence.PurposeEventsSerde
-import it.pagopa.interop.purposemanagement.common.system.ApplicationConfiguration.{
-  numberOfProjectionTags,
-  projectionTag,
-  projectionsEnabled
-}
-import it.pagopa.interop.purposemanagement.model.persistence.{
-  Command,
-  PurposePersistentBehavior,
-  PurposePersistentProjection
-}
 import it.pagopa.interop.purposemanagement.server.Controller
 import kamon.Kamon
-import slick.basic.DatabaseConfig
-import slick.jdbc.JdbcProfile
 
-import scala.util.Try
-import it.pagopa.interop.commons.logging.renderBuildInfo
-import it.pagopa.interop.commons.queue.QueueWriter
-import buildinfo.BuildInfo
-import scala.concurrent.ExecutionContextExecutor
-import com.typesafe.scalalogging.Logger
-import scala.concurrent.Future
-import scala.util.{Success, Failure}
+import scala.concurrent.{ExecutionContextExecutor, Future}
+import scala.util.{Failure, Success}
 
 object Main extends App with Dependencies {
 
@@ -70,7 +37,7 @@ object Main extends App with Dependencies {
       val cluster: Cluster = Cluster(context.system)
       ClusterBootstrap.get(actorSystem).start()
 
-      val listener: classic.typed.ActorRef[ClusterEvent.MemberEvent] = context.spawn(
+      val listener = context.spawn(
         Behaviors.receive[ClusterEvent.MemberEvent]((ctx, event) => {
           ctx.log.info("MemberEvent: {}", event)
           Behaviors.same

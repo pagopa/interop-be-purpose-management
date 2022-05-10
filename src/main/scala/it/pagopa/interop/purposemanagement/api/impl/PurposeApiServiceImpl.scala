@@ -20,18 +20,19 @@ import it.pagopa.interop.purposemanagement.error.InternalErrors
 import it.pagopa.interop.purposemanagement.error.InternalErrors._
 import it.pagopa.interop.purposemanagement.error.PurposeManagementErrors._
 import it.pagopa.interop.purposemanagement.model._
-import it.pagopa.interop.purposemanagement.model.persistence.Adapters._
 import it.pagopa.interop.purposemanagement.model.decoupling.{
   DraftPurposeVersionUpdate,
   PurposeUpdate,
   WaitingForApprovalPurposeVersionUpdate
 }
+import it.pagopa.interop.purposemanagement.model.persistence.Adapters._
 import it.pagopa.interop.purposemanagement.model.persistence._
 import it.pagopa.interop.purposemanagement.model.purpose.{
   PersistentPurpose,
   PersistentPurposeVersion,
   PersistentPurposeVersionState
 }
+
 import scala.concurrent._
 import scala.util.{Failure, Success}
 

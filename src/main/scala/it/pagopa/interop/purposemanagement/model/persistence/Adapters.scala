@@ -1,10 +1,10 @@
 package it.pagopa.interop.purposemanagement.model.persistence
 
-import it.pagopa.interop.purposemanagement.model._
-import it.pagopa.interop.purposemanagement.model.purpose._
-import it.pagopa.interop.purposemanagement.model.decoupling._
 import it.pagopa.interop.commons.utils.service._
 import it.pagopa.interop.purposemanagement.error.InternalErrors._
+import it.pagopa.interop.purposemanagement.model._
+import it.pagopa.interop.purposemanagement.model.decoupling._
+import it.pagopa.interop.purposemanagement.model.purpose._
 
 object Adapters {
 

@@ -165,6 +165,8 @@ object Dependencies {
     ).map(_ % Compile)
 
     lazy val client: Seq[ModuleID] =
-      Seq(akka.stream, akka.http, akka.httpJson4s, akka.slf4j, json4s.jackson, json4s.ext).map(_ % Compile)
+      Seq(akka.stream, akka.http, akka.httpJson4s, akka.slf4j, json4s.jackson, json4s.ext, pagopa.commons).map(
+        _ % Compile
+      )
   }
 }

@@ -250,7 +250,7 @@ object PurposePersistentBehavior {
 
       case Idle =>
         shard ! ClusterSharding.Passivate(context.self)
-        context.log.info(s"Passivate shard: ${shard.path.name}")
+        context.log.debug(s"Passivate shard: ${shard.path.name}")
         Effect.none[Event, State]
     }
   }
@@ -290,7 +290,7 @@ object PurposePersistentBehavior {
     persistenceTag: String
   ): Behavior[Command] = {
     Behaviors.setup { context =>
-      context.log.info(s"Starting Purpose Shard ${persistenceId.id}")
+      context.log.debug(s"Starting Purpose Shard ${persistenceId.id}")
       val numberOfEvents =
         context.system.settings.config
           .getInt("purpose-management.number-of-events-before-snapshot")

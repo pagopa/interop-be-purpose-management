@@ -71,13 +71,22 @@ final case class CqrsProjectionHandler(client: MongoClient, dbName: String, coll
         collection.updateOne(Filters.eq("data.id", p.id.toString), Updates.set("data", Document(p.toJson.compactPrint)))
       case PurposeVersionCreated(pId, v)      =>
         collection.updateOne(Filters.eq("data.id", pId), Updates.push("data.versions", Document(v.toJson.compactPrint)))
-      case _: PurposeVersionActivated         => ???
-      case _: PurposeVersionSuspended         => ???
-      case _: PurposeVersionWaitedForApproval => ???
-      case _: PurposeVersionArchived          => ???
-      case _: PurposeVersionUpdated           => ???
-      case _: PurposeVersionDeleted           => ???
-      case _: PurposeDeleted                  => ???
+      case PurposeVersionActivated(p)         =>
+        collection.updateOne(Filters.eq("data.id", p.id.toString), Updates.set("data", Document(p.toJson.compactPrint)))
+      case PurposeVersionSuspended(p)         =>
+        collection.updateOne(Filters.eq("data.id", p.id.toString), Updates.set("data", Document(p.toJson.compactPrint)))
+      case PurposeVersionWaitedForApproval(p) =>
+        collection.updateOne(Filters.eq("data.id", p.id.toString), Updates.set("data", Document(p.toJson.compactPrint)))
+      case PurposeVersionArchived(p)          =>
+        collection.updateOne(Filters.eq("data.id", p.id.toString), Updates.set("data", Document(p.toJson.compactPrint)))
+      case PurposeVersionUpdated(pId, v)      =>
+        collection.updateOne(
+          Filters.and(Filters.eq("data.id", pId), Filters.eq("data.versions.id", v.id.toString)),
+          Updates.set("data.versions.$", Document(v.toJson.compactPrint))
+        )
+      case PurposeVersionDeleted(pId, vId)    =>
+        collection.updateOne(Filters.eq("data.id", pId), Updates.pull("data.versions", Document(s"{ id : \"$vId\" }")))
+      case PurposeDeleted(pId)                => collection.deleteOne(Filters.eq("data.id", pId))
     }
 
     result.toFuture().as(Done)

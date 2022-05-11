@@ -23,7 +23,7 @@ object PurposeEventsSerde {
       case x: PurposeVersionDeleted           => x.toJson
       case x: PurposeDeleted                  => x.toJson
     }
-// TODO Use enumeration for an exhaustive pattern matching?
+
   val jsonToPurpose: PartialFunction[String, JsValue => ProjectableEvent] = {
     case `purposeCreated`                  => _.convertTo[PurposeCreated]
     case `purposeUpdated`                  => _.convertTo[PurposeUpdated]

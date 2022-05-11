@@ -10,19 +10,18 @@ object PurposeEventsSerde {
     purposeToJson(event)
   }
 
-  def purposeToJson(event: Event): JsValue =
-    event match {
-      case x: PurposeCreated                  => x.toJson
-      case x: PurposeUpdated                  => x.toJson
-      case x: PurposeVersionCreated           => x.toJson
-      case x: PurposeVersionActivated         => x.toJson
-      case x: PurposeVersionSuspended         => x.toJson
-      case x: PurposeVersionWaitedForApproval => x.toJson
-      case x: PurposeVersionArchived          => x.toJson
-      case x: PurposeVersionUpdated           => x.toJson
-      case x: PurposeVersionDeleted           => x.toJson
-      case x: PurposeDeleted                  => x.toJson
-    }
+  def purposeToJson(event: Event): JsValue = event match {
+    case x: PurposeCreated                  => x.toJson
+    case x: PurposeUpdated                  => x.toJson
+    case x: PurposeVersionCreated           => x.toJson
+    case x: PurposeVersionActivated         => x.toJson
+    case x: PurposeVersionSuspended         => x.toJson
+    case x: PurposeVersionWaitedForApproval => x.toJson
+    case x: PurposeVersionArchived          => x.toJson
+    case x: PurposeVersionUpdated           => x.toJson
+    case x: PurposeVersionDeleted           => x.toJson
+    case x: PurposeDeleted                  => x.toJson
+  }
 
   val jsonToPurpose: PartialFunction[String, JsValue => ProjectableEvent] = {
     case `purposeCreated`                  => _.convertTo[PurposeCreated]

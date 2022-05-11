@@ -10,6 +10,7 @@ import akka.projection.eventsourced.scaladsl.EventSourcedProvider
 import akka.projection.scaladsl.{ExactlyOnceProjection, SourceProvider}
 import akka.projection.slick.{SlickHandler, SlickProjection}
 import cats.syntax.all._
+import com.typesafe.scalalogging.Logger
 import it.pagopa.interop.purposemanagement.common.system.MongoDbConfig
 import it.pagopa.interop.purposemanagement.model.persistence.JsonFormats._
 import it.pagopa.interop.purposemanagement.model.persistence._
@@ -19,7 +20,6 @@ import org.mongodb.scala._
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.connection.NettyStreamFactoryFactory
 import org.mongodb.scala.model._
-import org.slf4j.LoggerFactory
 import slick.basic.DatabaseConfig
 import slick.dbio._
 import slick.jdbc.JdbcProfile
@@ -59,7 +59,7 @@ final case class CqrsProjectionHandler(client: MongoClient, dbName: String, coll
   ec: ExecutionContext
 ) extends SlickHandler[EventEnvelope[Event]] {
 
-  private val logger = LoggerFactory.getLogger(getClass)
+  private val logger: Logger = Logger(this.getClass)
 
   // Note: the implementation is not idempotent
   override def process(envelope: EventEnvelope[Event]): DBIO[Done] = DBIOAction.from {

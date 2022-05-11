@@ -26,6 +26,7 @@ import slick.jdbc.JdbcProfile
 import spray.json._
 
 import scala.concurrent.ExecutionContext
+import scala.util.{Failure, Success}
 
 final case class PurposeCqrsProjection(offsetDbConfig: DatabaseConfig[JdbcProfile], mongoDbConfig: MongoDbConfig)(
   implicit
@@ -62,7 +63,7 @@ final case class CqrsProjectionHandler(client: MongoClient, dbName: String, coll
 
   // Note: the implementation is not idempotent
   override def process(envelope: EventEnvelope[Event]): DBIO[Done] = DBIOAction.from {
-    logger.trace(s"CQRS Projection: writing event with envelop $envelope")
+    logger.debug(s"CQRS Projection: writing event with envelop $envelope")
     val collection: MongoCollection[Document] = client.getDatabase(dbName).getCollection(collectionName)
 
     val metadata: CqrsMetadata = CqrsMetadata(sourceEvent =
@@ -103,8 +104,17 @@ final case class CqrsProjectionHandler(client: MongoClient, dbName: String, coll
       case PurposeDeleted(pId)                => collection.deleteOne(Filters.eq("data.id", pId))
     }
 
-    result.toFuture().as(Done)
+    val futureResult = result.toFuture()
+
+    futureResult.onComplete {
+      case Failure(e) => logger.error(s"Error on CQRS sink for ${show(metadata)}", e)
+      case Success(_) => logger.debug(s"CQRS sink completed for ${show(metadata)}")
+    }
+    futureResult.as(Done)
   }
+
+  private def show(metadata: CqrsMetadata) =
+    s"(persistenceId: ${metadata.sourceEvent.persistenceId}, sequenceNr: ${metadata.sourceEvent.sequenceNr}, timestamp : ${metadata.sourceEvent.timestamp})"
 
   implicit class SerializableToDocument[T: JsonWriter](v: T) extends AnyRef {
     def toDocument = Document(v.toJson.compactPrint)

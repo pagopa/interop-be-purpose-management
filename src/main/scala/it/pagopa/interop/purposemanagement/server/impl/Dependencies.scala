@@ -14,6 +14,7 @@ import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier
 import it.pagopa.interop.commons.jwt.service.JWTReader
 import it.pagopa.interop.commons.jwt.service.impl.{DefaultJWTReader, getClaimsVerifier}
 import it.pagopa.interop.commons.jwt.{JWTConfiguration, KID, PublicKeysHolder, SerializedKey}
+import it.pagopa.interop.commons.queue.QueueWriter
 import it.pagopa.interop.commons.utils.OpenapiUtils
 import it.pagopa.interop.commons.utils.TypeConversions._
 import it.pagopa.interop.commons.utils.errors.GenericComponentErrors.ValidationRequestError
@@ -26,8 +27,11 @@ import it.pagopa.interop.purposemanagement.common.system.ApplicationConfiguratio
   numberOfProjectionTags,
   projectionTag
 }
-import it.pagopa.interop.purposemanagement.model.persistence.projection.PurposeCqrsProjection
-import it.pagopa.interop.purposemanagement.model.persistence.{Command, PurposePersistentBehavior}
+import it.pagopa.interop.purposemanagement.model.persistence.projection.{
+  PurposeCqrsProjection,
+  PurposePersistentProjection
+}
+import it.pagopa.interop.purposemanagement.model.persistence.{Command, PurposeEventsSerde, PurposePersistentBehavior}
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
@@ -53,23 +57,23 @@ trait Dependencies {
     Entity(PurposePersistentBehavior.TypeKey)(behaviorFactory(dateTimeSupplier))
 
   def initProjections()(implicit actorSystem: ActorSystem[_], ec: ExecutionContext): Unit = {
-//    val queueWriter: QueueWriter =
-//      QueueWriter.get(ApplicationConfiguration.queueUrl)(PurposeEventsSerde.projectablePurposeToJson)
+    val queueWriter: QueueWriter =
+      QueueWriter.get(ApplicationConfiguration.queueUrl)(PurposeEventsSerde.projectablePurposeToJson)
 
     val dbConfig: DatabaseConfig[JdbcProfile] =
       DatabaseConfig.forConfig("akka-persistence-jdbc.shared-databases.slick")
 
     val mongoDbConfig = ApplicationConfiguration.mongoDb
 
-    val purposeCqrsProjection = PurposeCqrsProjection(dbConfig, mongoDbConfig)
-//    val purposePersistentProjection = new PurposePersistentProjection(dbConfig, queueWriter)
+    val purposeCqrsProjection       = PurposeCqrsProjection(dbConfig, mongoDbConfig)
+    val purposePersistentProjection = PurposePersistentProjection(dbConfig, queueWriter)
 
-//    ShardedDaemonProcess(actorSystem).init[ProjectionBehavior.Command](
-//      name = "purpose-projections",
-//      numberOfInstances = numberOfProjectionTags,
-//      behaviorFactory = (i: Int) => ProjectionBehavior(purposePersistentProjection.projection(projectionTag(i))),
-//      stopMessage = ProjectionBehavior.Stop
-//    )
+    ShardedDaemonProcess(actorSystem).init[ProjectionBehavior.Command](
+      name = "purpose-projections",
+      numberOfInstances = numberOfProjectionTags,
+      behaviorFactory = (i: Int) => ProjectionBehavior(purposePersistentProjection.projection(projectionTag(i))),
+      stopMessage = ProjectionBehavior.Stop
+    )
 
     ShardedDaemonProcess(actorSystem).init[ProjectionBehavior.Command](
       name = "purpose-cqrs-projections",

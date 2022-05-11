@@ -113,7 +113,7 @@ final case class CqrsProjectionHandler(client: MongoClient, dbName: String, coll
     futureResult.as(Done)
   }
 
-  private def show(metadata: CqrsMetadata) =
+  private def show(metadata: CqrsMetadata): String =
     s"(persistenceId: ${metadata.sourceEvent.persistenceId}, sequenceNr: ${metadata.sourceEvent.sequenceNr}, timestamp : ${metadata.sourceEvent.timestamp})"
 
   implicit class SerializableToDocument[T: JsonWriter](v: T) extends AnyRef {

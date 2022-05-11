@@ -10,7 +10,7 @@ object PurposeEventsSerde {
     purposeToJson(event)
   }
 
-  def purposeToJson(event: Event): JsValue                                =
+  def purposeToJson(event: Event): JsValue =
     event match {
       case x: PurposeCreated                  => x.toJson
       case x: PurposeUpdated                  => x.toJson

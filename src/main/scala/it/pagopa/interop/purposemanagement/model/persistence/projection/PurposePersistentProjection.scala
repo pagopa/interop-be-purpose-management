@@ -1,4 +1,4 @@
-package it.pagopa.interop.purposemanagement.model.persistence
+package it.pagopa.interop.purposemanagement.model.persistence.projection
 
 import akka.Done
 import akka.actor.typed.ActorSystem
@@ -13,7 +13,7 @@ import cats.syntax.all._
 import com.typesafe.scalalogging.Logger
 import it.pagopa.interop.commons.queue.QueueWriter
 import it.pagopa.interop.commons.queue.message.{Message, ProjectableEvent}
-import it.pagopa.interop.purposemanagement.model.persistence.Event
+import it.pagopa.interop.purposemanagement.model.persistence.{Event, PurposeEventsSerde}
 import slick.basic.DatabaseConfig
 import slick.dbio._
 import slick.jdbc.JdbcProfile
@@ -22,7 +22,7 @@ import java.util.UUID
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
 
-class PurposePersistentProjection(dbConfig: DatabaseConfig[JdbcProfile], queueWriter: QueueWriter)(implicit
+final case class PurposePersistentProjection(dbConfig: DatabaseConfig[JdbcProfile], queueWriter: QueueWriter)(implicit
   system: ActorSystem[_],
   ec: ExecutionContext
 ) {
@@ -39,7 +39,7 @@ class PurposePersistentProjection(dbConfig: DatabaseConfig[JdbcProfile], queueWr
   )
 }
 
-class ProjectionHandler(queueWriter: QueueWriter)(implicit ec: ExecutionContext)
+final case class ProjectionHandler(queueWriter: QueueWriter)(implicit ec: ExecutionContext)
     extends SlickHandler[EventEnvelope[Event]] {
 
   private val logger: Logger = Logger(this.getClass)

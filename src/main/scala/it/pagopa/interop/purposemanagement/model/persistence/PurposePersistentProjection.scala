@@ -9,19 +9,18 @@ import akka.projection.eventsourced.EventEnvelope
 import akka.projection.eventsourced.scaladsl.EventSourcedProvider
 import akka.projection.scaladsl.{ExactlyOnceProjection, SourceProvider}
 import akka.projection.slick.{SlickHandler, SlickProjection}
+import cats.syntax.all._
+import com.typesafe.scalalogging.Logger
+import it.pagopa.interop.commons.queue.QueueWriter
+import it.pagopa.interop.commons.queue.message.{Message, ProjectableEvent}
+import it.pagopa.interop.purposemanagement.model.persistence.Event
 import slick.basic.DatabaseConfig
 import slick.dbio._
 import slick.jdbc.JdbcProfile
-import it.pagopa.interop.commons.queue.QueueWriter
-import it.pagopa.interop.commons.queue.message.ProjectableEvent
-import java.util.UUID
-import it.pagopa.interop.commons.queue.message.Message
-import it.pagopa.interop.purposemanagement.model.persistence.Event
 
+import java.util.UUID
 import scala.concurrent.ExecutionContext
-import cats.syntax.all._
-import org.slf4j.LoggerFactory
-import scala.util.{Success, Failure}
+import scala.util.{Failure, Success}
 
 class PurposePersistentProjection(dbConfig: DatabaseConfig[JdbcProfile], queueWriter: QueueWriter)(implicit
   system: ActorSystem[_],
@@ -43,7 +42,7 @@ class PurposePersistentProjection(dbConfig: DatabaseConfig[JdbcProfile], queueWr
 class ProjectionHandler(queueWriter: QueueWriter)(implicit ec: ExecutionContext)
     extends SlickHandler[EventEnvelope[Event]] {
 
-  private val logger = LoggerFactory.getLogger(getClass)
+  private val logger: Logger = Logger(this.getClass)
 
   def innerSend(message: Message): DBIO[Done] = DBIOAction.from {
     def show(m: Message): String = {
@@ -53,7 +52,7 @@ class ProjectionHandler(queueWriter: QueueWriter)(implicit ec: ExecutionContext)
 
     val future = queueWriter.send(message)
     future.onComplete {
-      case Failure(e) => logger.error(s"Error sending ${show(message)} with reason ${e.getMessage()}")
+      case Failure(e) => logger.error(s"Error sending ${show(message)}", e)
       case Success(_) => logger.debug(s"Wrote on queue ${show(message)}")
     }
     future.as(Done)

@@ -7,8 +7,8 @@ import akka.http.scaladsl.model.StatusCode
 import akka.util.Timeout
 import it.pagopa.interop.commons.utils.SprayCommonFormats.{offsetDateTimeFormat, uuidFormat}
 import it.pagopa.interop.commons.utils.errors.ComponentError
-import it.pagopa.interop.purposemanagement.model.persistence.Command
 import it.pagopa.interop.purposemanagement.model._
+import it.pagopa.interop.purposemanagement.model.persistence.Command
 import spray.json.{DefaultJsonProtocol, RootJsonFormat}
 
 import scala.annotation.tailrec

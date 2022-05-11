@@ -29,7 +29,7 @@ import it.pagopa.interop.purposemanagement.common.system.ApplicationConfiguratio
 }
 import it.pagopa.interop.purposemanagement.model.persistence.projection.{
   PurposeCqrsProjection,
-  PurposePersistentProjection
+  PurposeNotificationProjection
 }
 import it.pagopa.interop.purposemanagement.model.persistence.{Command, PurposeEventsSerde, PurposePersistentBehavior}
 import slick.basic.DatabaseConfig
@@ -65,13 +65,13 @@ trait Dependencies {
 
     val mongoDbConfig = ApplicationConfiguration.mongoDb
 
-    val purposeCqrsProjection       = PurposeCqrsProjection(dbConfig, mongoDbConfig)
-    val purposePersistentProjection = PurposePersistentProjection(dbConfig, queueWriter)
+    val purposeCqrsProjection         = PurposeCqrsProjection(dbConfig, mongoDbConfig)
+    val purposeNotificationProjection = PurposeNotificationProjection(dbConfig, queueWriter)
 
     ShardedDaemonProcess(actorSystem).init[ProjectionBehavior.Command](
-      name = "purpose-projections",
+      name = "purpose-notification-projections",
       numberOfInstances = numberOfProjectionTags,
-      behaviorFactory = (i: Int) => ProjectionBehavior(purposePersistentProjection.projection(projectionTag(i))),
+      behaviorFactory = (i: Int) => ProjectionBehavior(purposeNotificationProjection.projection(projectionTag(i))),
       stopMessage = ProjectionBehavior.Stop
     )
 

@@ -22,7 +22,7 @@ import java.util.UUID
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
 
-final case class PurposePersistentProjection(dbConfig: DatabaseConfig[JdbcProfile], queueWriter: QueueWriter)(implicit
+final case class PurposeNotificationProjection(dbConfig: DatabaseConfig[JdbcProfile], queueWriter: QueueWriter)(implicit
   system: ActorSystem[_],
   ec: ExecutionContext
 ) {
@@ -32,14 +32,14 @@ final case class PurposePersistentProjection(dbConfig: DatabaseConfig[JdbcProfil
       .eventsByTag[Event](system, readJournalPluginId = JdbcReadJournal.Identifier, tag = tag)
 
   def projection(tag: String): ExactlyOnceProjection[Offset, EventEnvelope[Event]] = SlickProjection.exactlyOnce(
-    projectionId = ProjectionId("purpose-projections", tag),
+    projectionId = ProjectionId("purpose-notification-projections", tag),
     sourceProvider = sourceProvider(tag),
-    handler = () => new ProjectionHandler(queueWriter),
+    handler = () => NotificationProjectionHandler(queueWriter),
     databaseConfig = dbConfig
   )
 }
 
-final case class ProjectionHandler(queueWriter: QueueWriter)(implicit ec: ExecutionContext)
+final case class NotificationProjectionHandler(queueWriter: QueueWriter)(implicit ec: ExecutionContext)
     extends SlickHandler[EventEnvelope[Event]] {
 
   private val logger: Logger = Logger(this.getClass)

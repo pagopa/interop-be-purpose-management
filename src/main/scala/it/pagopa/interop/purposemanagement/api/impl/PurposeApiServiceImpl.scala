@@ -10,9 +10,11 @@ import akka.http.scaladsl.server.Route
 import akka.pattern.StatusReply
 import cats.implicits.toTraverseOps
 import com.typesafe.scalalogging.Logger
+import it.pagopa.interop.commons.jwt.{ADMIN_ROLE, authorizeInterop, hasPermissions}
 import it.pagopa.interop.commons.logging.{CanLogContextFields, ContextFieldsToLog}
 import it.pagopa.interop.commons.utils.AkkaUtils
 import it.pagopa.interop.commons.utils.OpenapiUtils.parseArrayParameters
+import it.pagopa.interop.commons.utils.errors.GenericComponentErrors.OperationForbidden
 import it.pagopa.interop.commons.utils.service.{OffsetDateTimeSupplier, UUIDSupplier}
 import it.pagopa.interop.purposemanagement.api.PurposeApiService
 import it.pagopa.interop.purposemanagement.common.system._
@@ -51,11 +53,18 @@ final case class PurposeApiServiceImpl(
     case Some(s) => s
   }
 
+  private[this] def authorize(roles: String*)(
+    route: => Route
+  )(implicit contexts: Seq[(String, String)], toEntityMarshallerProblem: ToEntityMarshaller[Problem]): Route =
+    authorizeInterop(hasPermissions(roles: _*), problemOf(StatusCodes.Forbidden, OperationForbidden)) {
+      route
+    }
+
   override def createPurpose(purposeSeed: PurposeSeed)(implicit
     toEntityMarshallerPurpose: ToEntityMarshaller[Purpose],
     toEntityMarshallerProblem: ToEntityMarshaller[Problem],
     contexts: Seq[(String, String)]
-  ): Route = {
+  ): Route = authorize(ADMIN_ROLE) {
     logger.info("Adding a purpose for consumer {} to e-service {}", purposeSeed.consumerId, purposeSeed.eserviceId)
     val purpose: PersistentPurpose = PersistentPurpose.fromSeed(purposeSeed, uuidSupplier, dateTimeSupplier)
     val result: Future[StatusReply[PersistentPurpose]] = createPurpose(purpose)
@@ -99,37 +108,38 @@ final case class PurposeApiServiceImpl(
 
   override def deletePurpose(
     purposeId: String
-  )(implicit toEntityMarshallerProblem: ToEntityMarshaller[Problem], contexts: Seq[(String, String)]): Route = {
-    logger.info("Deleting purpose {}", purposeId)
-    val commander: EntityRef[Command]     =
-      sharding.entityRefFor(PurposePersistentBehavior.TypeKey, AkkaUtils.getShard(purposeId, settings.numberOfShards))
-    val result: Future[StatusReply[Unit]] =
-      commander.ask(ref => DeletePurpose(purposeId, ref))
+  )(implicit toEntityMarshallerProblem: ToEntityMarshaller[Problem], contexts: Seq[(String, String)]): Route =
+    authorize(ADMIN_ROLE) {
+      logger.info("Deleting purpose {}", purposeId)
+      val commander: EntityRef[Command]     =
+        sharding.entityRefFor(PurposePersistentBehavior.TypeKey, AkkaUtils.getShard(purposeId, settings.numberOfShards))
+      val result: Future[StatusReply[Unit]] =
+        commander.ask(ref => DeletePurpose(purposeId, ref))
 
-    onComplete(result) {
-      case Success(statusReply) if statusReply.isSuccess =>
-        deletePurpose204
-      case Success(statusReply)                          =>
-        logger.error(s"Error while deleting purpose ${purposeId}", statusReply.getError)
-        statusReply.getError match {
-          case PurposeNotFound(pId)    =>
-            deletePurpose404(problemOf(StatusCodes.NotFound, DeletePurposeNotFound(pId)))
-          case PurposeHasVersions(pId) =>
-            deletePurpose409(problemOf(StatusCodes.Conflict, DeletePurposeVersionsNotEmpty(pId)))
-          case _                       =>
-            deletePurpose400(problemOf(StatusCodes.BadRequest, DeletePurposeBadRequest(purposeId)))
-        }
-      case Failure(ex)                                   =>
-        logger.error(s"Error while deleting purpose ${purposeId}", ex)
-        deletePurpose400(problemOf(StatusCodes.BadRequest, DeletePurposeBadRequest(purposeId)))
+      onComplete(result) {
+        case Success(statusReply) if statusReply.isSuccess =>
+          deletePurpose204
+        case Success(statusReply)                          =>
+          logger.error(s"Error while deleting purpose ${purposeId}", statusReply.getError)
+          statusReply.getError match {
+            case PurposeNotFound(pId)    =>
+              deletePurpose404(problemOf(StatusCodes.NotFound, DeletePurposeNotFound(pId)))
+            case PurposeHasVersions(pId) =>
+              deletePurpose409(problemOf(StatusCodes.Conflict, DeletePurposeVersionsNotEmpty(pId)))
+            case _                       =>
+              deletePurpose400(problemOf(StatusCodes.BadRequest, DeletePurposeBadRequest(purposeId)))
+          }
+        case Failure(ex)                                   =>
+          logger.error(s"Error while deleting purpose ${purposeId}", ex)
+          deletePurpose400(problemOf(StatusCodes.BadRequest, DeletePurposeBadRequest(purposeId)))
+      }
     }
-  }
 
   override def createPurposeVersion(purposeId: String, purposeVersionSeed: PurposeVersionSeed)(implicit
     toEntityMarshallerPurposeVersion: ToEntityMarshaller[PurposeVersion],
     toEntityMarshallerProblem: ToEntityMarshaller[Problem],
     contexts: Seq[(String, String)]
-  ): Route = {
+  ): Route = authorize(ADMIN_ROLE) {
     logger.info("Adding a version to purpose {}", purposeId)
     val purposeVersion: PersistentPurposeVersion              =
       PersistentPurposeVersion.fromSeed(purposeVersionSeed, uuidSupplier, dateTimeSupplier)
@@ -156,7 +166,7 @@ final case class PurposeApiServiceImpl(
   override def deletePurposeVersion(purposeId: String, versionId: String)(implicit
     toEntityMarshallerProblem: ToEntityMarshaller[Problem],
     contexts: Seq[(String, String)]
-  ): Route = {
+  ): Route = authorize(ADMIN_ROLE) {
     logger.info("Deleting version {} of purpose {}", versionId, purposeId)
     val commander: EntityRef[Command]     =
       sharding.entityRefFor(PurposePersistentBehavior.TypeKey, AkkaUtils.getShard(purposeId, settings.numberOfShards))
@@ -192,7 +202,7 @@ final case class PurposeApiServiceImpl(
     toEntityMarshallerPurposeVersion: ToEntityMarshaller[PurposeVersion],
     toEntityMarshallerProblem: ToEntityMarshaller[Problem],
     contexts: Seq[(String, String)]
-  ): Route = {
+  ): Route = authorize(ADMIN_ROLE) {
     logger.info("Activating purpose {} version {}", purposeId, versionId)
     val result: Future[StatusReply[PersistentPurpose]] =
       activatePurposeVersionById(
@@ -233,7 +243,7 @@ final case class PurposeApiServiceImpl(
     toEntityMarshallerPurposeVersion: ToEntityMarshaller[PurposeVersion],
     toEntityMarshallerProblem: ToEntityMarshaller[Problem],
     contexts: Seq[(String, String)]
-  ): Route = {
+  ): Route = authorize(ADMIN_ROLE) {
     logger.info("Suspending purpose {} version {}", purposeId, versionId)
     val result: Future[StatusReply[PersistentPurpose]] =
       suspendPurposeVersionById(purposeId, versionId, stateChangeDetails)
@@ -268,7 +278,7 @@ final case class PurposeApiServiceImpl(
     toEntityMarshallerPurposeVersion: ToEntityMarshaller[PurposeVersion],
     toEntityMarshallerProblem: ToEntityMarshaller[Problem],
     contexts: Seq[(String, String)]
-  ): Route = {
+  ): Route = authorize(ADMIN_ROLE) {
     logger.info("Wait for Approval purpose {} version {}", purposeId, versionId)
     val result: Future[StatusReply[PersistentPurpose]] =
       waitForApprovalPurposeVersionById(purposeId, versionId, stateChangeDetails)
@@ -310,7 +320,7 @@ final case class PurposeApiServiceImpl(
     toEntityMarshallerPurposeVersion: ToEntityMarshaller[PurposeVersion],
     toEntityMarshallerProblem: ToEntityMarshaller[Problem],
     contexts: Seq[(String, String)]
-  ): Route = {
+  ): Route = authorize(ADMIN_ROLE) {
     logger.info("Archiving purpose {} version {}", purposeId, versionId)
     val result: Future[StatusReply[PersistentPurpose]] =
       archivePurposeVersionById(purposeId, versionId, stateChangeDetails)
@@ -375,7 +385,7 @@ final case class PurposeApiServiceImpl(
     toEntityMarshallerPurpose: ToEntityMarshaller[Purpose],
     toEntityMarshallerProblem: ToEntityMarshaller[Problem],
     contexts: Seq[(String, String)]
-  ): Route = {
+  ): Route = authorize(ADMIN_ROLE) {
     logger.info("Updating Purpose {}", purposeId)
 
     val commander: EntityRef[Command] =
@@ -414,7 +424,7 @@ final case class PurposeApiServiceImpl(
     toEntityMarshallerPurposeVersion: ToEntityMarshaller[PurposeVersion],
     toEntityMarshallerProblem: ToEntityMarshaller[Problem],
     contexts: Seq[(String, String)]
-  ): Route = {
+  ): Route = authorize(ADMIN_ROLE) {
     logger.info("Updating version {} of purpose {}", versionId, purposeId)
 
     val commander: EntityRef[Command] =
@@ -462,7 +472,7 @@ final case class PurposeApiServiceImpl(
     toEntityMarshallerPurposeVersion: ToEntityMarshaller[PurposeVersion],
     toEntityMarshallerProblem: ToEntityMarshaller[Problem],
     contexts: Seq[(String, String)]
-  ): Route = {
+  ): Route = authorize(ADMIN_ROLE) {
     logger.info("Updating version {} of purpose {}", versionId, purposeId)
 
     val commander: EntityRef[Command] =

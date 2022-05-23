@@ -8,7 +8,6 @@ import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, Entity}
 import akka.cluster.typed.{Cluster, Join}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.directives.{AuthenticationDirective, SecurityDirectives}
-import it.pagopa.interop.commons.utils.AkkaUtils.Authenticator
 import it.pagopa.interop.purposemanagement.api.PurposeApi
 import it.pagopa.interop.purposemanagement.api.impl.{PurposeApiMarshallerImpl, PurposeApiServiceImpl}
 import it.pagopa.interop.purposemanagement.model.persistence.PurposePersistentBehavior
@@ -32,7 +31,7 @@ abstract class BaseIntegrationSpec
   private var controller: Option[Controller]                                    = None
   private var bindServer: Option[Future[Http.ServerBinding]]                    = None
   private val wrappingDirective: AuthenticationDirective[Seq[(String, String)]] =
-    SecurityDirectives.authenticateOAuth2("SecurityRealm", Authenticator)
+    SecurityDirectives.authenticateOAuth2("SecurityRealm", AdminMockAuthenticator)
 
   private val sharding: ClusterSharding = ClusterSharding(system)
 

@@ -10,7 +10,7 @@ import akka.http.scaladsl.server.Route
 import akka.pattern.StatusReply
 import cats.implicits.toTraverseOps
 import com.typesafe.scalalogging.Logger
-import it.pagopa.interop.commons.jwt.{ADMIN_ROLE, authorizeInterop, hasPermissions}
+import it.pagopa.interop.commons.jwt.{ADMIN_ROLE, API_ROLE, M2M_ROLE, SECURITY_ROLE, authorizeInterop, hasPermissions}
 import it.pagopa.interop.commons.logging.{CanLogContextFields, ContextFieldsToLog}
 import it.pagopa.interop.commons.utils.AkkaUtils
 import it.pagopa.interop.commons.utils.OpenapiUtils.parseArrayParameters
@@ -90,7 +90,7 @@ final case class PurposeApiServiceImpl(
     toEntityMarshallerPurpose: ToEntityMarshaller[Purpose],
     toEntityMarshallerProblem: ToEntityMarshaller[Problem],
     contexts: Seq[(String, String)]
-  ): Route = {
+  ): Route = authorize(ADMIN_ROLE, SECURITY_ROLE, API_ROLE, M2M_ROLE) {
     logger.info("Retrieving purpose {}", purposeId)
     val commander: EntityRef[Command]                          =
       sharding.entityRefFor(PurposePersistentBehavior.TypeKey, AkkaUtils.getShard(purposeId, settings.numberOfShards))
@@ -351,7 +351,7 @@ final case class PurposeApiServiceImpl(
     toEntityMarshallerPurposes: ToEntityMarshaller[Purposes],
     toEntityMarshallerProblem: ToEntityMarshaller[Problem],
     contexts: Seq[(String, String)]
-  ): Route = {
+  ): Route = authorize(ADMIN_ROLE, SECURITY_ROLE, API_ROLE, M2M_ROLE) {
     logger.info("Getting purposes for consumer {} to e-service {} with states {}", consumerId, eserviceId, states)
     val sliceSize = 100
 

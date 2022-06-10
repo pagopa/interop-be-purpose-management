@@ -1,0 +1,95 @@
+{
+  "endpoints": [
+    {
+      "verb": "POST",
+      "roles": [
+        "admin"
+      ],
+      "route": "createPurpose"
+    },
+    {
+      "verb": "GET",
+      "roles": [
+        "admin", "security", "api", "m2m"
+      ],
+      "route": "getPurpose"
+    },
+    {
+      "verb": "DELETE",
+      "roles": [
+        "admin"
+      ],
+      "route": "deletePurpose"
+    },
+    {
+      "verb": "POST",
+      "roles": [
+        "admin"
+      ],
+      "route": "createPurposeVersion"
+    },
+    {
+      "verb": "DELETE",
+      "roles": [
+        "admin"
+      ],
+      "route": "deletePurposeVersion"
+    },
+    {
+      "verb": "POST",
+      "roles": [
+        "admin"
+      ],
+      "route": "activatePurposeVersion"
+    },
+    {
+      "verb": "POST",
+      "roles": [
+        "admin"
+      ],
+      "route": "suspendPurposeVersion"
+    },
+    {
+      "verb": "POST",
+      "roles": [
+        "admin"
+      ],
+      "route": "waitForApprovalPurposeVersion"
+    },
+    {
+      "verb": "POST",
+      "roles": [
+        "admin"
+      ],
+      "route": "archivePurposeVersion"
+    },
+    {
+      "verb": "GET",
+      "roles": [
+        "admin", "security", "api", "m2m"
+      ],
+      "route": "getPurposes"
+    },
+    {
+      "verb": "POST",
+      "roles": [
+        "admin"
+      ],
+      "route": "updatePurpose"
+    },
+    {
+      "verb": "POST",
+      "roles": [
+        "admin"
+      ],
+      "route": "updateDraftPurposeVersion"
+    },
+    {
+      "verb": "POST",
+      "roles": [
+        "admin"
+      ],
+      "route": "updateWaitingForApprovalPurposeVersion"
+    }
+  ]
+}

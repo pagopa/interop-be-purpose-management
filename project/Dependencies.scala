@@ -33,6 +33,7 @@ object Dependencies {
     lazy val slf4j            = namespace            %% "akka-slf4j"                   % akkaVersion
     lazy val stream           = namespace            %% "akka-stream-typed"            % akkaVersion
     lazy val testkit          = namespace            %% "akka-actor-testkit-typed"     % akkaVersion
+    lazy val httpTestkit      = namespace            %% "akka-http-testkit"            % akkaHttpVersion
   }
 
   private[this] object awssdk {
@@ -148,6 +149,7 @@ object Dependencies {
       scalaprotobuf.core          % Protobuf,
       scalatest.core              % Test,
       scalamock.core              % Test,
+      akka.httpTestkit            % Test,
       akka.testkit                % Test
     )
 

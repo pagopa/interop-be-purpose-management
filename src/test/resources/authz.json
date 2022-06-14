@@ -10,7 +10,7 @@
     {
       "verb": "GET",
       "roles": [
-        "admin", "security", "api", "m2m"
+        "admin", "security", "api", "m2m", "internal"
       ],
       "route": "getPurpose"
     },

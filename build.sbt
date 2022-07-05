@@ -6,7 +6,8 @@ ThisBuild / organization     := "it.pagopa"
 ThisBuild / organizationName := "Pagopa S.p.A."
 
 ThisBuild / dependencyOverrides ++= Dependencies.Jars.overrides
-ThisBuild / version := ComputeVersion.version
+ThisBuild / version           := ComputeVersion.version
+Global / onChangedBuildSource := ReloadOnSourceChanges
 
 ThisBuild / resolvers += "Pagopa Nexus Snapshots" at s"https://${System.getenv("MAVEN_REPO")}/nexus/repository/maven-snapshots/"
 ThisBuild / resolvers += "Pagopa Nexus Releases" at s"https://${System.getenv("MAVEN_REPO")}/nexus/repository/maven-releases/"

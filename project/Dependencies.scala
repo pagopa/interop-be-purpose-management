@@ -76,10 +76,6 @@ object Dependencies {
     lazy val core = "io.spray" %% "spray-json" % sprayVersion
   }
 
-  private[this] object mongodb {
-    lazy val scalaDriver = "org.mongodb.scala" %% "mongo-scala-driver" % mongodbScalaDriverVersion
-  }
-
   private[this] object mustache {
     lazy val mustache = "com.github.spullara.mustache.java" % "compiler" % mustacheVersion
   }
@@ -145,7 +141,6 @@ object Dependencies {
       kamon.bundle                % Compile,
       kamon.prometheus            % Compile,
       logback.classic             % Compile,
-      mongodb.scalaDriver         % Compile,
       mustache.mustache           % Compile,
       pagopa.commonsUtils         % Compile,
       pagopa.commonsJWT           % Compile,

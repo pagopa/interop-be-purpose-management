@@ -65,7 +65,7 @@ trait Dependencies {
 
     val mongoDbConfig = ApplicationConfiguration.mongoDb
 
-    val purposeCqrsProjection         = PurposeCqrsProjection(dbConfig, mongoDbConfig)
+    val purposeCqrsProjection         = PurposeCqrsProjection.projection(dbConfig, mongoDbConfig)
     val purposeNotificationProjection = PurposeNotificationProjection(dbConfig, queueWriter)
 
     ShardedDaemonProcess(actorSystem).init[ProjectionBehavior.Command](

@@ -1,6 +1,7 @@
 package it.pagopa.interop.purposemanagement.common.system
 
 import com.typesafe.config.{Config, ConfigFactory}
+import it.pagopa.interop.commons.cqrs.model.MongoDbConfig
 
 object ApplicationConfiguration {
   val config: Config = ConfigFactory.load()

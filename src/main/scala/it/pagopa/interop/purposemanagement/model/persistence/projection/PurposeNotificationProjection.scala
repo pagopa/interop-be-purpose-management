@@ -1,4 +1,4 @@
-package it.pagopa.interop.purposemanagement.model.persistence
+package it.pagopa.interop.purposemanagement.model.persistence.projection
 
 import akka.Done
 import akka.actor.typed.ActorSystem
@@ -13,7 +13,7 @@ import cats.syntax.all._
 import com.typesafe.scalalogging.Logger
 import it.pagopa.interop.commons.queue.QueueWriter
 import it.pagopa.interop.commons.queue.message.{Message, ProjectableEvent}
-import it.pagopa.interop.purposemanagement.model.persistence.Event
+import it.pagopa.interop.purposemanagement.model.persistence.{Event, PurposeEventsSerde}
 import slick.basic.DatabaseConfig
 import slick.dbio._
 import slick.jdbc.JdbcProfile
@@ -22,24 +22,25 @@ import java.util.UUID
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
 
-class PurposePersistentProjection(dbConfig: DatabaseConfig[JdbcProfile], queueWriter: QueueWriter)(implicit
-  system: ActorSystem[_],
-  ec: ExecutionContext
-) {
+final case class PurposeNotificationProjection(
+  dbConfig: DatabaseConfig[JdbcProfile],
+  queueWriter: QueueWriter,
+  projectionId: String
+)(implicit system: ActorSystem[_], ec: ExecutionContext) {
 
   def sourceProvider(tag: String): SourceProvider[Offset, EventEnvelope[Event]] =
     EventSourcedProvider
       .eventsByTag[Event](system, readJournalPluginId = JdbcReadJournal.Identifier, tag = tag)
 
   def projection(tag: String): ExactlyOnceProjection[Offset, EventEnvelope[Event]] = SlickProjection.exactlyOnce(
-    projectionId = ProjectionId("purpose-projections", tag),
+    projectionId = ProjectionId(projectionId, tag),
     sourceProvider = sourceProvider(tag),
-    handler = () => new ProjectionHandler(queueWriter),
+    handler = () => NotificationProjectionHandler(queueWriter),
     databaseConfig = dbConfig
   )
 }
 
-class ProjectionHandler(queueWriter: QueueWriter)(implicit ec: ExecutionContext)
+final case class NotificationProjectionHandler(queueWriter: QueueWriter)(implicit ec: ExecutionContext)
     extends SlickHandler[EventEnvelope[Event]] {
 
   private val logger: Logger = Logger(this.getClass)

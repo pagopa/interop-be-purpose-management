@@ -27,12 +27,11 @@ import it.pagopa.interop.purposemanagement.common.system.ApplicationConfiguratio
   numberOfProjectionTags,
   projectionTag
 }
-import it.pagopa.interop.purposemanagement.model.persistence.{
-  Command,
-  PurposeEventsSerde,
-  PurposePersistentBehavior,
-  PurposePersistentProjection
+import it.pagopa.interop.purposemanagement.model.persistence.projection.{
+  PurposeCqrsProjection,
+  PurposeNotificationProjection
 }
+import it.pagopa.interop.purposemanagement.model.persistence.{Command, PurposeEventsSerde, PurposePersistentBehavior}
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
@@ -57,19 +56,32 @@ trait Dependencies {
   val purposePersistenceEntity: Entity[Command, ShardingEnvelope[Command]] =
     Entity(PurposePersistentBehavior.TypeKey)(behaviorFactory(dateTimeSupplier))
 
-  def initProjections()(implicit actorSystem: ActorSystem[_], ec: ExecutionContext) = {
+  def initProjections()(implicit actorSystem: ActorSystem[_], ec: ExecutionContext): Unit = {
     val queueWriter: QueueWriter =
-      QueueWriter.get(ApplicationConfiguration.queueUrl)(PurposeEventsSerde.purposeToJson)
+      QueueWriter.get(ApplicationConfiguration.queueUrl)(PurposeEventsSerde.projectablePurposeToJson)
 
     val dbConfig: DatabaseConfig[JdbcProfile] =
       DatabaseConfig.forConfig("akka-persistence-jdbc.shared-databases.slick")
 
-    val purposePersistentProjection = new PurposePersistentProjection(dbConfig, queueWriter)
+    val mongoDbConfig = ApplicationConfiguration.mongoDb
+
+    val notificationProjectionId = "purpose-notification-projections"
+    val cqrsProjectionId         = "purpose-cqrs-projections"
+
+    val purposeNotificationProjection = PurposeNotificationProjection(dbConfig, queueWriter, notificationProjectionId)
+    val purposeCqrsProjection         = PurposeCqrsProjection.projection(dbConfig, mongoDbConfig, cqrsProjectionId)
 
     ShardedDaemonProcess(actorSystem).init[ProjectionBehavior.Command](
-      name = "purpose-projections",
+      name = notificationProjectionId,
       numberOfInstances = numberOfProjectionTags,
-      behaviorFactory = (i: Int) => ProjectionBehavior(purposePersistentProjection.projection(projectionTag(i))),
+      behaviorFactory = (i: Int) => ProjectionBehavior(purposeNotificationProjection.projection(projectionTag(i))),
+      stopMessage = ProjectionBehavior.Stop
+    )
+
+    ShardedDaemonProcess(actorSystem).init[ProjectionBehavior.Command](
+      name = cqrsProjectionId,
+      numberOfInstances = numberOfProjectionTags,
+      behaviorFactory = (i: Int) => ProjectionBehavior(purposeCqrsProjection.projection(projectionTag(i))),
       stopMessage = ProjectionBehavior.Stop
     )
   }

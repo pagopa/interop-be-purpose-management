@@ -15,11 +15,11 @@ import spray.json._
 import scala.concurrent.ExecutionContext
 
 object PurposeCqrsProjection {
-  def projection(offsetDbConfig: DatabaseConfig[JdbcProfile], mongoDbConfig: MongoDbConfig)(implicit
+  def projection(offsetDbConfig: DatabaseConfig[JdbcProfile], mongoDbConfig: MongoDbConfig, projectionId: String)(implicit
     system: ActorSystem[_],
     ec: ExecutionContext
   ): CqrsProjection[Event] =
-    CqrsProjection[Event](offsetDbConfig, mongoDbConfig, projectionId = "purpose-cqrs-projections", eventHandler)
+    CqrsProjection[Event](offsetDbConfig, mongoDbConfig, projectionId = projectionId, eventHandler)
 
   private def eventHandler(collection: MongoCollection[Document], event: Event): PartialMongoAction = event match {
     case PurposeCreated(p)                  =>

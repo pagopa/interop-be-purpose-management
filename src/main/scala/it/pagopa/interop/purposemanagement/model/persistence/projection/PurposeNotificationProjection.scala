@@ -22,17 +22,18 @@ import java.util.UUID
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
 
-final case class PurposeNotificationProjection(dbConfig: DatabaseConfig[JdbcProfile], queueWriter: QueueWriter)(implicit
-  system: ActorSystem[_],
-  ec: ExecutionContext
-) {
+final case class PurposeNotificationProjection(
+  dbConfig: DatabaseConfig[JdbcProfile],
+  queueWriter: QueueWriter,
+  projectionId: String
+)(implicit system: ActorSystem[_], ec: ExecutionContext) {
 
   def sourceProvider(tag: String): SourceProvider[Offset, EventEnvelope[Event]] =
     EventSourcedProvider
       .eventsByTag[Event](system, readJournalPluginId = JdbcReadJournal.Identifier, tag = tag)
 
   def projection(tag: String): ExactlyOnceProjection[Offset, EventEnvelope[Event]] = SlickProjection.exactlyOnce(
-    projectionId = ProjectionId("purpose-notification-projections", tag),
+    projectionId = ProjectionId(projectionId, tag),
     sourceProvider = sourceProvider(tag),
     handler = () => NotificationProjectionHandler(queueWriter),
     databaseConfig = dbConfig

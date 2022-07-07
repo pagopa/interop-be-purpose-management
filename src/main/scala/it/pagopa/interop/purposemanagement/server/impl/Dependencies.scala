@@ -65,18 +65,21 @@ trait Dependencies {
 
     val mongoDbConfig = ApplicationConfiguration.mongoDb
 
-    val purposeCqrsProjection         = PurposeCqrsProjection.projection(dbConfig, mongoDbConfig)
-    val purposeNotificationProjection = PurposeNotificationProjection(dbConfig, queueWriter)
+    val notificationProjectionId = "purpose-notification-projections"
+    val cqrsProjectionId         = "purpose-cqrs-projections"
+
+    val purposeNotificationProjection = PurposeNotificationProjection(dbConfig, queueWriter, notificationProjectionId)
+    val purposeCqrsProjection         = PurposeCqrsProjection.projection(dbConfig, mongoDbConfig, cqrsProjectionId)
 
     ShardedDaemonProcess(actorSystem).init[ProjectionBehavior.Command](
-      name = "purpose-notification-projections",
+      name = notificationProjectionId,
       numberOfInstances = numberOfProjectionTags,
       behaviorFactory = (i: Int) => ProjectionBehavior(purposeNotificationProjection.projection(projectionTag(i))),
       stopMessage = ProjectionBehavior.Stop
     )
 
     ShardedDaemonProcess(actorSystem).init[ProjectionBehavior.Command](
-      name = "purpose-cqrs-projections",
+      name = cqrsProjectionId,
       numberOfInstances = numberOfProjectionTags,
       behaviorFactory = (i: Int) => ProjectionBehavior(purposeCqrsProjection.projection(projectionTag(i))),
       stopMessage = ProjectionBehavior.Stop

@@ -18,6 +18,7 @@ import kamon.Kamon
 
 import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.util.{Failure, Success}
+import akka.actor.typed.DispatcherSelector
 
 object Main extends App with Dependencies {
 
@@ -27,6 +28,9 @@ object Main extends App with Dependencies {
     Behaviors.setup[Nothing] { context =>
       implicit val actorSystem: ActorSystem[Nothing]          = context.system
       implicit val executionContext: ExecutionContextExecutor = actorSystem.executionContext
+
+      val selector: DispatcherSelector         = DispatcherSelector.fromConfig("futures-dispatcher")
+      val blockingEc: ExecutionContextExecutor = actorSystem.dispatchers.lookup(selector)
 
       Kamon.init()
       AkkaManagement.get(actorSystem).start()
@@ -47,7 +51,7 @@ object Main extends App with Dependencies {
 
       cluster.subscriptions ! Subscribe(listener, classOf[ClusterEvent.MemberEvent])
 
-      if (ApplicationConfiguration.projectionsEnabled) initProjections()
+      if (ApplicationConfiguration.projectionsEnabled) initProjections(blockingEc)
 
       logger.info(renderBuildInfo(BuildInfo))
       logger.info(s"Started cluster at ${cluster.selfMember.address}")

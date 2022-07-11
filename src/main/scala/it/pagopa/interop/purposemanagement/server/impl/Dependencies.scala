@@ -37,6 +37,7 @@ import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContextExecutor
 
 trait Dependencies {
 
@@ -57,9 +58,11 @@ trait Dependencies {
   val purposePersistenceEntity: Entity[Command, ShardingEnvelope[Command]] =
     Entity(PurposePersistentBehavior.TypeKey)(behaviorFactory(dateTimeSupplier))
 
-  def initProjections()(implicit actorSystem: ActorSystem[_], ec: ExecutionContext) = {
+  def initProjections(
+    blockingEc: ExecutionContextExecutor
+  )(implicit actorSystem: ActorSystem[_], ec: ExecutionContext) = {
     val queueWriter: QueueWriter =
-      QueueWriter.get(ApplicationConfiguration.queueUrl)(PurposeEventsSerde.purposeToJson)
+      QueueWriter.get(ApplicationConfiguration.queueUrl)(PurposeEventsSerde.purposeToJson)(blockingEc)
 
     val dbConfig: DatabaseConfig[JdbcProfile] =
       DatabaseConfig.forConfig("akka-persistence-jdbc.shared-databases.slick")
@@ -74,9 +77,8 @@ trait Dependencies {
     )
   }
 
-  def getJwtValidator()(implicit ec: ExecutionContext): Future[JWTReader] = JWTConfiguration.jwtReader
+  def getJwtValidator(): Future[JWTReader] = JWTConfiguration.jwtReader
     .loadKeyset()
-    .toFuture
     .map(keyset =>
       new DefaultJWTReader with PublicKeysHolder {
         var publicKeyset: Map[KID, SerializedKey]                                        = keyset
@@ -84,6 +86,7 @@ trait Dependencies {
           getClaimsVerifier(audience = ApplicationConfiguration.jwtAudience)
       }
     )
+    .toFuture
 
   val validationExceptionToRoute: ValidationReport => Route = report => {
     val error =

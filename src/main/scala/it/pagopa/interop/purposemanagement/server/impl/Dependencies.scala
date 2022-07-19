@@ -41,8 +41,6 @@ import scala.concurrent.ExecutionContextExecutor
 
 trait Dependencies {
 
-  System.setProperty("kanela.show-banner", "false")
-
   val uuidSupplier: UUIDSupplier               = new UUIDSupplierImpl
   val dateTimeSupplier: OffsetDateTimeSupplier = OffsetDateTimeSupplierImpl
 

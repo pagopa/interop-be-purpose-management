@@ -14,21 +14,15 @@ import com.typesafe.scalalogging.Logger
 import it.pagopa.interop.commons.logging.renderBuildInfo
 import it.pagopa.interop.purposemanagement.common.system.ApplicationConfiguration
 import it.pagopa.interop.purposemanagement.server.Controller
-import kamon.Kamon
-
 import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.util.{Failure, Success}
 import akka.actor.typed.DispatcherSelector
 
 object Main extends App with Dependencies {
 
-  Kamon.init()
-
   val logger: Logger = Logger(this.getClass())
 
-  System.setProperty("kanela.show-banner", "false")
-
-  val actorSystem: ActorSystem[Nothing] = ActorSystem[Nothing](
+  ActorSystem[Nothing](
     Behaviors.setup[Nothing] { context =>
       implicit val actorSystem: ActorSystem[Nothing]          = context.system
       implicit val executionContext: ExecutionContextExecutor = actorSystem.executionContext
@@ -78,7 +72,4 @@ object Main extends App with Dependencies {
     },
     BuildInfo.name
   )
-
-  actorSystem.whenTerminated.onComplete { case _ => Kamon.stop() }(scala.concurrent.ExecutionContext.global)
-
 }

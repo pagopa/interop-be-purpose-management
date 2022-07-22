@@ -8,6 +8,7 @@ import PersistentSerializationSpec._
 import com.softwaremill.diffx.munit.DiffxAssertions
 import com.softwaremill.diffx.generic.auto._
 import com.softwaremill.diffx.Diff
+import scala.reflect.runtime.universe.{typeOf, TypeTag}
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import it.pagopa.interop.purposemanagement.model.persistence.serializer.v1.purpose.PurposeStateV1._
@@ -17,7 +18,6 @@ import it.pagopa.interop.purposemanagement.model.persistence.serializer.v1.event
 import it.pagopa.interop.purposemanagement.model.persistence.serializer.v1.state._
 import it.pagopa.interop.purposemanagement.model.persistence._
 import it.pagopa.interop.purposemanagement.model.purpose._
-import scala.reflect.runtime.universe.{typeOf, TypeTag}
 
 class PersistentSerializationSpec extends ScalaCheckSuite with DiffxAssertions {
 
@@ -60,7 +60,7 @@ class PersistentSerializationSpec extends ScalaCheckSuite with DiffxAssertions {
   def deserCheck[A, B: TypeTag](
     gen: Gen[(A, B)]
   )(implicit e: PersistEventDeserializer[B, A], loc: munit.Location, d: => Diff[Either[Throwable, A]]): Unit =
-    property(s"${typeOf[B].typeSymbol.name.toString} is correctly serialized") {
+    property(s"${typeOf[B].typeSymbol.name.toString} is correctly deserialized") {
       forAll(gen) { case (state, stateV1) =>
         // * This is declared lazy in the signature to avoid a MethodTooBigException
         implicit val diffX: Diff[Either[Throwable, A]] = d

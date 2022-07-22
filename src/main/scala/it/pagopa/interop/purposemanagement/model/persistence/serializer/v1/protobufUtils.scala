@@ -1,7 +1,7 @@
 package it.pagopa.interop.purposemanagement.model.persistence.serializer.v1
 
 import cats.implicits.toTraverseOps
-import it.pagopa.interop.commons.utils.TypeConversions.{LongOps, OffsetDateTimeOps, StringOps}
+import it.pagopa.interop.commons.utils.TypeConversions.{OffsetDateTimeOps, StringOps}
 import it.pagopa.interop.purposemanagement.model.persistence.serializer.v1.purpose.{
   PurposeStateV1,
   PurposeV1,
@@ -44,23 +44,23 @@ object protobufUtils {
     purpose.toEither
   }
 
-  def toProtobufPurpose(persistentPurpose: PersistentPurpose): Either[Throwable, PurposeV1] = {
-    Right(
-      PurposeV1(
-        id = persistentPurpose.id.toString,
-        eserviceId = persistentPurpose.eserviceId.toString,
-        consumerId = persistentPurpose.consumerId.toString,
-        versions = persistentPurpose.versions.map(toProtobufPurposeVersion),
-        suspendedByConsumer = persistentPurpose.suspendedByConsumer,
-        suspendedByProducer = persistentPurpose.suspendedByProducer,
-        title = persistentPurpose.title,
-        description = persistentPurpose.description,
-        riskAnalysisForm = persistentPurpose.riskAnalysisForm.map(toProtobufRiskAnalysis),
-        createdAt = persistentPurpose.createdAt.toMillis,
-        updatedAt = persistentPurpose.updatedAt.map(_.toMillis)
-      )
-    )
-  }
+  def toProtobufPurpose(persistentPurpose: PersistentPurpose): Either[Throwable, PurposeV1] = for {
+    createdAt <- persistentPurpose.createdAt.asFormattedString.toEither
+    updatedAt <- persistentPurpose.updatedAt.traverse(_.asFormattedString.toEither)
+    versions  <- persistentPurpose.versions.traverse(toProtobufPurposeVersion)
+  } yield PurposeV1(
+    id = persistentPurpose.id.toString,
+    eserviceId = persistentPurpose.eserviceId.toString,
+    consumerId = persistentPurpose.consumerId.toString,
+    versions = versions,
+    suspendedByConsumer = persistentPurpose.suspendedByConsumer,
+    suspendedByProducer = persistentPurpose.suspendedByProducer,
+    title = persistentPurpose.title,
+    description = persistentPurpose.description,
+    riskAnalysisForm = persistentPurpose.riskAnalysisForm.map(toProtobufRiskAnalysis),
+    createdAt = createdAt,
+    updatedAt = updatedAt
+  )
 
   def toPersistentPurposeVersion(
     protobufPurposeVersion: PurposeVersionV1
@@ -86,17 +86,24 @@ object protobufUtils {
     purpose.toEither
   }
 
-  def toProtobufPurposeVersion(persistentPurposeVersion: PersistentPurposeVersion): PurposeVersionV1 =
-    PurposeVersionV1(
-      id = persistentPurposeVersion.id.toString,
-      state = toProtobufPurposeState(persistentPurposeVersion.state),
-      dailyCalls = persistentPurposeVersion.dailyCalls,
-      createdAt = persistentPurposeVersion.createdAt.toMillis,
-      updatedAt = persistentPurposeVersion.updatedAt.map(_.toMillis),
-      firstActivationAt = persistentPurposeVersion.firstActivationAt.map(_.toMillis),
-      expectedApprovalDate = persistentPurposeVersion.expectedApprovalDate.map(_.toMillis),
-      riskAnalysis = persistentPurposeVersion.riskAnalysis.map(toProtobufPurposeVersionDocument)
-    )
+  def toProtobufPurposeVersion(
+    persistentPurposeVersion: PersistentPurposeVersion
+  ): Either[Throwable, PurposeVersionV1] = for {
+    createdAt            <- persistentPurposeVersion.createdAt.asFormattedString.toEither
+    updatedAt            <- persistentPurposeVersion.updatedAt.traverse(_.asFormattedString.toEither)
+    riskAnalysis         <- persistentPurposeVersion.riskAnalysis.traverse(toProtobufPurposeVersionDocument)
+    firstActivationAt    <- persistentPurposeVersion.firstActivationAt.traverse(_.asFormattedString.toEither)
+    expectedApprovalDate <- persistentPurposeVersion.expectedApprovalDate.traverse(_.asFormattedString.toEither)
+  } yield PurposeVersionV1(
+    id = persistentPurposeVersion.id.toString,
+    state = toProtobufPurposeState(persistentPurposeVersion.state),
+    dailyCalls = persistentPurposeVersion.dailyCalls,
+    createdAt = createdAt,
+    updatedAt = updatedAt,
+    firstActivationAt = firstActivationAt,
+    expectedApprovalDate = expectedApprovalDate,
+    riskAnalysis = riskAnalysis
+  )
 
   def toProtobufPurposeState(status: PersistentPurposeVersionState): PurposeStateV1 = status match {
     case Draft              => PurposeStateV1.DRAFT
@@ -133,14 +140,15 @@ object protobufUtils {
 
   def toProtobufPurposeVersionDocument(
     persistentDocument: PersistentPurposeVersionDocument
-  ): PurposeVersionDocumentV1 = {
-    PurposeVersionDocumentV1(
-      id = persistentDocument.id.toString,
-      contentType = persistentDocument.contentType,
-      path = persistentDocument.path,
-      createdAt = persistentDocument.createdAt.toMillis
-    )
-  }
+  ): Either[Throwable, PurposeVersionDocumentV1] =
+    persistentDocument.createdAt.asFormattedString.toEither.map { createdAt =>
+      PurposeVersionDocumentV1(
+        id = persistentDocument.id.toString,
+        contentType = persistentDocument.contentType,
+        path = persistentDocument.path,
+        createdAt = createdAt
+      )
+    }
 
   def toPersistentRiskAnalysis(
     protobufRiskAnalysis: RiskAnalysisFormV1

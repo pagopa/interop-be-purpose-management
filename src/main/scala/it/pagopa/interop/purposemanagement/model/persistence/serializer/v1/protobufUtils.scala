@@ -44,7 +44,7 @@ object protobufUtils {
     purpose.toEither
   }
 
-  def toProtobufPurpose(persistentPurpose: PersistentPurpose): Either[Throwable, PurposeV1] = {
+  def toProtobufPurpose(persistentPurpose: PersistentPurpose): Either[Throwable, PurposeV1] =
     Right(
       PurposeV1(
         id = persistentPurpose.id.toString,
@@ -60,7 +60,6 @@ object protobufUtils {
         updatedAt = persistentPurpose.updatedAt.map(_.toMillis)
       )
     )
-  }
 
   def toPersistentPurposeVersion(
     protobufPurposeVersion: PurposeVersionV1
@@ -131,16 +130,13 @@ object protobufUtils {
     purpose.toEither
   }
 
-  def toProtobufPurposeVersionDocument(
-    persistentDocument: PersistentPurposeVersionDocument
-  ): PurposeVersionDocumentV1 = {
+  def toProtobufPurposeVersionDocument(persistentDocument: PersistentPurposeVersionDocument): PurposeVersionDocumentV1 =
     PurposeVersionDocumentV1(
       id = persistentDocument.id.toString,
       contentType = persistentDocument.contentType,
       path = persistentDocument.path,
       createdAt = persistentDocument.createdAt.toMillis
     )
-  }
 
   def toPersistentRiskAnalysis(
     protobufRiskAnalysis: RiskAnalysisFormV1

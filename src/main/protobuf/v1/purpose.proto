@@ -19,8 +19,8 @@ message PurposeV1 {
   required string title = 8;
   required string description = 9;
   optional RiskAnalysisFormV1 riskAnalysisForm = 10;
-  required string createdAt = 11;
-  optional string updatedAt = 12;
+  required int64 createdAt = 11;
+  optional int64 updatedAt = 12;
 }
 
 message PurposeVersionV1 {
@@ -28,10 +28,10 @@ message PurposeVersionV1 {
   required PurposeStateV1 state = 2;
   optional PurposeVersionDocumentV1 riskAnalysis = 3;
   required int32 dailyCalls = 4;
-  required string createdAt = 5;
-  optional string updatedAt = 6;
-  optional string firstActivationAt = 7;
-  optional string expectedApprovalDate = 8;
+  required int64 createdAt = 5;
+  optional int64 updatedAt = 6;
+  optional int64 firstActivationAt = 7;
+  optional int64 expectedApprovalDate = 8;
 }
 
 enum PurposeStateV1 {
@@ -46,5 +46,5 @@ message PurposeVersionDocumentV1 {
   required string id = 1;
   required string contentType = 2;
   required string path = 3;
-  required string createdAt = 4;
+  required int64 createdAt = 4;
 }

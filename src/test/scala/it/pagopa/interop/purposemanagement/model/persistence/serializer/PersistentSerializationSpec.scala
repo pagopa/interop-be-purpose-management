@@ -1,23 +1,23 @@
 package it.pagopa.interop.purposemanagement.model.persistence.serializer
 
 import cats.implicits._
-import org.scalacheck.Prop.forAll
-import org.scalacheck.Gen
-import munit.ScalaCheckSuite
-import PersistentSerializationSpec._
-import com.softwaremill.diffx.munit.DiffxAssertions
-import com.softwaremill.diffx.generic.auto._
 import com.softwaremill.diffx.Diff
-import scala.reflect.runtime.universe.{typeOf, TypeTag}
-import java.time.OffsetDateTime
-import java.time.format.DateTimeFormatter
+import com.softwaremill.diffx.generic.auto._
+import com.softwaremill.diffx.munit.DiffxAssertions
+import it.pagopa.interop.purposemanagement.model.persistence._
+import it.pagopa.interop.purposemanagement.model.persistence.serializer.PersistentSerializationSpec._
+import it.pagopa.interop.purposemanagement.model.persistence.serializer.v1.events._
 import it.pagopa.interop.purposemanagement.model.persistence.serializer.v1.purpose.PurposeStateV1._
 import it.pagopa.interop.purposemanagement.model.persistence.serializer.v1.purpose._
 import it.pagopa.interop.purposemanagement.model.persistence.serializer.v1.riskAnalysis._
-import it.pagopa.interop.purposemanagement.model.persistence.serializer.v1.events._
 import it.pagopa.interop.purposemanagement.model.persistence.serializer.v1.state._
-import it.pagopa.interop.purposemanagement.model.persistence._
 import it.pagopa.interop.purposemanagement.model.purpose._
+import munit.ScalaCheckSuite
+import org.scalacheck.Gen
+import org.scalacheck.Prop.forAll
+
+import java.time.{OffsetDateTime, ZoneOffset}
+import scala.reflect.runtime.universe.{TypeTag, typeOf}
 
 class PersistentSerializationSpec extends ScalaCheckSuite with DiffxAssertions {
 
@@ -76,11 +76,13 @@ object PersistentSerializationSpec {
     s <- Gen.containerOfN[List, Char](n, Gen.alphaNumChar)
   } yield s.foldLeft("")(_ + _)
 
-  val offsetDatetimeGen: Gen[(OffsetDateTime, String)] = for {
+  val offsetDatetimeGen: Gen[(OffsetDateTime, Long)] = for {
     n <- Gen.chooseNum(0, 10000L)
-    now = OffsetDateTime.now()
-    time <- Gen.oneOf(now.minusSeconds(n), now.plusSeconds(n))
-  } yield (time, DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(time))
+    now      = OffsetDateTime.now(ZoneOffset.UTC)
+    // Truncate to millis precision
+    nowMills = now.withNano(now.getNano - (now.getNano % 1000000))
+    time <- Gen.oneOf(nowMills.minusSeconds(n), nowMills.plusSeconds(n))
+  } yield (time, time.toInstant.toEpochMilli)
 
   def listOf[T](g: => Gen[T]): Gen[List[T]] = for {
     n <- Gen.choose(0, 10)
@@ -96,13 +98,13 @@ object PersistentSerializationSpec {
   )
 
   val persistentPurposeVersionDocumentGen: Gen[(PersistentPurposeVersionDocument, PurposeVersionDocumentV1)] = for {
-    id                      <- Gen.uuid
-    contentType             <- stringGen
-    path                    <- stringGen
-    (createdAt, createdAtS) <- offsetDatetimeGen
+    id                       <- Gen.uuid
+    contentType              <- stringGen
+    path                     <- stringGen
+    (createdAt, createdAtV1) <- offsetDatetimeGen
   } yield (
     PersistentPurposeVersionDocument(id, contentType, path, createdAt),
-    PurposeVersionDocumentV1(id.toString(), contentType, path, createdAtS)
+    PurposeVersionDocumentV1(id.toString(), contentType, path, createdAtV1)
   )
 
   val persistentPurposeVersionGen: Gen[(PersistentPurposeVersion, PurposeVersionV1)] = for {

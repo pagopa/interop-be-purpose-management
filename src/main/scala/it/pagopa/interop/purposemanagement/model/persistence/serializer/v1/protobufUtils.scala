@@ -1,7 +1,7 @@
 package it.pagopa.interop.purposemanagement.model.persistence.serializer.v1
 
 import cats.implicits.toTraverseOps
-import it.pagopa.interop.commons.utils.TypeConversions.{OffsetDateTimeOps, StringOps, LongOps}
+import it.pagopa.interop.commons.utils.TypeConversions.{LongOps, OffsetDateTimeOps, StringOps}
 import it.pagopa.interop.purposemanagement.model.persistence.serializer.v1.purpose.{
   PurposeStateV1,
   PurposeV1,

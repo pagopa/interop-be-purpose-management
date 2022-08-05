@@ -15,7 +15,8 @@ import spray.json._
 import scala.concurrent.ExecutionContext
 
 object PurposeCqrsProjection {
-  def projection(offsetDbConfig: DatabaseConfig[JdbcProfile], mongoDbConfig: MongoDbConfig, projectionId: String)(implicit
+  def projection(offsetDbConfig: DatabaseConfig[JdbcProfile], mongoDbConfig: MongoDbConfig, projectionId: String)(
+    implicit
     system: ActorSystem[_],
     ec: ExecutionContext
   ): CqrsProjection[Event] =

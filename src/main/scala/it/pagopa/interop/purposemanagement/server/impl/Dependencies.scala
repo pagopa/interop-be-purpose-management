@@ -57,19 +57,20 @@ trait Dependencies {
     Entity(PurposePersistentBehavior.TypeKey)(behaviorFactory(dateTimeSupplier))
 
   def initProjections()(implicit actorSystem: ActorSystem[_], ec: ExecutionContext): Unit = {
+    initNotificationProjection()
+    initCqrsProjection()
+  }
+
+  def initNotificationProjection()(implicit actorSystem: ActorSystem[_], ec: ExecutionContext): Unit = {
     val queueWriter: QueueWriter =
       QueueWriter.get(ApplicationConfiguration.queueUrl)(PurposeEventsSerde.projectablePurposeToJson)
 
     val dbConfig: DatabaseConfig[JdbcProfile] =
       DatabaseConfig.forConfig("akka-persistence-jdbc.shared-databases.slick")
 
-    val mongoDbConfig = ApplicationConfiguration.mongoDb
-
     val notificationProjectionId = "purpose-notification-projections"
-    val cqrsProjectionId         = "purpose-cqrs-projections"
 
     val purposeNotificationProjection = PurposeNotificationProjection(dbConfig, queueWriter, notificationProjectionId)
-    val purposeCqrsProjection         = PurposeCqrsProjection.projection(dbConfig, mongoDbConfig, cqrsProjectionId)
 
     ShardedDaemonProcess(actorSystem).init[ProjectionBehavior.Command](
       name = notificationProjectionId,
@@ -77,6 +78,17 @@ trait Dependencies {
       behaviorFactory = (i: Int) => ProjectionBehavior(purposeNotificationProjection.projection(projectionTag(i))),
       stopMessage = ProjectionBehavior.Stop
     )
+  }
+
+  def initCqrsProjection()(implicit actorSystem: ActorSystem[_], ec: ExecutionContext): Unit = {
+    val dbConfig: DatabaseConfig[JdbcProfile] =
+      DatabaseConfig.forConfig("akka-persistence-jdbc.shared-databases.slick")
+
+    val mongoDbConfig = ApplicationConfiguration.mongoDb
+
+    val cqrsProjectionId = "purpose-cqrs-projections"
+
+    val purposeCqrsProjection = PurposeCqrsProjection.projection(dbConfig, mongoDbConfig, cqrsProjectionId)
 
     ShardedDaemonProcess(actorSystem).init[ProjectionBehavior.Command](
       name = cqrsProjectionId,

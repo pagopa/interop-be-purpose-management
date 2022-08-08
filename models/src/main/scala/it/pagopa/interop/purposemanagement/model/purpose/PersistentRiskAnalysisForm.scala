@@ -1,7 +1,5 @@
 package it.pagopa.interop.purposemanagement.model.purpose
 
-import it.pagopa.interop.commons.utils.service.UUIDSupplier
-import it.pagopa.interop.purposemanagement.model._
 import java.util.UUID
 
 object PersistentRiskAnalysisForm

@@ -20,6 +20,7 @@ import it.pagopa.interop.purposemanagement.common.system.ApplicationConfiguratio
 import it.pagopa.interop.purposemanagement.model.decoupling.PurposeUpdate
 import it.pagopa.interop.purposemanagement.model.persistence._
 import it.pagopa.interop.purposemanagement.model.purpose._
+import it.pagopa.interop.purposemanagement.model.{PurposeVersionDocument, StateChangeDetails}
 import it.pagopa.interop.purposemanagement.server.Controller
 import it.pagopa.interop.purposemanagement.server.impl.Dependencies
 import org.scalamock.scalatest.MockFactory
@@ -121,179 +122,25 @@ trait ItSpecHelper
   def createVersion(purposeId: UUID, version: PersistentPurposeVersion): PersistentPurposeVersion =
     commander(purposeId).ask(ref => CreatePurposeVersion(purposeId.toString, version, ref)).futureValue.getValue
 
-  //  def createPurpose(purposeId: UUID): Future[Purpose] =
-//    for {
-//      seed <- Future.successful(
-//        PurposeSeed(
-//          eserviceId = UUID.randomUUID(),
-//          consumerId = UUID.randomUUID(),
-//          title = "A title",
-//          description = "A description",
-//          riskAnalysisForm = Some(riskAnalysisFormSeed)
-//        )
-//      )
-//      data <- Marshal(seed).to[MessageEntity].map(_.dataBytes)
-//      _ = (() => mockUUIDSupplier.get).expects().returning(purposeId).once()
-//      _ = (() => mockDateTimeSupplier.get).expects().returning(timestamp).once()
-//      _ = (() => mockUUIDSupplier.get).expects().returning(riskAnalysisForm.id).once()
-//      purpose <- Unmarshal(makeRequest(data, "purposes", HttpMethods.POST)).to[Purpose]
-//    } yield purpose
-//
-//  def createPurposeVersion(purposeId: UUID, versionId: UUID, seed: PurposeVersionSeed)(implicit
-//    ec: ExecutionContext,
-//    actorSystem: actor.ActorSystem
-//  ): Future[PurposeVersion] =
-//    for {
-//      data <- Marshal(seed).to[MessageEntity].map(_.dataBytes)
-//      _ = (() => mockUUIDSupplier.get).expects().returning(versionId).once()
-//      _ = (() => mockDateTimeSupplier.get).expects().returning(timestamp).once()
-//      purpose <- Unmarshal(makeRequest(data, s"purposes/$purposeId/versions", HttpMethods.POST)).to[PurposeVersion]
-//    } yield purpose
-//
-//  def updatePurpose(purposeId: UUID, seed: PurposeUpdateContent)(implicit
-//    ec: ExecutionContext,
-//    actorSystem: actor.ActorSystem
-//  ): Future[Purpose] =
-//    for {
-//      data <- Marshal(seed).to[MessageEntity].map(_.dataBytes)
-//      _ = (() => mockUUIDSupplier.get).expects().returning(UUID.randomUUID()).once()
-//      purpose <- Unmarshal(makeRequest(data, s"purposes/$purposeId", HttpMethods.POST))
-//        .to[Purpose]
-//    } yield purpose
-//
-//  def updateDraftPurposeVersion(purposeId: UUID, versionId: UUID, seed: DraftPurposeVersionUpdateContent)(implicit
-//    ec: ExecutionContext,
-//    actorSystem: actor.ActorSystem
-//  ): Future[PurposeVersion] =
-//    for {
-//      data <- Marshal(seed).to[MessageEntity].map(_.dataBytes)
-//      _ = (() => mockDateTimeSupplier.get).expects().returning(timestamp).once()
-//      purpose <- Unmarshal(makeRequest(data, s"purposes/$purposeId/versions/$versionId/update/draft", HttpMethods.POST))
-//        .to[PurposeVersion]
-//    } yield purpose
-//
-//  def updateWaitingForApprovalPurposeVersion(
-//    purposeId: UUID,
-//    versionId: UUID,
-//    seed: WaitingForApprovalPurposeVersionUpdateContent
-//  )(implicit ec: ExecutionContext, actorSystem: actor.ActorSystem): Future[PurposeVersion] =
-//    for {
-//      data <- Marshal(seed).to[MessageEntity].map(_.dataBytes)
-//      _ = (() => mockDateTimeSupplier.get).expects().returning(timestamp).once()
-//      purpose <- Unmarshal(
-//        makeRequest(data, s"purposes/$purposeId/versions/$versionId/update/waitingForApproval", HttpMethods.POST)
-//      )
-//        .to[PurposeVersion]
-//    } yield purpose
-//
-//  def deletePurpose(
-//    purposeId: UUID
-//  )(implicit ec: ExecutionContext, actorSystem: actor.ActorSystem): Future[Option[String]] =
-//    Unmarshal(makeRequest(emptyData, s"purposes/$purposeId", HttpMethods.DELETE)).to[Option[String]]
-//
-//  def deletePurposeVersion(purposeId: UUID, versionId: UUID)(implicit
-//    ec: ExecutionContext,
-//    actorSystem: actor.ActorSystem
-//  ): Future[Option[String]] =
-//    Unmarshal(makeRequest(emptyData, s"purposes/$purposeId/versions/$versionId", HttpMethods.DELETE)).to[Option[String]]
-//
-//  def makeFailingRequest[T](url: String, verb: HttpMethod, data: T)(implicit
-//    ec: ExecutionContext,
-//    actorSystem: actor.ActorSystem,
-//    marshaller: Marshaller[T, MessageEntity]
-//  ): Future[Problem] =
-//    for {
-//      body    <- Marshal(data).to[MessageEntity].map(_.dataBytes)
-//      purpose <- Unmarshal(makeRequest(body, url, verb)).to[Problem]
-//    } yield purpose
-//
-//  def makeFailingRequest(url: String, verb: HttpMethod)(implicit
-//    ec: ExecutionContext,
-//    actorSystem: actor.ActorSystem
-//  ): Future[Problem] = makeFailingRequest(url, verb, "")
-//
-//  def getPurpose(id: UUID)(implicit ec: ExecutionContext, actorSystem: actor.ActorSystem): Future[Purpose] = {
-//    val response = makeRequest(emptyData, s"purposes/${id.toString}", HttpMethods.GET)
-//    Unmarshal(response).to[Purpose]
-//  }
-//
-//  def getPurposes(
-//    eServiceId: Option[UUID] = None,
-//    consumerId: Option[UUID] = None,
-//    states: Seq[PurposeVersionState] = Seq.empty
-//  )(implicit ec: ExecutionContext, actorSystem: actor.ActorSystem): Future[Purposes] = {
-//    val eServiceParam = eServiceId.fold("")(id => s"eserviceId=${id.toString}")
-//    val consumerParam = consumerId.fold("")(id => s"consumerId=${id.toString}")
-//    val stateParam    = states.mkString("states=", ",", "")
-//
-//    val params   = Seq(eServiceParam, consumerParam, stateParam).mkString("?", "&", "")
-//    val response = makeRequest(emptyData, s"purposes$params", HttpMethods.GET)
-//    Unmarshal(response).to[Purposes]
-//  }
-//
-//  def activateVersion(
-//    purposeId: UUID,
-//    versionId: UUID,
-//    changedBy: ChangedBy,
-//    riskAnalysis: Option[PurposeVersionDocument],
-//    timestamp: OffsetDateTime = timestamp
-//  )(implicit ec: ExecutionContext, actorSystem: actor.ActorSystem): Future[PurposeVersion] = {
-//    for {
-//      data <- Marshal(
-//        ActivatePurposeVersionPayload(
-//          riskAnalysis = riskAnalysis,
-//          stateChangeDetails = StateChangeDetails(changedBy = changedBy)
-//        )
-//      )
-//        .to[MessageEntity]
-//        .map(_.dataBytes)
-//      _ = (() => mockDateTimeSupplier.get).expects().returning(timestamp).once()
-//      result <- Unmarshal(makeRequest(data, s"purposes/$purposeId/versions/$versionId/activate", HttpMethods.POST))
-//        .to[PurposeVersion]
-//    } yield result
-//  }
-//
-//  def suspendVersion(purposeId: UUID, versionId: UUID, changedBy: ChangedBy)(implicit
-//    ec: ExecutionContext,
-//    actorSystem: actor.ActorSystem
-//  ): Future[PurposeVersion] =
-//    changeVersionState(purposeId, versionId, changedBy, "suspend")
-//
-//  def waitForApprovalVersion(purposeId: UUID, versionId: UUID, changedBy: ChangedBy)(implicit
-//    ec: ExecutionContext,
-//    actorSystem: actor.ActorSystem
-//  ): Future[PurposeVersion] =
-//    changeVersionState(purposeId, versionId, changedBy, "waitForApproval")
-//
-//  def archiveVersion(purposeId: UUID, versionId: UUID, changedBy: ChangedBy)(implicit
-//    ec: ExecutionContext,
-//    actorSystem: actor.ActorSystem
-//  ): Future[PurposeVersion] =
-//    changeVersionState(purposeId, versionId, changedBy, "archive")
-//
-//  def changeVersionState(purposeId: UUID, versionId: UUID, changedBy: ChangedBy, statePath: String)(implicit
-//    ec: ExecutionContext,
-//    actorSystem: actor.ActorSystem
-//  ): Future[PurposeVersion] = for {
-//    data <- Marshal(StateChangeDetails(changedBy = changedBy))
-//      .to[MessageEntity]
-//      .map(_.dataBytes)
-//    _ = (() => mockDateTimeSupplier.get).expects().returning(timestamp).once()
-//    result <- Unmarshal(makeRequest(data, s"purposes/$purposeId/versions/$versionId/$statePath", HttpMethods.POST))
-//      .to[PurposeVersion]
-//  } yield result
-//
-//  def makeRequest(data: Source[ByteString, Any], path: String, verb: HttpMethod): HttpResponse = {
-//    Await.result(
-//      Http().singleRequest(
-//        HttpRequest(
-//          uri = s"$url/$path",
-//          method = verb,
-//          entity = HttpEntity(ContentTypes.`application/json`, data),
-//          headers = requestHeaders
-//        )
-//      ),
-//      Duration.Inf
-//    )
-//  }
+  def activateVersion(
+    purposeId: UUID,
+    versionId: UUID,
+    riskAnalysis: Option[PurposeVersionDocument],
+    stateChangeDetails: StateChangeDetails
+  ): PersistentPurpose = {
+    (() => mockDateTimeSupplier.get).expects().returning(ItSpecData.timestamp).once()
+    commander(purposeId)
+      .ask(ref => ActivatePurposeVersion(purposeId.toString, versionId.toString, riskAnalysis, stateChangeDetails, ref))
+      .futureValue
+      .getValue
+  }
+
+  def suspendVersion(purposeId: UUID, versionId: UUID, stateChangeDetails: StateChangeDetails): PersistentPurpose = {
+    (() => mockDateTimeSupplier.get).expects().returning(ItSpecData.timestamp).once()
+    commander(purposeId)
+      .ask(ref => SuspendPurposeVersion(purposeId.toString, versionId.toString, stateChangeDetails, ref))
+      .futureValue
+      .getValue
+  }
+
 }

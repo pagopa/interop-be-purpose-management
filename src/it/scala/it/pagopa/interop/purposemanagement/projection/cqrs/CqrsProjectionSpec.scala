@@ -2,7 +2,7 @@ package it.pagopa.interop.purposemanagement.projection.cqrs
 
 import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
 import it.pagopa.interop.purposemanagement.ItSpecData._
-import it.pagopa.interop.purposemanagement.model.decoupling.PurposeUpdate
+import it.pagopa.interop.purposemanagement.model.decoupling.{DraftPurposeVersionUpdate, PurposeUpdate}
 import it.pagopa.interop.purposemanagement.model.persistence.Adapters._
 import it.pagopa.interop.purposemanagement.model.persistence.JsonFormats._
 import it.pagopa.interop.purposemanagement.model.purpose.{Active, Archived, Draft, PersistentPurpose}
@@ -97,6 +97,48 @@ class CqrsProjectionSpec extends ScalaTestWithActorTestKit(ItSpecConfiguration.c
       val persisted = findOne[PersistentPurpose](expected.id.toString).futureValue
 
       comparePurposes(expected, persisted)
+    }
+
+    "succeed for event PurposeVersionUpdated" in {
+      val update = DraftPurposeVersionUpdate(dailyCalls = 1234, timestamp = timestamp.plusDays(10))
+
+      val draftVersion = persistentPurposeVersion.copy(state = Draft)
+      val otherVersion = persistentPurposeVersion.copy(state = Archived)
+
+      val purpose = createPurpose(persistentPurpose.copy(versions = Seq(draftVersion, otherVersion)))
+
+      val updatedVersion = updateDraftVersion(purpose.id, draftVersion.id, update)
+
+      val expected = purpose.copy(versions = purpose.versions.filter(_.id != draftVersion.id) :+ updatedVersion)
+
+      val persisted = findOne[PersistentPurpose](expected.id.toString).futureValue
+
+      comparePurposes(expected, persisted)
+    }
+
+    "succeed for event PurposeVersionDeleted" in {
+      val draftVersion = persistentPurposeVersion.copy(state = Draft)
+      val otherVersion = persistentPurposeVersion.copy(state = Archived)
+
+      val purpose = createPurpose(persistentPurpose.copy(versions = Seq(draftVersion, otherVersion)))
+
+      deleteVersion(purpose.id, draftVersion.id)
+
+      val expected = purpose.copy(versions = purpose.versions.filter(_.id != draftVersion.id))
+
+      val persisted = findOne[PersistentPurpose](expected.id.toString).futureValue
+
+      comparePurposes(expected, persisted)
+    }
+
+    "succeed for event PurposeDeleted" in {
+      val purpose = createPurpose(persistentPurpose.copy(versions = Nil))
+
+      deletePurpose(purpose.id)
+
+      val persisted = find[PersistentPurpose](purpose.id.toString).futureValue
+
+      persisted shouldBe empty
     }
 
   }

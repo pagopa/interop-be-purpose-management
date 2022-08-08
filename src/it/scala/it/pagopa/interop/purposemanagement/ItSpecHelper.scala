@@ -17,7 +17,7 @@ import it.pagopa.interop.commons.utils.service.{OffsetDateTimeSupplier, UUIDSupp
 import it.pagopa.interop.purposemanagement.api._
 import it.pagopa.interop.purposemanagement.api.impl._
 import it.pagopa.interop.purposemanagement.common.system.ApplicationConfiguration
-import it.pagopa.interop.purposemanagement.model.decoupling.PurposeUpdate
+import it.pagopa.interop.purposemanagement.model.decoupling.{DraftPurposeVersionUpdate, PurposeUpdate}
 import it.pagopa.interop.purposemanagement.model.persistence._
 import it.pagopa.interop.purposemanagement.model.purpose._
 import it.pagopa.interop.purposemanagement.model.{PurposeVersionDocument, StateChangeDetails}
@@ -116,11 +116,20 @@ trait ItSpecHelper
   def createPurpose(persistentPurpose: PersistentPurpose): PersistentPurpose =
     commander(persistentPurpose.id).ask(ref => CreatePurpose(persistentPurpose, ref)).futureValue.getValue
 
+  def deletePurpose(purposeId: UUID): Unit =
+    commander(purposeId).ask(ref => DeletePurpose(purposeId.toString, ref)).futureValue.getValue
+
   def updatePurpose(purposeId: UUID, update: PurposeUpdate): PersistentPurpose =
     commander(purposeId).ask(ref => UpdatePurpose(purposeId.toString, update, ref)).futureValue.getValue
 
   def createVersion(purposeId: UUID, version: PersistentPurposeVersion): PersistentPurposeVersion =
     commander(purposeId).ask(ref => CreatePurposeVersion(purposeId.toString, version, ref)).futureValue.getValue
+
+  def deleteVersion(purposeId: UUID, versionId: UUID): Unit =
+    commander(purposeId)
+      .ask(ref => DeletePurposeVersion(purposeId.toString, versionId.toString, ref))
+      .futureValue
+      .getValue
 
   def activateVersion(
     purposeId: UUID,
@@ -162,5 +171,15 @@ trait ItSpecHelper
       .futureValue
       .getValue
   }
+
+  def updateDraftVersion(
+    purposeId: UUID,
+    versionId: UUID,
+    update: DraftPurposeVersionUpdate
+  ): PersistentPurposeVersion =
+    commander(purposeId)
+      .ask(ref => UpdateDraftPurposeVersion(purposeId.toString, versionId.toString, update, ref))
+      .futureValue
+      .getValue
 
 }

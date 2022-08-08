@@ -143,4 +143,24 @@ trait ItSpecHelper
       .getValue
   }
 
+  def waitForApprovalVersion(
+    purposeId: UUID,
+    versionId: UUID,
+    stateChangeDetails: StateChangeDetails
+  ): PersistentPurpose = {
+    (() => mockDateTimeSupplier.get).expects().returning(ItSpecData.timestamp).once()
+    commander(purposeId)
+      .ask(ref => WaitForApprovalPurposeVersion(purposeId.toString, versionId.toString, stateChangeDetails, ref))
+      .futureValue
+      .getValue
+  }
+
+  def archiveVersion(purposeId: UUID, versionId: UUID, stateChangeDetails: StateChangeDetails): PersistentPurpose = {
+    (() => mockDateTimeSupplier.get).expects().returning(ItSpecData.timestamp).once()
+    commander(purposeId)
+      .ask(ref => ArchivePurposeVersion(purposeId.toString, versionId.toString, stateChangeDetails, ref))
+      .futureValue
+      .getValue
+  }
+
 }

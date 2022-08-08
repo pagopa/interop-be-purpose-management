@@ -66,6 +66,33 @@ class CqrsProjectionSpec extends ScalaTestWithActorTestKit(ItSpecConfiguration.c
       comparePurposes(expected, persisted)
     }
 
+    "succeed for event PurposeVersionWaitedForApproval" in {
+      val stateChangeDetails = StateChangeDetails(changedBy = ChangedBy.PRODUCER)
+      val purpose            =
+        createPurpose(persistentPurpose.copy(versions = Seq(persistentPurposeVersion.copy(state = Archived))))
+      val version            = createVersion(purpose.id, persistentPurposeVersion)
+
+      val expected = waitForApprovalVersion(purpose.id, version.id, stateChangeDetails)
+
+      val persisted = findOne[PersistentPurpose](expected.id.toString).futureValue
+
+      comparePurposes(expected, persisted)
+    }
+
+    "succeed for event PurposeVersionArchived" in {
+      val stateChangeDetails = StateChangeDetails(changedBy = ChangedBy.PRODUCER)
+      val purpose            =
+        createPurpose(persistentPurpose.copy(versions = Seq(persistentPurposeVersion.copy(state = Archived))))
+      val version            = createVersion(purpose.id, persistentPurposeVersion)
+      activateVersion(purpose.id, version.id, Some(persistentDocument.toAPI), stateChangeDetails)
+
+      val expected = archiveVersion(purpose.id, version.id, stateChangeDetails)
+
+      val persisted = findOne[PersistentPurpose](expected.id.toString).futureValue
+
+      comparePurposes(expected, persisted)
+    }
+
   }
 
 }

@@ -56,15 +56,15 @@ trait Dependencies {
     Entity(PurposePersistentBehavior.TypeKey)(behaviorFactory(dateTimeSupplier))
 
   def initProjections(
-                       blockingEc: ExecutionContextExecutor
-                     )(implicit actorSystem: ActorSystem[_], ec: ExecutionContext): Unit = {
+    blockingEc: ExecutionContextExecutor
+  )(implicit actorSystem: ActorSystem[_], ec: ExecutionContext): Unit = {
     initNotificationProjection(blockingEc)
     initCqrsProjection()
   }
 
   def initNotificationProjection(
-                                  blockingEc: ExecutionContextExecutor
-                                )(implicit actorSystem: ActorSystem[_], ec: ExecutionContext): Unit = {
+    blockingEc: ExecutionContextExecutor
+  )(implicit actorSystem: ActorSystem[_], ec: ExecutionContext): Unit = {
     val queueWriter: QueueWriter =
       QueueWriter.get(ApplicationConfiguration.queueUrl)(PurposeEventsSerde.projectablePurposeToJson)(blockingEc)
 

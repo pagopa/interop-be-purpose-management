@@ -96,9 +96,10 @@ object Dependencies {
 
   private[this] object pagopa {
     lazy val namespace    = "it.pagopa"
-    lazy val commons      = namespace %% "interop-commons-utils"         % commonsVersion
+    lazy val commonsUtils = namespace %% "interop-commons-utils"         % commonsVersion
     lazy val commonsJWT   = namespace %% "interop-commons-jwt"           % commonsVersion
     lazy val commonsQueue = namespace %% "interop-commons-queue-manager" % commonsVersion
+    lazy val commonsCqrs  = namespace %% "interop-commons-cqrs"          % commonsVersion
   }
 
   object Jars {
@@ -133,35 +134,37 @@ object Dependencies {
       cats.core                   % Compile,
       logback.classic             % Compile,
       mustache.mustache           % Compile,
-      pagopa.commons              % Compile,
+      pagopa.commonsUtils         % "compile,it",
       pagopa.commonsJWT           % Compile,
       pagopa.commonsQueue         % Compile,
-      postgres.jdbc               % Compile,
+      pagopa.commonsCqrs          % "compile,it",
+      postgres.jdbc               % "compile,it",
       scalaprotobuf.core          % Compile,
       scalaprotobuf.core          % Protobuf,
-      scalatest.core              % Test,
-      scalamock.core              % Test,
-      akka.httpTestkit            % Test,
-      akka.testkit                % Test,
+      scalatest.core              % "test,it",
+      scalamock.core              % "test,it",
+      akka.httpTestkit            % "test,it",
+      akka.testkit                % "test,it",
+      "com.dimafeng"             %% "testcontainers-scala-scalatest" % testcontainersScalaVersion % IntegrationTest,
       "org.scalameta"            %% "munit-scalacheck"     % "0.7.29" % Test,
       "com.softwaremill.diffx"   %% "diffx-munit"          % "0.7.0"  % Test
     )
 
-    val models: Seq[ModuleID] = Seq(spray.core, cats.core, pagopa.commons, pagopa.commonsQueue).map(_ % Compile)
+    val models: Seq[ModuleID] = Seq(spray.core, cats.core, pagopa.commonsUtils, pagopa.commonsQueue).map(_ % Compile)
 
     lazy val generated: Seq[ModuleID] = Seq(
       akka.stream,
       akka.http,
       akka.httpJson4s,
       akka.slf4j,
-      pagopa.commons,
+      pagopa.commonsUtils,
       logback.classic,
       spray.core,
       mustache.mustache
     ).map(_ % Compile)
 
     lazy val client: Seq[ModuleID] =
-      Seq(akka.stream, akka.http, akka.httpJson4s, akka.slf4j, json4s.jackson, json4s.ext, pagopa.commons).map(
+      Seq(akka.stream, akka.http, akka.httpJson4s, akka.slf4j, json4s.jackson, json4s.ext, pagopa.commonsUtils).map(
         _ % Compile
       )
   }

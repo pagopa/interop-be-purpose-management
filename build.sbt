@@ -74,6 +74,8 @@ runStandalone := {
 }
 
 lazy val generated = project
+  .configs(IntegrationTest)
+  .settings(Defaults.itSettings: _*)
   .in(file("generated"))
   .settings(
     scalacOptions       := Seq(),
@@ -87,7 +89,6 @@ lazy val models = project
   .in(file("models"))
   .settings(
     name                := "interop-be-purpose-management-models",
-    scalacOptions       := Seq(),
     libraryDependencies := Dependencies.Jars.models,
     scalafmtOnCompile   := true,
     Docker / publish    := {},
@@ -121,9 +122,15 @@ lazy val client = project
   )
 
 lazy val root = (project in file("."))
+  .configs(IntegrationTest)
+  .settings(Defaults.itSettings: _*)
   .settings(
     name                        := "interop-be-purpose-management",
     Test / parallelExecution    := false,
+    Test / fork                 := true,
+    Test / javaOptions += "-Dconfig.file=src/test/resources/application-test.conf",
+    IntegrationTest / fork      := true,
+    IntegrationTest / javaOptions += "-Dconfig.file=src/it/resources/application-it.conf",
     scalafmtOnCompile           := true,
     libraryDependencies         := Dependencies.Jars.`server`,
     dockerBuildOptions ++= Seq("--network=host"),
@@ -141,6 +148,3 @@ lazy val root = (project in file("."))
   .dependsOn(generated, models)
   .enablePlugins(JavaAppPackaging)
   .setupBuildInfo
-
-Test / fork := true
-Test / javaOptions += "-Dconfig.file=src/test/resources/application-test.conf"

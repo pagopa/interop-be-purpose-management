@@ -36,10 +36,9 @@ import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContextExecutor
 
 trait Dependencies {
-
-  System.setProperty("kanela.show-banner", "false")
 
   val uuidSupplier: UUIDSupplier               = new UUIDSupplierImpl
   val dateTimeSupplier: OffsetDateTimeSupplier = OffsetDateTimeSupplierImpl
@@ -56,14 +55,18 @@ trait Dependencies {
   val purposePersistenceEntity: Entity[Command, ShardingEnvelope[Command]] =
     Entity(PurposePersistentBehavior.TypeKey)(behaviorFactory(dateTimeSupplier))
 
-  def initProjections()(implicit actorSystem: ActorSystem[_], ec: ExecutionContext): Unit = {
-    initNotificationProjection()
+  def initProjections(
+                       blockingEc: ExecutionContextExecutor
+                     )(implicit actorSystem: ActorSystem[_], ec: ExecutionContext): Unit = {
+    initNotificationProjection(blockingEc)
     initCqrsProjection()
   }
 
-  def initNotificationProjection()(implicit actorSystem: ActorSystem[_], ec: ExecutionContext): Unit = {
+  def initNotificationProjection(
+                                  blockingEc: ExecutionContextExecutor
+                                )(implicit actorSystem: ActorSystem[_], ec: ExecutionContext): Unit = {
     val queueWriter: QueueWriter =
-      QueueWriter.get(ApplicationConfiguration.queueUrl)(PurposeEventsSerde.projectablePurposeToJson)
+      QueueWriter.get(ApplicationConfiguration.queueUrl)(PurposeEventsSerde.projectablePurposeToJson)(blockingEc)
 
     val dbConfig: DatabaseConfig[JdbcProfile] =
       DatabaseConfig.forConfig("akka-persistence-jdbc.shared-databases.slick")
@@ -98,9 +101,8 @@ trait Dependencies {
     )
   }
 
-  def getJwtValidator()(implicit ec: ExecutionContext): Future[JWTReader] = JWTConfiguration.jwtReader
+  def getJwtValidator(): Future[JWTReader] = JWTConfiguration.jwtReader
     .loadKeyset()
-    .toFuture
     .map(keyset =>
       new DefaultJWTReader with PublicKeysHolder {
         var publicKeyset: Map[KID, SerializedKey]                                        = keyset
@@ -108,6 +110,7 @@ trait Dependencies {
           getClaimsVerifier(audience = ApplicationConfiguration.jwtAudience)
       }
     )
+    .toFuture
 
   val validationExceptionToRoute: ValidationReport => Route = report => {
     val error =

@@ -1,10 +1,9 @@
 import ProjectSettings.ProjectFrom
 import com.typesafe.sbt.packager.docker.Cmd
 
-ThisBuild / scalaVersion     := "2.13.8"
-ThisBuild / organization     := "it.pagopa"
-ThisBuild / organizationName := "Pagopa S.p.A."
-
+ThisBuild / scalaVersion      := "2.13.8"
+ThisBuild / organization      := "it.pagopa"
+ThisBuild / organizationName  := "Pagopa S.p.A."
 ThisBuild / dependencyOverrides ++= Dependencies.Jars.overrides
 ThisBuild / version           := ComputeVersion.version
 Global / onChangedBuildSource := ReloadOnSourceChanges
@@ -147,7 +146,5 @@ lazy val root = (project in file("."))
   )
   .aggregate(client, models)
   .dependsOn(generated, models)
-  .enablePlugins(JavaAppPackaging, JavaAgent)
+  .enablePlugins(JavaAppPackaging)
   .setupBuildInfo
-
-javaAgents += "io.kamon" % "kanela-agent" % "1.0.14"

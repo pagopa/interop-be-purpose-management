@@ -66,12 +66,6 @@ object Dependencies {
     lazy val classic   = namespace % "logback-classic" % logbackVersion
   }
 
-  private[this] object kamon {
-    lazy val namespace  = "io.kamon"
-    lazy val bundle     = namespace %% "kamon-bundle"     % kamonVersion
-    lazy val prometheus = namespace %% "kamon-prometheus" % kamonVersion
-  }
-
   private[this] object spray {
     lazy val core = "io.spray" %% "spray-json" % sprayVersion
   }
@@ -113,7 +107,7 @@ object Dependencies {
       Seq(jackson.annotations % Compile, jackson.core % Compile, jackson.databind % Compile)
     lazy val `server`: Seq[ModuleID]  = Seq(
       // For making Java 12 happy
-      "javax.annotation"          % "javax.annotation-api"           % "1.3.2"                    % "compile",
+      "javax.annotation"          % "javax.annotation-api" % "1.3.2"  % "compile",
       //
       akka.actorTyped             % Compile,
       akka.clusterBootstrap       % Compile,
@@ -138,8 +132,6 @@ object Dependencies {
       akka.stream                 % Compile,
       awssdk.s3                   % Compile,
       cats.core                   % Compile,
-      kamon.bundle                % Compile,
-      kamon.prometheus            % Compile,
       logback.classic             % Compile,
       mustache.mustache           % Compile,
       pagopa.commonsUtils         % "compile,it",
@@ -153,7 +145,9 @@ object Dependencies {
       scalamock.core              % "test,it",
       akka.httpTestkit            % "test,it",
       akka.testkit                % "test,it",
-      "com.dimafeng"             %% "testcontainers-scala-scalatest" % testcontainersScalaVersion % IntegrationTest
+      "com.dimafeng"             %% "testcontainers-scala-scalatest" % testcontainersScalaVersion % IntegrationTest,
+      "org.scalameta"            %% "munit-scalacheck"     % "0.7.29" % Test,
+      "com.softwaremill.diffx"   %% "diffx-munit"          % "0.7.0"  % Test
     )
 
     val models: Seq[ModuleID] = Seq(spray.core, cats.core, pagopa.commonsUtils, pagopa.commonsQueue).map(_ % Compile)

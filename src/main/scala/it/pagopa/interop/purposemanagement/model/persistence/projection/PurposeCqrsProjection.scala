@@ -13,6 +13,7 @@ import slick.jdbc.JdbcProfile
 import spray.json._
 
 import scala.concurrent.ExecutionContext
+import scala.jdk.CollectionConverters._
 
 object PurposeCqrsProjection {
   def projection(offsetDbConfig: DatabaseConfig[JdbcProfile], mongoDbConfig: MongoDbConfig, projectionId: String)(
@@ -39,8 +40,12 @@ object PurposeCqrsProjection {
       ActionWithBson(collection.updateOne(Filters.eq("data.id", p.id.toString), _), Updates.set("data", p.toDocument))
     case PurposeVersionUpdated(pId, v)      =>
       ActionWithBson(
-        collection.updateOne(Filters.and(Filters.eq("data.id", pId), Filters.eq("data.versions.id", v.id.toString)), _),
-        Updates.set("data.versions.$", v.toDocument)
+        collection.updateMany(
+          Filters.eq("data.id", pId),
+          _,
+          UpdateOptions().arrayFilters(List(Filters.eq("elem.id", v.id.toString)).asJava)
+        ),
+        Updates.set("data.versions.$[elem]", v.toDocument)
       )
     case PurposeVersionDeleted(pId, vId)    =>
       ActionWithBson(

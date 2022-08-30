@@ -9,6 +9,7 @@ import org.mongodb.scala.MongoClient.DEFAULT_CODEC_REGISTRY
 import org.mongodb.scala.connection.NettyStreamFactoryFactory
 import org.mongodb.scala.model.Filters
 import org.mongodb.scala.{ConnectionString, Document, MongoClient, MongoClientSettings}
+import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.wordspec.AnyWordSpecLike
 import spray.json._
 
@@ -84,6 +85,7 @@ trait ItCqrsSpec extends AnyWordSpecLike with TestContainersForAll {
   }
 
   override def beforeContainersStop(containers: Containers): Unit = {
+    mongodbClient.getDatabase(mongoDbConfig.dbName).drop().toFuture().futureValue
     shutdownServer()
     internalMongodbClient.get.close()
     super.afterContainersStart(containers)

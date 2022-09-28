@@ -17,7 +17,7 @@ object Adapters {
   implicit class PersistentRiskAnalysisSingleAnswerObjectWrapper(private val p: PersistentRiskAnalysisSingleAnswer.type)
       extends AnyVal {
     def fromSeed(uuidSupplier: UUIDSupplier)(seed: RiskAnalysisSingleAnswerSeed): PersistentRiskAnalysisSingleAnswer =
-      PersistentRiskAnalysisSingleAnswer(id = uuidSupplier.get, key = seed.key, value = seed.value)
+      PersistentRiskAnalysisSingleAnswer(id = uuidSupplier.get(), key = seed.key, value = seed.value)
   }
 
   implicit class PersistentRiskAnalysisMultiAnswerWrapper(private val p: PersistentRiskAnalysisMultiAnswer)
@@ -28,7 +28,7 @@ object Adapters {
   implicit class PersistentRiskAnalysisMultiAnswerObjectWrapper(private val p: PersistentRiskAnalysisMultiAnswer.type)
       extends AnyVal {
     def fromSeed(uuidSupplier: UUIDSupplier)(seed: RiskAnalysisMultiAnswerSeed): PersistentRiskAnalysisMultiAnswer =
-      PersistentRiskAnalysisMultiAnswer(id = uuidSupplier.get, key = seed.key, values = seed.values)
+      PersistentRiskAnalysisMultiAnswer(id = uuidSupplier.get(), key = seed.key, values = seed.values)
   }
 
   implicit class PersistentRiskAnalysisFormWrapper(private val p: PersistentRiskAnalysisForm) extends AnyVal {
@@ -44,7 +44,7 @@ object Adapters {
       extends AnyVal {
     def fromSeed(uuidSupplier: UUIDSupplier)(seed: RiskAnalysisFormSeed): PersistentRiskAnalysisForm =
       PersistentRiskAnalysisForm(
-        id = uuidSupplier.get,
+        id = uuidSupplier.get(),
         version = seed.version,
         singleAnswers = seed.singleAnswers.map(PersistentRiskAnalysisSingleAnswer.fromSeed(uuidSupplier)),
         multiAnswers = seed.multiAnswers.map(PersistentRiskAnalysisMultiAnswer.fromSeed(uuidSupplier))
@@ -141,10 +141,10 @@ object Adapters {
       uuidSupplier: UUIDSupplier,
       dateTimeSupplier: OffsetDateTimeSupplier
     ): PersistentPurposeVersion = PersistentPurposeVersion(
-      id = uuidSupplier.get,
+      id = uuidSupplier.get(),
       state = Draft,
       dailyCalls = seed.dailyCalls,
-      createdAt = dateTimeSupplier.get,
+      createdAt = dateTimeSupplier.get(),
       updatedAt = None,
       firstActivationAt = None,
       riskAnalysis = seed.riskAnalysis.map(PersistentPurposeVersionDocument.fromAPI),
@@ -177,7 +177,7 @@ object Adapters {
       uuidSupplier: UUIDSupplier,
       dateTimeSupplier: OffsetDateTimeSupplier
     ): PersistentPurpose = PersistentPurpose(
-      id = uuidSupplier.get,
+      id = uuidSupplier.get(),
       eserviceId = seed.eserviceId,
       consumerId = seed.consumerId,
       versions = Seq.empty,
@@ -186,7 +186,7 @@ object Adapters {
       title = seed.title,
       description = seed.description,
       riskAnalysisForm = seed.riskAnalysisForm.map(PersistentRiskAnalysisForm.fromSeed(uuidSupplier)),
-      createdAt = dateTimeSupplier.get,
+      createdAt = dateTimeSupplier.get(),
       updatedAt = None
     )
   }

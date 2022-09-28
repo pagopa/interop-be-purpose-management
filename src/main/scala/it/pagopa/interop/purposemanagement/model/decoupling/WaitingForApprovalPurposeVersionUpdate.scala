@@ -14,6 +14,6 @@ object WaitingForApprovalPurposeVersionUpdate {
   ): WaitingForApprovalPurposeVersionUpdate =
     WaitingForApprovalPurposeVersionUpdate(
       expectedApprovalDate = update.expectedApprovalDate,
-      timestamp = dateTimeSupplier.get
+      timestamp = dateTimeSupplier.get()
     )
 }

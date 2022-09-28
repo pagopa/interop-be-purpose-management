@@ -12,5 +12,5 @@ object DraftPurposeVersionUpdate {
     update: DraftPurposeVersionUpdateContent,
     dateTimeSupplier: OffsetDateTimeSupplier
   ): DraftPurposeVersionUpdate =
-    DraftPurposeVersionUpdate(dailyCalls = update.dailyCalls, timestamp = dateTimeSupplier.get)
+    DraftPurposeVersionUpdate(dailyCalls = update.dailyCalls, timestamp = dateTimeSupplier.get())
 }

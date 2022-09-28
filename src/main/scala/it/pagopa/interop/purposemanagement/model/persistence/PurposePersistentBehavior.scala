@@ -313,7 +313,7 @@ object PurposePersistentBehavior {
 
     def isSuspended = newVersionState == Suspended
 
-    val timestamp = dateTimeSupplier.get
+    val timestamp = dateTimeSupplier.get()
 
     def updateVersions(newState: PersistentPurposeVersionState): Seq[PersistentPurposeVersion] = {
       val firstActivationAt: Option[OffsetDateTime] = version.state match {

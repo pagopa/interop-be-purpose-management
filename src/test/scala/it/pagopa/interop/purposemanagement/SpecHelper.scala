@@ -23,9 +23,9 @@ trait SpecHelper {
   ): Future[Purpose] =
     for {
       data <- Marshal(seed).to[MessageEntity].map(_.dataBytes)
-      _ = (() => mockUUIDSupplier.get).expects().returning(purposeId).once()
-      _ = (() => mockDateTimeSupplier.get).expects().returning(timestamp).once()
-      _ = (() => mockUUIDSupplier.get).expects().returning(riskAnalysisForm.id).once()
+      _ = (() => mockUUIDSupplier.get()).expects().returning(purposeId).once()
+      _ = (() => mockDateTimeSupplier.get()).expects().returning(timestamp).once()
+      _ = (() => mockUUIDSupplier.get()).expects().returning(riskAnalysisForm.id).once()
       purpose <- Unmarshal(makeRequest(data, "purposes", HttpMethods.POST)).to[Purpose]
     } yield purpose
 
@@ -35,8 +35,8 @@ trait SpecHelper {
   ): Future[PurposeVersion] =
     for {
       data <- Marshal(seed).to[MessageEntity].map(_.dataBytes)
-      _ = (() => mockUUIDSupplier.get).expects().returning(versionId).once()
-      _ = (() => mockDateTimeSupplier.get).expects().returning(timestamp).once()
+      _ = (() => mockUUIDSupplier.get()).expects().returning(versionId).once()
+      _ = (() => mockDateTimeSupplier.get()).expects().returning(timestamp).once()
       purpose <- Unmarshal(makeRequest(data, s"purposes/$purposeId/versions", HttpMethods.POST)).to[PurposeVersion]
     } yield purpose
 
@@ -46,7 +46,7 @@ trait SpecHelper {
   ): Future[Purpose] =
     for {
       data <- Marshal(seed).to[MessageEntity].map(_.dataBytes)
-      _ = (() => mockUUIDSupplier.get).expects().returning(UUID.randomUUID()).once()
+      _ = (() => mockUUIDSupplier.get()).expects().returning(UUID.randomUUID()).once()
       purpose <- Unmarshal(makeRequest(data, s"purposes/$purposeId", HttpMethods.POST))
         .to[Purpose]
     } yield purpose
@@ -57,7 +57,7 @@ trait SpecHelper {
   ): Future[PurposeVersion] =
     for {
       data <- Marshal(seed).to[MessageEntity].map(_.dataBytes)
-      _ = (() => mockDateTimeSupplier.get).expects().returning(timestamp).once()
+      _ = (() => mockDateTimeSupplier.get()).expects().returning(timestamp).once()
       purpose <- Unmarshal(makeRequest(data, s"purposes/$purposeId/versions/$versionId/update/draft", HttpMethods.POST))
         .to[PurposeVersion]
     } yield purpose
@@ -69,7 +69,7 @@ trait SpecHelper {
   )(implicit ec: ExecutionContext, actorSystem: actor.ActorSystem): Future[PurposeVersion] =
     for {
       data <- Marshal(seed).to[MessageEntity].map(_.dataBytes)
-      _ = (() => mockDateTimeSupplier.get).expects().returning(timestamp).once()
+      _ = (() => mockDateTimeSupplier.get()).expects().returning(timestamp).once()
       purpose <- Unmarshal(
         makeRequest(data, s"purposes/$purposeId/versions/$versionId/update/waitingForApproval", HttpMethods.POST)
       )
@@ -137,7 +137,7 @@ trait SpecHelper {
       )
         .to[MessageEntity]
         .map(_.dataBytes)
-      _ = (() => mockDateTimeSupplier.get).expects().returning(timestamp).once()
+      _ = (() => mockDateTimeSupplier.get()).expects().returning(timestamp).once()
       result <- Unmarshal(makeRequest(data, s"purposes/$purposeId/versions/$versionId/activate", HttpMethods.POST))
         .to[PurposeVersion]
     } yield result
@@ -168,7 +168,7 @@ trait SpecHelper {
     data <- Marshal(StateChangeDetails(changedBy = changedBy))
       .to[MessageEntity]
       .map(_.dataBytes)
-    _ = (() => mockDateTimeSupplier.get).expects().returning(timestamp).once()
+    _ = (() => mockDateTimeSupplier.get()).expects().returning(timestamp).once()
     result <- Unmarshal(makeRequest(data, s"purposes/$purposeId/versions/$versionId/$statePath", HttpMethods.POST))
       .to[PurposeVersion]
   } yield result

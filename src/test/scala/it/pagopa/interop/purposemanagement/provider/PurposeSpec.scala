@@ -555,7 +555,7 @@ class PurposeSpec extends BaseIntegrationSpec {
         riskAnalysisForm = Some(riskAnalysisFormSeed.copy(version = "2.0"))
       )
 
-      (() => mockUUIDSupplier.get).expects().returning(UUID.randomUUID()).once()
+      (() => mockUUIDSupplier.get()).expects().returning(UUID.randomUUID()).once()
 
       val response: Future[Problem] =
         makeFailingRequest(s"purposes/$purposeId", HttpMethods.POST, updateContent)
@@ -598,7 +598,7 @@ class PurposeSpec extends BaseIntegrationSpec {
           _ <- createPurpose(purposeId, purposeSeed)
           _ <- createPurposeVersion(purposeId, versionId, versionSeed)
           _ <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, versionSeed.riskAnalysis)
-          _ = (() => mockUUIDSupplier.get).expects().returning(UUID.randomUUID()).once()
+          _ = (() => mockUUIDSupplier.get()).expects().returning(UUID.randomUUID()).once()
           result <- makeFailingRequest(s"purposes/$purposeId", HttpMethods.POST, updateContent)
         } yield result
 
@@ -642,7 +642,7 @@ class PurposeSpec extends BaseIntegrationSpec {
           _ <- createPurposeVersion(purposeId, versionId1, versionSeed)
           _ <- activateVersion(purposeId, versionId1, ChangedBy.CONSUMER, versionSeed.riskAnalysis)
           _ <- createPurposeVersion(purposeId, versionId2, versionSeed)
-          _ = (() => mockUUIDSupplier.get).expects().returning(UUID.randomUUID()).once()
+          _ = (() => mockUUIDSupplier.get()).expects().returning(UUID.randomUUID()).once()
           result <- makeFailingRequest(s"purposes/$purposeId", HttpMethods.POST, updateContent)
         } yield result
 

@@ -94,8 +94,8 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
 
       val versionSeed = PurposeVersionSeed(dailyCalls = 100)
 
-      (() => mockUUIDSupplier.get).expects().returning(versionId).once()
-      (() => mockDateTimeSupplier.get).expects().returning(timestamp).once()
+      (() => mockUUIDSupplier.get()).expects().returning(versionId).once()
+      (() => mockDateTimeSupplier.get()).expects().returning(timestamp).once()
 
       val response: Future[Problem] = makeFailingRequest(s"purposes/$purposeId/versions", HttpMethods.POST, versionSeed)
 
@@ -123,8 +123,8 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
         for {
           _ <- createPurpose(purposeId, purposeSeed)
           _ <- createPurposeVersion(purposeId, versionId, versionSeed)
-          _ = (() => mockUUIDSupplier.get).expects().returning(versionId).once()
-          _ = (() => mockDateTimeSupplier.get).expects().returning(timestamp).once()
+          _ = (() => mockUUIDSupplier.get()).expects().returning(versionId).once()
+          _ = (() => mockDateTimeSupplier.get()).expects().returning(timestamp).once()
           result <- makeFailingRequest(s"purposes/$purposeId/versions", HttpMethods.POST, versionSeed)
         } yield result
 
@@ -161,8 +161,8 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
           _ <- createPurpose(purposeId, purposeSeed)
           _ <- createPurposeVersion(purposeId, versionId, versionSeed)
           _ <- waitForApprovalVersion(purposeId, versionId, CONSUMER)
-          _ = (() => mockUUIDSupplier.get).expects().returning(versionId).once()
-          _ = (() => mockDateTimeSupplier.get).expects().returning(timestamp).once()
+          _ = (() => mockUUIDSupplier.get()).expects().returning(versionId).once()
+          _ = (() => mockDateTimeSupplier.get()).expects().returning(timestamp).once()
           result <- makeFailingRequest(s"purposes/$purposeId/versions", HttpMethods.POST, versionSeed)
         } yield result
 
@@ -218,7 +218,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
 
       val updateContent = DraftPurposeVersionUpdateContent(dailyCalls = 100)
 
-      (() => mockDateTimeSupplier.get).expects().returning(timestamp).once()
+      (() => mockDateTimeSupplier.get()).expects().returning(timestamp).once()
 
       val response: Future[Problem] =
         makeFailingRequest(s"purposes/$purposeId/versions/$versionId/update/draft", HttpMethods.POST, updateContent)
@@ -252,7 +252,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
       val versionSeed   = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 200)
       val updateContent = DraftPurposeVersionUpdateContent(dailyCalls = 100)
 
-      (() => mockDateTimeSupplier.get).expects().returning(timestamp).once()
+      (() => mockDateTimeSupplier.get()).expects().returning(timestamp).once()
 
       val response: Future[Problem] =
         for {
@@ -321,7 +321,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
 
       val updateContent = WaitingForApprovalPurposeVersionUpdateContent(expectedApprovalDate = timestamp)
 
-      (() => mockDateTimeSupplier.get).expects().returning(timestamp).once()
+      (() => mockDateTimeSupplier.get()).expects().returning(timestamp).once()
 
       val response: Future[Problem] =
         makeFailingRequest(
@@ -358,7 +358,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
       val versionSeed   = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 200)
       val updateContent = WaitingForApprovalPurposeVersionUpdateContent(expectedApprovalDate = timestamp)
 
-      (() => mockDateTimeSupplier.get).expects().returning(timestamp).once()
+      (() => mockDateTimeSupplier.get()).expects().returning(timestamp).once()
 
       val response: Future[Problem] =
         for {

@@ -45,7 +45,7 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
       val version = versionTemplate.copy(state = Draft)
       val purpose = purposeTemplate
 
-      (() => mockDateTimeSupplier.get).expects().returning(newTimestamp).once()
+      (() => mockDateTimeSupplier.get()).expects().returning(newTimestamp).once()
 
       val result = updatePurposeFromState(
         purpose,
@@ -66,7 +66,7 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
       val version = versionTemplate.copy(state = Active)
       val purpose = purposeTemplate
 
-      (() => mockDateTimeSupplier.get).expects().returning(newTimestamp).once()
+      (() => mockDateTimeSupplier.get()).expects().returning(newTimestamp).once()
 
       val result = updatePurposeFromState(
         purpose,
@@ -92,7 +92,7 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
       val version = versionTemplate.copy(state = Active)
       val purpose = purposeTemplate
 
-      (() => mockDateTimeSupplier.get).expects().returning(newTimestamp).once()
+      (() => mockDateTimeSupplier.get()).expects().returning(newTimestamp).once()
 
       val result = updatePurposeFromState(
         purpose,
@@ -118,7 +118,7 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
       val version = versionTemplate.copy(state = Suspended)
       val purpose = purposeTemplate.copy(suspendedByConsumer = Some(true))
 
-      (() => mockDateTimeSupplier.get).expects().returning(newTimestamp).once()
+      (() => mockDateTimeSupplier.get()).expects().returning(newTimestamp).once()
 
       val result = updatePurposeFromState(
         purpose,
@@ -144,7 +144,7 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
       val version = versionTemplate.copy(state = Suspended)
       val purpose = purposeTemplate.copy(suspendedByConsumer = Some(true), suspendedByProducer = Some(true))
 
-      (() => mockDateTimeSupplier.get).expects().returning(newTimestamp).once()
+      (() => mockDateTimeSupplier.get()).expects().returning(newTimestamp).once()
 
       val result = updatePurposeFromState(
         purpose,
@@ -170,7 +170,7 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
       val version = versionTemplate.copy(state = Suspended)
       val purpose = purposeTemplate.copy(suspendedByConsumer = Some(true), suspendedByProducer = Some(true))
 
-      (() => mockDateTimeSupplier.get).expects().returning(newTimestamp).once()
+      (() => mockDateTimeSupplier.get()).expects().returning(newTimestamp).once()
 
       val result = updatePurposeFromState(
         purpose,
@@ -196,7 +196,7 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
       val version = versionTemplate.copy(state = Suspended)
       val purpose = purposeTemplate.copy(suspendedByConsumer = Some(true), suspendedByProducer = Some(false))
 
-      (() => mockDateTimeSupplier.get).expects().returning(newTimestamp).once()
+      (() => mockDateTimeSupplier.get()).expects().returning(newTimestamp).once()
 
       val result = updatePurposeFromState(
         purpose,
@@ -222,7 +222,7 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
       val version = versionTemplate.copy(state = Suspended)
       val purpose = purposeTemplate.copy(suspendedByConsumer = Some(false), suspendedByProducer = Some(true))
 
-      (() => mockDateTimeSupplier.get).expects().returning(newTimestamp).once()
+      (() => mockDateTimeSupplier.get()).expects().returning(newTimestamp).once()
 
       val result = updatePurposeFromState(
         purpose,

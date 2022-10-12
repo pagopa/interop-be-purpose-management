@@ -137,7 +137,7 @@ trait ItSpecHelper
     riskAnalysis: Option[PurposeVersionDocument],
     stateChangeDetails: StateChangeDetails
   ): PersistentPurpose = {
-    (() => mockDateTimeSupplier.get).expects().returning(ItSpecData.timestamp).once()
+    (() => mockDateTimeSupplier.get()).expects().returning(ItSpecData.timestamp).once()
     commander(purposeId)
       .ask(ref => ActivatePurposeVersion(purposeId.toString, versionId.toString, riskAnalysis, stateChangeDetails, ref))
       .futureValue
@@ -145,7 +145,7 @@ trait ItSpecHelper
   }
 
   def suspendVersion(purposeId: UUID, versionId: UUID, stateChangeDetails: StateChangeDetails): PersistentPurpose = {
-    (() => mockDateTimeSupplier.get).expects().returning(ItSpecData.timestamp).once()
+    (() => mockDateTimeSupplier.get()).expects().returning(ItSpecData.timestamp).once()
     commander(purposeId)
       .ask(ref => SuspendPurposeVersion(purposeId.toString, versionId.toString, stateChangeDetails, ref))
       .futureValue
@@ -157,7 +157,7 @@ trait ItSpecHelper
     versionId: UUID,
     stateChangeDetails: StateChangeDetails
   ): PersistentPurpose = {
-    (() => mockDateTimeSupplier.get).expects().returning(ItSpecData.timestamp).once()
+    (() => mockDateTimeSupplier.get()).expects().returning(ItSpecData.timestamp).once()
     commander(purposeId)
       .ask(ref => WaitForApprovalPurposeVersion(purposeId.toString, versionId.toString, stateChangeDetails, ref))
       .futureValue
@@ -165,7 +165,7 @@ trait ItSpecHelper
   }
 
   def archiveVersion(purposeId: UUID, versionId: UUID, stateChangeDetails: StateChangeDetails): PersistentPurpose = {
-    (() => mockDateTimeSupplier.get).expects().returning(ItSpecData.timestamp).once()
+    (() => mockDateTimeSupplier.get()).expects().returning(ItSpecData.timestamp).once()
     commander(purposeId)
       .ask(ref => ArchivePurposeVersion(purposeId.toString, versionId.toString, stateChangeDetails, ref))
       .futureValue

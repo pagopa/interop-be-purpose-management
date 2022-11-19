@@ -4,7 +4,7 @@ object Versions {
   lazy val akkaVersion                 = "2.6.20"
   lazy val awsSdkVersion               = "2.17.290"
   lazy val cassandraPersistenceVersion = "1.0.5"
-  lazy val catsVersion                 = "2.8.0"
+  lazy val catsVersion                 = "2.9.0"
   lazy val httpJson4sVersion           = "1.39.2"
   lazy val jacksonVersion              = "2.11.4"
   lazy val jdbcPersistenceVersion      = "5.1.0"

@@ -17,14 +17,11 @@ import it.pagopa.interop.commons.jwt.{JWTConfiguration, KID, PublicKeysHolder, S
 import it.pagopa.interop.commons.queue.QueueWriter
 import it.pagopa.interop.commons.utils.OpenapiUtils
 import it.pagopa.interop.commons.utils.TypeConversions._
+import it.pagopa.interop.commons.utils.errors.{Problem => CommonProblem}
 import it.pagopa.interop.commons.utils.service.{OffsetDateTimeSupplier, UUIDSupplier}
 import it.pagopa.interop.purposemanagement.api.PurposeApi
-import it.pagopa.interop.purposemanagement.api.impl.{
-  PurposeApiMarshallerImpl,
-  PurposeApiServiceImpl,
-  entityMarshallerProblem,
-  problemOf
-}
+import it.pagopa.interop.purposemanagement.api.impl.ResponseHandlers.serviceCode
+import it.pagopa.interop.purposemanagement.api.impl.{PurposeApiMarshallerImpl, PurposeApiServiceImpl}
 import it.pagopa.interop.purposemanagement.common.system.ApplicationConfiguration
 import it.pagopa.interop.purposemanagement.common.system.ApplicationConfiguration.{
   numberOfProjectionTags,
@@ -116,11 +113,14 @@ trait Dependencies {
 
   val validationExceptionToRoute: ValidationReport => Route = report => {
     val error =
-      problemOf(StatusCodes.BadRequest, OpenapiUtils.errorFromRequestValidationReport(report))
-    complete(error.status, error)(entityMarshallerProblem)
+      CommonProblem(StatusCodes.BadRequest, OpenapiUtils.errorFromRequestValidationReport(report), serviceCode)
+    complete(error.status, error)
   }
 
-  def purposeApi(sharding: ClusterSharding, jwtReader: JWTReader)(implicit actorSystem: ActorSystem[_]) =
+  def purposeApi(sharding: ClusterSharding, jwtReader: JWTReader)(implicit
+    actorSystem: ActorSystem[_],
+    ec: ExecutionContext
+  ) =
     new PurposeApi(
       PurposeApiServiceImpl(actorSystem, sharding, purposePersistenceEntity, uuidSupplier, dateTimeSupplier),
       PurposeApiMarshallerImpl,

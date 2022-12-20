@@ -101,7 +101,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
 
       val result = response.futureValue
       result.status shouldBe 404
-      result.errors.map(_.code) shouldBe Seq("011-0033")
+      result.errors.map(_.code) shouldBe Seq("011-0002")
     }
 
     "fail if a version in Draft already exists for the same purpose" in {
@@ -130,7 +130,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
 
       val result = response.futureValue
       result.status shouldBe 409
-      result.errors.map(_.code) shouldBe Seq("011-0032")
+      result.errors.map(_.code) shouldBe Seq("011-0005")
     }
 
     "fail if a version in Waiting For Approval already exists for the same purpose" in {
@@ -168,7 +168,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
 
       val result = response.futureValue
       result.status shouldBe 409
-      result.errors.map(_.code) shouldBe Seq("011-0032")
+      result.errors.map(_.code) shouldBe Seq("011-0005")
     }
   }
 
@@ -225,7 +225,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
 
       val result = response.futureValue
       result.status shouldBe 404
-      result.errors.map(_.code) shouldBe Seq("011-0029")
+      result.errors.map(_.code) shouldBe Seq("011-0006")
     }
 
     "fail if version is not draft" in {
@@ -268,7 +268,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
 
       val result = response.futureValue
       result.status shouldBe 400
-      result.errors.map(_.code) shouldBe Seq("011-0030")
+      result.errors.map(_.code) shouldBe Seq("011-0004")
     }
 
   }
@@ -332,7 +332,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
 
       val result = response.futureValue
       result.status shouldBe 404
-      result.errors.map(_.code) shouldBe Seq("011-0029")
+      result.errors.map(_.code) shouldBe Seq("011-0006")
     }
     "fail if version is not in waiting for approval" in {
       val purposeId      = UUID.randomUUID()
@@ -374,7 +374,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
 
       val result = response.futureValue
       result.status shouldBe 400
-      result.errors.map(_.code) shouldBe Seq("011-0044")
+      result.errors.map(_.code) shouldBe Seq("011-0004")
     }
   }
 
@@ -472,7 +472,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
 
       val result = response.futureValue
       result.status shouldBe 409
-      result.errors.map(_.code) shouldBe Seq("011-0035")
+      result.errors.map(_.code) shouldBe Seq("011-0004")
     }
 
     "fail if the version is in Suspended" in {
@@ -509,7 +509,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
 
       val result = response.futureValue
       result.status shouldBe 409
-      result.errors.map(_.code) shouldBe Seq("011-0035")
+      result.errors.map(_.code) shouldBe Seq("011-0004")
     }
 
     "fail if the version is in Archived" in {
@@ -546,7 +546,7 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
 
       val result = response.futureValue
       result.status shouldBe 409
-      result.errors.map(_.code) shouldBe Seq("011-0035")
+      result.errors.map(_.code) shouldBe Seq("011-0004")
     }
   }
 

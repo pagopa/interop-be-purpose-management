@@ -267,7 +267,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
 
       val result = response.futureValue
       result.status shouldBe 404
-      result.errors.map(_.code) shouldBe Seq("011-0006")
+      result.errors.map(_.code) shouldBe Seq("011-0002")
     }
 
     "fail on missing risk analysis" in {
@@ -298,7 +298,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
 
       val result = response.futureValue
       result.status shouldBe 400
-      result.errors.map(_.code) shouldBe Seq("011-0009")
+      result.errors.map(_.code) shouldBe Seq("011-0003")
     }
 
     "fail on wrong current version state" in {
@@ -339,7 +339,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
 
       val result = response.futureValue
       result.status shouldBe 400
-      result.errors.map(_.code) shouldBe Seq("011-0008")
+      result.errors.map(_.code) shouldBe Seq("011-0004")
     }
   }
 
@@ -396,7 +396,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
 
       val result = response.futureValue
       result.status shouldBe 404
-      result.errors.map(_.code) shouldBe Seq("011-0011")
+      result.errors.map(_.code) shouldBe Seq("011-0002")
     }
 
     "fail on wrong current version state" in {
@@ -427,7 +427,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
 
       val result = response.futureValue
       result.status shouldBe 400
-      result.errors.map(_.code) shouldBe Seq("011-0013")
+      result.errors.map(_.code) shouldBe Seq("011-0004")
     }
   }
 
@@ -484,7 +484,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
 
       val result = response.futureValue
       result.status shouldBe 404
-      result.errors.map(_.code) shouldBe Seq("011-0015")
+      result.errors.map(_.code) shouldBe Seq("011-0002")
     }
 
     "fail on wrong current version state" in {
@@ -515,7 +515,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
 
       val result = response.futureValue
       result.status shouldBe 400
-      result.errors.map(_.code) shouldBe Seq("011-0017")
+      result.errors.map(_.code) shouldBe Seq("011-0004")
     }
   }
 
@@ -563,7 +563,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
 
       val result = response.futureValue
       result.status shouldBe 404
-      result.errors.map(_.code) shouldBe Seq("011-0019")
+      result.errors.map(_.code) shouldBe Seq("011-0002")
     }
 
     "fail on wrong current version state" in {
@@ -603,7 +603,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
 
       val result = response.futureValue
       result.status shouldBe 400
-      result.errors.map(_.code) shouldBe Seq("011-0021")
+      result.errors.map(_.code) shouldBe Seq("011-0004")
     }
   }
 

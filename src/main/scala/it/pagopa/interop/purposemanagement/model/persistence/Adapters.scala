@@ -1,7 +1,10 @@
 package it.pagopa.interop.purposemanagement.model.persistence
 
 import it.pagopa.interop.commons.utils.service._
-import it.pagopa.interop.purposemanagement.error.InternalErrors._
+import it.pagopa.interop.purposemanagement.error.PurposeManagementErrors.{
+  PurposeMissingRiskAnalysis,
+  NotAllowedForPurposeVersionState
+}
 import it.pagopa.interop.purposemanagement.model._
 import it.pagopa.interop.purposemanagement.model.decoupling._
 import it.pagopa.interop.purposemanagement.model.purpose._
@@ -88,7 +91,7 @@ object Adapters {
     )
   }
 
-  implicit class PersistentPurposeVersionWrapper(private val p: PersistentPurposeVersion) {
+  implicit class PersistentPurposeVersionWrapper(private val v: PersistentPurposeVersion) {
 
     val ACTIVABLE_STATES             = Seq(Draft, Suspended, WaitingForApproval)
     val SUSPENDABLE_STATES           = Seq(Active, Suspended)
@@ -97,41 +100,41 @@ object Adapters {
 
     def isActivable(purposeId: String): Either[Throwable, Unit] = for {
       _ <- Either.cond(
-        ACTIVABLE_STATES.contains(p.state),
+        ACTIVABLE_STATES.contains(v.state),
         (),
-        PurposeVersionNotInExpectedState(purposeId, p.id.toString, p.state)
+        NotAllowedForPurposeVersionState(purposeId, v.id.toString, v.state)
       )
-      _ <- Either.cond(p.riskAnalysis.isDefined, (), PurposeVersionMissingRiskAnalysis(purposeId, p.id.toString))
+      _ <- Either.cond(v.riskAnalysis.isDefined, (), PurposeMissingRiskAnalysis(purposeId, v.id.toString))
     } yield ()
 
     def isSuspendable(purposeId: String): Either[Throwable, Unit] = Either.cond(
-      SUSPENDABLE_STATES.contains(p.state),
+      SUSPENDABLE_STATES.contains(v.state),
       (),
-      PurposeVersionNotInExpectedState(purposeId, p.id.toString, p.state)
+      NotAllowedForPurposeVersionState(purposeId, v.id.toString, v.state)
     )
 
     def canWaitForApproval(purposeId: String): Either[Throwable, Unit] = Either.cond(
-      WAITABLE_FOR_APPROVAL_STATES.contains(p.state),
+      WAITABLE_FOR_APPROVAL_STATES.contains(v.state),
       (),
-      PurposeVersionNotInExpectedState(purposeId, p.id.toString, p.state)
+      NotAllowedForPurposeVersionState(purposeId, v.id.toString, v.state)
     )
 
     def isArchivable(purposeId: String): Either[Throwable, Unit] =
       Either.cond(
-        ARCHIVABLE_STATES.contains(p.state),
+        ARCHIVABLE_STATES.contains(v.state),
         (),
-        PurposeVersionNotInExpectedState(purposeId, p.id.toString, p.state)
+        NotAllowedForPurposeVersionState(purposeId, v.id.toString, v.state)
       )
 
     def toAPI: PurposeVersion = PurposeVersion(
-      id = p.id,
-      state = p.state.toApi,
-      riskAnalysis = p.riskAnalysis.map(_.toAPI),
-      createdAt = p.createdAt,
-      updatedAt = p.updatedAt,
-      firstActivationAt = p.firstActivationAt,
-      expectedApprovalDate = p.expectedApprovalDate,
-      dailyCalls = p.dailyCalls
+      id = v.id,
+      state = v.state.toApi,
+      riskAnalysis = v.riskAnalysis.map(_.toAPI),
+      createdAt = v.createdAt,
+      updatedAt = v.updatedAt,
+      firstActivationAt = v.firstActivationAt,
+      expectedApprovalDate = v.expectedApprovalDate,
+      dailyCalls = v.dailyCalls
     )
   }
 

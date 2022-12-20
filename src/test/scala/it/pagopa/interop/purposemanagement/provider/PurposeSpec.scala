@@ -101,7 +101,7 @@ class PurposeSpec extends BaseIntegrationSpec {
 
       val result = response.futureValue
       result.status shouldBe 404
-      result.errors.map(_.code) shouldBe Seq("011-0003")
+      result.errors.map(_.code) shouldBe Seq("011-0002")
     }
   }
 
@@ -475,7 +475,7 @@ class PurposeSpec extends BaseIntegrationSpec {
 
       val result = response.futureValue
       result.status shouldBe 409
-      result.errors.map(_.code) shouldBe Seq("011-0038")
+      result.errors.map(_.code) shouldBe Seq("011-0007")
     }
   }
 
@@ -562,7 +562,7 @@ class PurposeSpec extends BaseIntegrationSpec {
 
       val result = response.futureValue
       result.status shouldBe 404
-      result.errors.map(_.code) shouldBe Seq("011-0041")
+      result.errors.map(_.code) shouldBe Seq("011-0002")
     }
 
     "fail if an active version exists" in {
@@ -603,8 +603,8 @@ class PurposeSpec extends BaseIntegrationSpec {
         } yield result
 
       val result = response.futureValue
-      result.status shouldBe 403
-      result.errors.map(_.code) shouldBe Seq("011-0042")
+      result.status shouldBe 409
+      result.errors.map(_.code) shouldBe Seq("011-0004")
     }
 
     "fail if other versions exist besides the one in draft" in {
@@ -647,8 +647,8 @@ class PurposeSpec extends BaseIntegrationSpec {
         } yield result
 
       val result = response.futureValue
-      result.status shouldBe 403
-      result.errors.map(_.code) shouldBe Seq("011-0042")
+      result.status shouldBe 409
+      result.errors.map(_.code) shouldBe Seq("011-0004")
     }
 
   }

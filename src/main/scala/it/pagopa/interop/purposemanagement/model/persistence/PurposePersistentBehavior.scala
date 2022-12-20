@@ -7,7 +7,7 @@ import akka.pattern.StatusReply
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.{Effect, EffectBuilder, EventSourcedBehavior, RetentionCriteria}
 import it.pagopa.interop.commons.utils.service.OffsetDateTimeSupplier
-import it.pagopa.interop.purposemanagement.error.InternalErrors._
+import it.pagopa.interop.purposemanagement.error.PurposeManagementErrors._
 import it.pagopa.interop.purposemanagement.model.persistence.Adapters._
 import it.pagopa.interop.purposemanagement.model.purpose._
 import it.pagopa.interop.purposemanagement.model.{ChangedBy, PurposeVersionDocument, StateChangeDetails}
@@ -36,7 +36,7 @@ object PurposePersistentBehavior {
               .persist(PurposeCreated(newPurpose))
               .thenRun((_: State) => replyTo ! StatusReply.Success(newPurpose))
           } { p =>
-            replyTo ! StatusReply.Error[PersistentPurpose](s"Purpose ${p.id.toString} already exists")
+            replyTo ! StatusReply.Error[PersistentPurpose](PurposeCreationConflict(p.id))
             Effect.none[PurposeCreated, State]
           }
 
@@ -53,7 +53,7 @@ object PurposePersistentBehavior {
                 .persist(PurposeDeleted(purposeId))
                 .thenRun((_: State) => replyTo ! StatusReply.Success(()))
             } else {
-              replyTo ! StatusReply.Error[Unit](PurposeHasVersions(purposeId))
+              replyTo ! StatusReply.Error[Unit](PurposeVersionsNotEmpty(purposeId))
               Effect.none[PurposeDeleted, State]
             }
           }
@@ -93,8 +93,8 @@ object PurposePersistentBehavior {
                 Effect
                   .persist(PurposeVersionDeleted(purposeId, versionId))
                   .thenRun((_: State) => replyTo ! StatusReply.Success(()))
-              case _                          =>
-                replyTo ! StatusReply.Error[Unit](PurposeVersionNotInDeletableState(purposeId, versionId))
+              case versionState               =>
+                replyTo ! StatusReply.Error[Unit](NotAllowedForPurposeVersionState(purposeId, versionId, versionState))
                 Effect.none[PurposeVersionDeleted, State]
             }
           }
@@ -353,13 +353,13 @@ object PurposePersistentBehavior {
   def isDraftVersion(purposeId: String, version: PersistentPurposeVersion): Either[Throwable, Unit] =
     version.state match {
       case Draft => Right(())
-      case _     => Left(PurposeVersionNotInDraft(purposeId, version.id.toString))
+      case v     => Left(NotAllowedForPurposeVersionState(purposeId, version.id.toString, v))
     }
 
   def isWaitingForApprovalVersion(purposeId: String, version: PersistentPurposeVersion): Either[Throwable, Unit] =
     version.state match {
       case WaitingForApproval => Right(())
-      case _                  => Left(PurposeVersionNotInWaitingForApproval(purposeId, version.id.toString))
+      case v                  => Left(NotAllowedForPurposeVersionState(purposeId, version.id.toString, v))
     }
 
   def getModifiedPurpose[T <: Event](

@@ -8,7 +8,9 @@ ThisBuild / dependencyOverrides ++= Dependencies.Jars.overrides
 ThisBuild / version           := ComputeVersion.version
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
-
+ThisBuild / githubOwner      := "pagopa"
+ThisBuild / githubRepository := "interop-be-purpose-management"
+ThisBuild / resolvers += Resolver.githubPackages("pagopa")
 
 lazy val generateCode = taskKey[Unit]("A task for generating the code starting from the swagger definition")
 
@@ -116,10 +118,7 @@ lazy val root = (project in file("."))
     libraryDependencies         := Dependencies.Jars.`server`,
     dockerBuildOptions ++= Seq("--network=host"),
     dockerRepository            := Some(System.getenv("ECR_REGISTRY")),
-    dockerBaseImage             := "adoptopenjdk:11-jdk-hotspot", ThisBuild / githubOwner := "pagopa"
-      ThisBuild / githubRepository :=
-"interop-be-purpose-management"
-ThisBuild / resolvers += Resolver.githubPackages("pagopa")
+    dockerBaseImage             := "adoptopenjdk:11-jdk-hotspot",
     daemonUser                  := "daemon",
     Docker / version            := (ThisBuild / version).value.replace("-SNAPSHOT", "-latest").toLowerCase,
     Docker / packageName        := s"${name.value}",

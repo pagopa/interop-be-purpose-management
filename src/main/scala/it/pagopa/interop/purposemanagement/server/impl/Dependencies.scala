@@ -41,7 +41,7 @@ import it.pagopa.interop.commons.logging.{CanLogContextFields, ContextFieldsToLo
 
 trait Dependencies {
 
-  implicit val logger: LoggerTakingImplicit[ContextFieldsToLog] =
+  implicit val loggerTI: LoggerTakingImplicit[ContextFieldsToLog] =
     Logger.takingImplicit[ContextFieldsToLog]("OAuth2JWTValidatorAsContexts")
 
   val uuidSupplier: UUIDSupplier               = UUIDSupplier

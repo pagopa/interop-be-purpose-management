@@ -178,9 +178,8 @@ object PurposePersistentBehavior {
         def archiveOldVersion(purpose: PersistentPurpose, newActiveVersionId: String): PersistentPurpose =
           purpose.copy(versions = purpose.versions.map { v =>
             v.state match {
-              case Active if v.id.toString != newActiveVersionId => v.copy(state = Archived)
-              case Suspended                                     => v.copy(state = Archived)
-              case _                                             => v
+              case Active | Suspended if v.id.toString != newActiveVersionId => v.copy(state = Archived)
+              case _                                                         => v
             }
           })
 
@@ -376,6 +375,29 @@ object PurposePersistentBehavior {
     riskAnalysisUpdated = riskAnalysisOpt.map(PersistentPurposeVersionDocument.fromAPI).orElse(version.riskAnalysis)
     versionWithRisk     = version.copy(riskAnalysis = riskAnalysisUpdated)
     _ <- versionValidation(versionWithRisk)
-  } yield updatePurposeFromState(purpose, versionWithRisk, newState, stateChangeDetails)(dateTimeSupplier)
+  } yield updatePurposeFromState(
+    purpose,
+    versionWithRisk,
+    getPurposeState(purpose, version.state, newState),
+    stateChangeDetails
+  )(dateTimeSupplier)
 
+  private val notFinalStates: Set[PersistentPurposeVersionState] = Set[PersistentPurposeVersionState](Active, Suspended)
+
+  private def getPurposeState(
+    purpose: PersistentPurpose,
+    currentState: PersistentPurposeVersionState,
+    newState: PersistentPurposeVersionState
+  ): PersistentPurposeVersionState = {
+
+    val actualValidState: Option[PersistentPurposeVersionState] =
+      purpose.versions.map(_.state).find(notFinalStates.contains)
+
+    // newState != WaitingForApproval is not currently a possible scenario, but this check could prevent a future bug
+    // in case of logic modification.
+    if (currentState == WaitingForApproval && newState != WaitingForApproval && actualValidState.nonEmpty)
+      actualValidState.getOrElse(newState)
+    else newState
+
+  }
 }

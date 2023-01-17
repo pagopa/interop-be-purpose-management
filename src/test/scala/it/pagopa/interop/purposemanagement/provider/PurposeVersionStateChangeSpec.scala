@@ -273,6 +273,67 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
       response.futureValue.versions should contain theSameElementsAs expectedVersions
     }
 
+    "succeed, archive the old active version and keep it active when it comes together with a waiting-for-approval version" in {
+      val purposeId      = UUID.randomUUID()
+      val versionId1     = UUID.randomUUID()
+      val versionId2     = UUID.randomUUID()
+      val eServiceId     = UUID.randomUUID()
+      val consumerId     = UUID.randomUUID()
+      val riskAnalysisId = UUID.randomUUID()
+
+      val riskAnalysisDoc = PurposeVersionDocument(
+        id = riskAnalysisId,
+        contentType = "a-content-type",
+        path = "a/store/path",
+        createdAt = timestamp
+      )
+
+      val purposeSeed = PurposeSeed(
+        eserviceId = eServiceId,
+        consumerId = consumerId,
+        title = "Purpose",
+        description = "Purpose description",
+        riskAnalysisForm = Some(riskAnalysisFormSeed)
+      )
+      val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
+
+      val response: Future[Purpose] =
+        for {
+          _       <- createPurpose(purposeId, purposeSeed)
+          _       <- createPurposeVersion(purposeId, versionId1, versionSeed)
+          _       <- activateVersion(purposeId, versionId1, ChangedBy.CONSUMER, versionSeed.riskAnalysis)
+          _       <- createPurposeVersion(purposeId, versionId2, versionSeed)
+          _       <- waitForApprovalVersion(purposeId, versionId2, ChangedBy.CONSUMER)
+          _       <- activateVersion(purposeId, versionId2, ChangedBy.PRODUCER, versionSeed.riskAnalysis)
+          purpose <- getPurpose(purposeId)
+        } yield purpose
+
+      val expectedVersions = Seq(
+        PurposeVersion(
+          id = versionId1,
+          state = PurposeVersionState.ARCHIVED,
+          createdAt = timestamp,
+          updatedAt = Some(timestamp),
+          firstActivationAt = Some(timestamp),
+          expectedApprovalDate = None,
+          riskAnalysis = Some(riskAnalysisDoc),
+          dailyCalls = 100
+        ),
+        PurposeVersion(
+          id = versionId2,
+          state = PurposeVersionState.ACTIVE,
+          createdAt = timestamp,
+          updatedAt = Some(timestamp),
+          firstActivationAt = Some(timestamp),
+          expectedApprovalDate = None,
+          riskAnalysis = Some(riskAnalysisDoc),
+          dailyCalls = 100
+        )
+      )
+
+      response.futureValue.versions should contain theSameElementsAs expectedVersions
+    }
+
     "succeed and update activation date only the first time" in {
       val purposeId      = UUID.randomUUID()
       val versionId      = UUID.randomUUID()

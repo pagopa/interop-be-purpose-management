@@ -393,10 +393,11 @@ object PurposePersistentBehavior {
     val actualValidState: Option[PersistentPurposeVersionState] =
       purpose.versions.map(_.state).find(notFinalStates.contains)
 
-    currentState match {
-      case WaitingForApproval if actualValidState.nonEmpty => actualValidState.getOrElse(newState)
-      case _                                               => newState
-    }
+    // newState != WaitingForApproval is not currently a possible scenario, but this check could prevent a future bug
+    // in case of logic modification.
+    if (currentState == WaitingForApproval && newState != WaitingForApproval && actualValidState.nonEmpty)
+      actualValidState.getOrElse(newState)
+    else newState
 
   }
 }

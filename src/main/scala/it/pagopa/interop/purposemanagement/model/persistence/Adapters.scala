@@ -95,7 +95,7 @@ object Adapters {
 
     val ACTIVABLE_STATES             = Seq(Draft, Suspended, WaitingForApproval)
     val SUSPENDABLE_STATES           = Seq(Active, Suspended)
-    val WAITABLE_FOR_APPROVAL_STATES = Seq(Draft)
+    val WAITABLE_FOR_APPROVAL_STATES = Seq(Draft, Suspended)
     val ARCHIVABLE_STATES            = Seq(Active, Suspended)
 
     def isActivable(purposeId: String): Either[Throwable, Unit] = for {

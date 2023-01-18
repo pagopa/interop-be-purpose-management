@@ -1,5 +1,6 @@
 package it.pagopa.interop.purposemanagement.provider
 
+import cats.syntax.all._
 import akka.http.scaladsl.model.HttpMethods
 import it.pagopa.interop.purposemanagement._
 import it.pagopa.interop.purposemanagement.model._
@@ -662,6 +663,48 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         for {
           _       <- createPurpose(purposeId, purposeSeed)
           version <- createPurposeVersion(purposeId, versionId, versionSeed)
+          result  <- waitForApprovalVersion(purposeId, versionId, ChangedBy.CONSUMER)
+        } yield (version, result)
+
+      val (version, result) = response.futureValue
+      val expected          = version.copy(
+        state = PurposeVersionState.WAITING_FOR_APPROVAL,
+        updatedAt = Some(timestamp),
+        firstActivationAt = Some(timestamp)
+      )
+      result shouldBe expected
+    }
+
+    "succeed when the purpose was previously suspended" in {
+      val purposeId      = UUID.randomUUID()
+      val versionId      = UUID.randomUUID()
+      val eServiceId     = UUID.randomUUID()
+      val consumerId     = UUID.randomUUID()
+      val riskAnalysisId = UUID.randomUUID()
+
+      val purposeSeed = PurposeSeed(
+        eserviceId = eServiceId,
+        consumerId = consumerId,
+        title = "Purpose",
+        description = "Purpose description",
+        riskAnalysisForm = Some(riskAnalysisFormSeed)
+      )
+
+      val riskAnalysisDoc = PurposeVersionDocument(
+        id = riskAnalysisId,
+        contentType = "a-content-type",
+        path = "a/store/path",
+        createdAt = timestamp
+      )
+
+      val versionSeed = PurposeVersionSeed(riskAnalysis = riskAnalysisDoc.some, dailyCalls = 100)
+
+      val response: Future[(PurposeVersion, PurposeVersion)] =
+        for {
+          _       <- createPurpose(purposeId, purposeSeed)
+          version <- createPurposeVersion(purposeId, versionId, versionSeed)
+          _       <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, versionSeed.riskAnalysis)
+          _       <- suspendVersion(purposeId, versionId, ChangedBy.CONSUMER)
           result  <- waitForApprovalVersion(purposeId, versionId, ChangedBy.CONSUMER)
         } yield (version, result)
 

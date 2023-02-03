@@ -18,7 +18,7 @@ import scala.concurrent.duration.{DurationInt, DurationLong}
 import scala.language.postfixOps
 
 object PurposePersistentBehavior {
-// TODO reset suspension flags?
+
   def commandHandler(
     shard: ActorRef[ClusterSharding.ShardCommand],
     context: ActorContext[Command],

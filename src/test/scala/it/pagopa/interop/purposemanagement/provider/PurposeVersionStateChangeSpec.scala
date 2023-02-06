@@ -211,7 +211,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
       response.futureValue.versions should contain theSameElementsAs expectedVersions
     }
 
-    "succeed, archive the old suspended version and keep it suspended when it comes together with a waiting-for-approval version" in {
+    "succeed, archive the old suspended version and change to active when it comes together with a waiting-for-approval version" in {
       val purposeId      = UUID.randomUUID()
       val versionId1     = UUID.randomUUID()
       val versionId2     = UUID.randomUUID()
@@ -260,7 +260,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         ),
         PurposeVersion(
           id = versionId2,
-          state = PurposeVersionState.SUSPENDED,
+          state = PurposeVersionState.ACTIVE,
           createdAt = timestamp,
           updatedAt = Some(timestamp),
           firstActivationAt = Some(timestamp),
@@ -270,7 +270,10 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         )
       )
 
-      response.futureValue.versions should contain theSameElementsAs expectedVersions
+      val result: Purpose = response.futureValue
+      result.suspendedByConsumer shouldBe Some(false)
+      result.suspendedByProducer shouldBe Some(false)
+      result.versions should contain theSameElementsAs expectedVersions
     }
 
     "succeed, archive the old active version and keep it active when it comes together with a waiting-for-approval version" in {

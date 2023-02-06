@@ -332,10 +332,23 @@ object PurposePersistentBehavior {
 
         purpose.copy(versions = updatedVersions, suspendedByConsumer = Some(isSuspended), updatedAt = Some(timestamp))
       case ChangedBy.PRODUCER =>
-        val newState        = calcNewVersionState(Some(isSuspended), purpose.suspendedByConsumer, newVersionState)
-        val updatedVersions = updateVersions(newState)
+        if (version.state == WaitingForApproval && newVersionState == Active) {
+          // Force the state to Active when enabling a version in WaitingForApproval
+          val updatedVersions = updateVersions(newVersionState)
 
-        purpose.copy(versions = updatedVersions, suspendedByProducer = Some(isSuspended), updatedAt = Some(timestamp))
+          purpose.copy(
+            versions = updatedVersions,
+            suspendedByConsumer = Some(false),
+            suspendedByProducer = Some(false),
+            updatedAt = Some(timestamp)
+          )
+        } else {
+          val newState        = calcNewVersionState(Some(isSuspended), purpose.suspendedByConsumer, newVersionState)
+          val updatedVersions = updateVersions(newState)
+
+          purpose.copy(versions = updatedVersions, suspendedByProducer = Some(isSuspended), updatedAt = Some(timestamp))
+        }
+
     }
   }
 
@@ -375,29 +388,6 @@ object PurposePersistentBehavior {
     riskAnalysisUpdated = riskAnalysisOpt.map(PersistentPurposeVersionDocument.fromAPI).orElse(version.riskAnalysis)
     versionWithRisk     = version.copy(riskAnalysis = riskAnalysisUpdated)
     _ <- versionValidation(versionWithRisk)
-  } yield updatePurposeFromState(
-    purpose,
-    versionWithRisk,
-    getPurposeState(purpose, version.state, newState),
-    stateChangeDetails
-  )(dateTimeSupplier)
+  } yield updatePurposeFromState(purpose, versionWithRisk, newState, stateChangeDetails)(dateTimeSupplier)
 
-  private val notFinalStates: Set[PersistentPurposeVersionState] = Set[PersistentPurposeVersionState](Active, Suspended)
-
-  private def getPurposeState(
-    purpose: PersistentPurpose,
-    currentState: PersistentPurposeVersionState,
-    newState: PersistentPurposeVersionState
-  ): PersistentPurposeVersionState = {
-
-    val actualValidState: Option[PersistentPurposeVersionState] =
-      purpose.versions.map(_.state).find(notFinalStates.contains)
-
-    // newState != WaitingForApproval is not currently a possible scenario, but this check could prevent a future bug
-    // in case of logic modification.
-    if (currentState == WaitingForApproval && newState != WaitingForApproval && actualValidState.nonEmpty)
-      actualValidState.getOrElse(newState)
-    else newState
-
-  }
 }

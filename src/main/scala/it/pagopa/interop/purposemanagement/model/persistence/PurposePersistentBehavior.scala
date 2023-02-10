@@ -310,7 +310,8 @@ object PurposePersistentBehavior {
     stateChangeDetails: StateChangeDetails
   )(dateTimeSupplier: OffsetDateTimeSupplier): PersistentPurpose = {
 
-    def isSuspended = newVersionState == Suspended
+    def isSuspended = newVersionState == Suspended ||
+      (newVersionState == WaitingForApproval && purpose.versions.exists(_.state == Suspended))
 
     val timestamp = dateTimeSupplier.get()
 

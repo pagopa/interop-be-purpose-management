@@ -310,8 +310,7 @@ object PurposePersistentBehavior {
     stateChangeDetails: StateChangeDetails
   )(dateTimeSupplier: OffsetDateTimeSupplier): PersistentPurpose = {
 
-    def isSuspended = newVersionState == Suspended ||
-      (newVersionState == WaitingForApproval && purpose.versions.exists(_.state == Suspended))
+    def isSuspended = newVersionState == Suspended
 
     val timestamp = dateTimeSupplier.get()
 
@@ -328,10 +327,17 @@ object PurposePersistentBehavior {
 
     stateChangeDetails.changedBy match {
       case ChangedBy.CONSUMER =>
-        val newState        = calcNewVersionState(purpose.suspendedByProducer, Some(isSuspended), newVersionState)
+        val suspendedByRequester = isSuspended ||
+          (newVersionState == WaitingForApproval && stateChangeDetails.changedBy == ChangedBy.CONSUMER && purpose.suspendedByConsumer
+            .contains(true))
+        val newState = calcNewVersionState(purpose.suspendedByProducer, Some(suspendedByRequester), newVersionState)
         val updatedVersions = updateVersions(newState)
 
-        purpose.copy(versions = updatedVersions, suspendedByConsumer = Some(isSuspended), updatedAt = Some(timestamp))
+        purpose.copy(
+          versions = updatedVersions,
+          suspendedByConsumer = Some(suspendedByRequester),
+          updatedAt = Some(timestamp)
+        )
       case ChangedBy.PRODUCER =>
         if (version.state == WaitingForApproval && newVersionState == Active) {
           // Force the state to Active when enabling a version in WaitingForApproval
@@ -344,10 +350,17 @@ object PurposePersistentBehavior {
             updatedAt = Some(timestamp)
           )
         } else {
-          val newState        = calcNewVersionState(Some(isSuspended), purpose.suspendedByConsumer, newVersionState)
+          val suspendedByRequester = isSuspended ||
+            (newVersionState == WaitingForApproval && stateChangeDetails.changedBy == ChangedBy.PRODUCER && purpose.suspendedByProducer
+              .contains(true))
+          val newState = calcNewVersionState(Some(suspendedByRequester), purpose.suspendedByConsumer, newVersionState)
           val updatedVersions = updateVersions(newState)
 
-          purpose.copy(versions = updatedVersions, suspendedByProducer = Some(isSuspended), updatedAt = Some(timestamp))
+          purpose.copy(
+            versions = updatedVersions,
+            suspendedByProducer = Some(suspendedByRequester),
+            updatedAt = Some(timestamp)
+          )
         }
 
     }

@@ -677,6 +677,51 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
       result shouldBe expected
     }
 
+    "succeed and stay suspended by Producer if previous version was suspended" in {
+      val purposeId      = UUID.randomUUID()
+      val versionId      = UUID.randomUUID()
+      val wfaVersionId   = UUID.randomUUID()
+      val eServiceId     = UUID.randomUUID()
+      val consumerId     = UUID.randomUUID()
+      val riskAnalysisId = UUID.randomUUID()
+
+      val riskAnalysisDoc = PurposeVersionDocument(
+        id = riskAnalysisId,
+        contentType = "a-content-type",
+        path = "a/store/path",
+        createdAt = timestamp
+      )
+
+      val purposeSeed = PurposeSeed(
+        eserviceId = eServiceId,
+        consumerId = consumerId,
+        title = "Purpose",
+        description = "Purpose description",
+        riskAnalysisForm = Some(riskAnalysisFormSeed)
+      )
+      val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
+
+      val response: Future[Purpose] =
+        for {
+          _              <- createPurpose(purposeId, purposeSeed)
+          _              <- createPurposeVersion(purposeId, versionId, versionSeed)
+          _              <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, None)
+          _              <- suspendVersion(purposeId, versionId, ChangedBy.PRODUCER)
+          _              <- createPurposeVersion(purposeId, wfaVersionId, versionSeed)
+          _              <- waitForApprovalVersion(purposeId, wfaVersionId, ChangedBy.CONSUMER)
+          updatedPurpose <- getPurpose(purposeId)
+        } yield updatedPurpose
+
+      val updatedPurpose = response.futureValue
+
+      updatedPurpose.suspendedByConsumer.getOrElse(false) shouldBe false
+      updatedPurpose.suspendedByProducer shouldBe Some(true)
+      updatedPurpose.versions.map(v => (v.id, v.state)) shouldBe Seq(
+        (versionId, PurposeVersionState.SUSPENDED),
+        (wfaVersionId, PurposeVersionState.WAITING_FOR_APPROVAL)
+      )
+    }
+
     "fail if not exist" in {
       val purposeId = UUID.randomUUID()
       val versionId = UUID.randomUUID()

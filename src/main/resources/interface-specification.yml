@@ -603,8 +603,12 @@ components:
       properties:
         changedBy:
           $ref: '#/components/schemas/ChangedBy'
+        timestamp:
+          type: string
+          format: date-time
       required:
         - changedBy
+        - timestamp
     ChangedBy:
       type: string
       description: Role who made the change
@@ -753,6 +757,9 @@ components:
           type: string
           format: date-time
         firstActivationAt:
+          type: string
+          format: date-time
+        suspendedAt:
           type: string
           format: date-time
         expectedApprovalDate:

@@ -32,6 +32,7 @@ message PurposeVersionV1 {
   optional int64 updatedAt = 6;
   optional int64 firstActivationAt = 7;
   optional int64 expectedApprovalDate = 8;
+  optional int64 suspendedAt = 9;
 }
 
 enum PurposeStateV1 {

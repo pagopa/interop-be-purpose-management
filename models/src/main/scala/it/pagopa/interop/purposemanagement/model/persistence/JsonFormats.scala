@@ -31,7 +31,7 @@ object JsonFormats {
     PersistentPurposeVersionDocument.apply
   )
 
-  implicit val ppvFormat: RootJsonFormat[PersistentPurposeVersion] = jsonFormat8(PersistentPurposeVersion.apply)
+  implicit val ppvFormat: RootJsonFormat[PersistentPurposeVersion] = jsonFormat9(PersistentPurposeVersion.apply)
 
   implicit val pramaFormat: RootJsonFormat[PersistentRiskAnalysisMultiAnswer] = jsonFormat3(
     PersistentRiskAnalysisMultiAnswer.apply

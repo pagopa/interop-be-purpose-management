@@ -151,7 +151,8 @@ object Adapters {
       updatedAt = None,
       firstActivationAt = None,
       riskAnalysis = seed.riskAnalysis.map(PersistentPurposeVersionDocument.fromAPI),
-      expectedApprovalDate = None
+      expectedApprovalDate = None,
+      suspendedAt = None
     )
   }
 

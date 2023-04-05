@@ -72,6 +72,7 @@ object protobufUtils {
       firstActivationAt    <- protobufPurposeVersion.firstActivationAt.traverse(_.toOffsetDateTime)
       expectedApprovalDate <- protobufPurposeVersion.expectedApprovalDate.traverse(_.toOffsetDateTime)
       riskAnalysisDoc      <- protobufPurposeVersion.riskAnalysis.traverse(toPersistentPurposeVersionDocument).toTry
+      suspendedAt          <- protobufPurposeVersion.suspendedAt.traverse(_.toOffsetDateTime)
     } yield PersistentPurposeVersion(
       id = id,
       state = state,
@@ -80,7 +81,8 @@ object protobufUtils {
       createdAt = createdAt,
       updatedAt = updatedAt,
       firstActivationAt = firstActivationAt,
-      expectedApprovalDate = expectedApprovalDate
+      expectedApprovalDate = expectedApprovalDate,
+      suspendedAt = suspendedAt
     )
     purpose.toEither
   }
@@ -94,7 +96,8 @@ object protobufUtils {
       updatedAt = persistentPurposeVersion.updatedAt.map(_.toMillis),
       firstActivationAt = persistentPurposeVersion.firstActivationAt.map(_.toMillis),
       expectedApprovalDate = persistentPurposeVersion.expectedApprovalDate.map(_.toMillis),
-      riskAnalysis = persistentPurposeVersion.riskAnalysis.map(toProtobufPurposeVersionDocument)
+      riskAnalysis = persistentPurposeVersion.riskAnalysis.map(toProtobufPurposeVersionDocument),
+      suspendedAt = persistentPurposeVersion.suspendedAt.map(_.toMillis)
     )
 
   def toProtobufPurposeState(status: PersistentPurposeVersionState): PurposeStateV1 = status match {

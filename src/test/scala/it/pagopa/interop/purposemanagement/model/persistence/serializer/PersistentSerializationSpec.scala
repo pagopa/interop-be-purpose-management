@@ -116,6 +116,8 @@ object PersistentSerializationSpec {
     (createdAt, createdAtV1)                       <- offsetDatetimeGen
     (updatedAt, updatedAtV1)                       <- Gen.option(offsetDatetimeGen).map(_.separate)
     (firstActivationAt, firstActivationAtV1)       <- Gen.option(offsetDatetimeGen).map(_.separate)
+    (suspendedAt, suspendedAtV1)                   <- Gen.option(offsetDatetimeGen).map(_.separate)
+
   } yield (
     PersistentPurposeVersion(
       id = id,
@@ -125,7 +127,8 @@ object PersistentSerializationSpec {
       dailyCalls = dailyCalls,
       createdAt = createdAt,
       updatedAt = updatedAt,
-      firstActivationAt = firstActivationAt
+      firstActivationAt = firstActivationAt,
+      suspendedAt = suspendedAt
     ),
     PurposeVersionV1(
       id = id.toString(),
@@ -135,7 +138,8 @@ object PersistentSerializationSpec {
       createdAt = createdAtV1,
       updatedAt = updatedAtV1,
       firstActivationAt = firstActivationAtV1,
-      expectedApprovalDate = expectedApprovalDateV1
+      expectedApprovalDate = expectedApprovalDateV1,
+      suspendedAt = suspendedAtV1
     )
   )
 

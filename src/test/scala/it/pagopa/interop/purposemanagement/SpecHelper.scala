@@ -132,7 +132,7 @@ trait SpecHelper {
       data <- Marshal(
         ActivatePurposeVersionPayload(
           riskAnalysis = riskAnalysis,
-          stateChangeDetails = StateChangeDetails(changedBy = changedBy)
+          stateChangeDetails = StateChangeDetails(changedBy = changedBy, timestamp = timestamp)
         )
       )
         .to[MessageEntity]
@@ -165,7 +165,7 @@ trait SpecHelper {
     ec: ExecutionContext,
     actorSystem: actor.ActorSystem
   ): Future[PurposeVersion] = for {
-    data <- Marshal(StateChangeDetails(changedBy = changedBy))
+    data <- Marshal(StateChangeDetails(changedBy = changedBy, timestamp = timestamp))
       .to[MessageEntity]
       .map(_.dataBytes)
     _ = (() => mockDateTimeSupplier.get()).expects().returning(timestamp).once()

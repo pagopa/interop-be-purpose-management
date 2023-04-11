@@ -126,13 +126,13 @@ trait SpecHelper {
     versionId: UUID,
     changedBy: ChangedBy,
     riskAnalysis: Option[PurposeVersionDocument],
-    timestamp: OffsetDateTime = timestamp
+    activatedAt: Option[OffsetDateTime] = Some(timestamp)
   )(implicit ec: ExecutionContext, actorSystem: actor.ActorSystem): Future[PurposeVersion] = {
     for {
       data <- Marshal(
         ActivatePurposeVersionPayload(
           riskAnalysis = riskAnalysis,
-          stateChangeDetails = StateChangeDetails(changedBy = changedBy, timestamp = timestamp)
+          stateChangeDetails = StateChangeDetails(changedBy = changedBy, timestamp = activatedAt)
         )
       )
         .to[MessageEntity]
@@ -165,7 +165,7 @@ trait SpecHelper {
     ec: ExecutionContext,
     actorSystem: actor.ActorSystem
   ): Future[PurposeVersion] = for {
-    data <- Marshal(StateChangeDetails(changedBy = changedBy, timestamp = timestamp))
+    data <- Marshal(StateChangeDetails(changedBy = changedBy, timestamp = Some(timestamp)))
       .to[MessageEntity]
       .map(_.dataBytes)
     _ = (() => mockDateTimeSupplier.get()).expects().returning(timestamp).once()

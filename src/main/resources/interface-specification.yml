@@ -608,7 +608,6 @@ components:
           format: date-time
       required:
         - changedBy
-        - timestamp
     ChangedBy:
       type: string
       description: Role who made the change

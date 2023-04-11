@@ -321,7 +321,12 @@ object PurposePersistentBehavior {
       }
 
       val updatedVersion =
-        version.copy(state = newState, updatedAt = Some(timestamp), firstActivationAt = firstActivationAt)
+        version.copy(
+          state = newState,
+          updatedAt = Some(timestamp),
+          firstActivationAt = firstActivationAt,
+          suspendedAt = stateChangeDetails.timestamp
+        )
       purpose.versions.filter(_.id != version.id) :+ updatedVersion
     }
 

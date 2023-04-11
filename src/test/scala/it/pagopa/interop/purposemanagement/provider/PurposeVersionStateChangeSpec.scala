@@ -367,9 +367,15 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         for {
           _       <- createPurpose(purposeId, purposeSeed)
           version <- createPurposeVersion(purposeId, versionId, versionSeed)
-          _ <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, versionSeed.riskAnalysis, firstActivationAt)
-          _ <- suspendVersion(purposeId, versionId, ChangedBy.CONSUMER)
-          result <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, None, secondActivationAt)
+          _       <- activateVersion(
+            purposeId,
+            versionId,
+            ChangedBy.CONSUMER,
+            versionSeed.riskAnalysis,
+            Some(firstActivationAt)
+          )
+          _       <- suspendVersion(purposeId, versionId, ChangedBy.CONSUMER)
+          result  <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, None, Some(secondActivationAt))
         } yield (version, result)
 
       val (version, result) = response.futureValue
@@ -389,7 +395,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         s"purposes/$purposeId/versions/$versionId/activate",
         HttpMethods.POST,
         ActivatePurposeVersionPayload(stateChangeDetails =
-          StateChangeDetails(changedBy = ChangedBy.CONSUMER, timestamp = timestamp)
+          StateChangeDetails(changedBy = ChangedBy.CONSUMER, timestamp = Some(timestamp))
         )
       )
 
@@ -421,7 +427,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
             s"purposes/$purposeId/versions/$versionId/activate",
             HttpMethods.POST,
             ActivatePurposeVersionPayload(stateChangeDetails =
-              StateChangeDetails(changedBy = ChangedBy.CONSUMER, timestamp = timestamp)
+              StateChangeDetails(changedBy = ChangedBy.CONSUMER, timestamp = Some(timestamp))
             )
           )
         } yield result
@@ -464,7 +470,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
             s"purposes/$purposeId/versions/$versionId/activate",
             HttpMethods.POST,
             ActivatePurposeVersionPayload(stateChangeDetails =
-              StateChangeDetails(changedBy = ChangedBy.CONSUMER, timestamp = timestamp)
+              StateChangeDetails(changedBy = ChangedBy.CONSUMER, timestamp = Some(timestamp))
             )
           )
         } yield result
@@ -523,7 +529,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
       val response: Future[Problem] = makeFailingRequest(
         s"purposes/$purposeId/versions/$versionId/suspend",
         HttpMethods.POST,
-        StateChangeDetails(changedBy = ChangedBy.CONSUMER, timestamp = timestamp)
+        StateChangeDetails(changedBy = ChangedBy.CONSUMER, timestamp = Some(timestamp))
       )
 
       val result = response.futureValue
@@ -553,7 +559,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
           result <- makeFailingRequest(
             s"purposes/$purposeId/versions/$versionId/suspend",
             HttpMethods.POST,
-            StateChangeDetails(changedBy = ChangedBy.CONSUMER, timestamp = timestamp)
+            StateChangeDetails(changedBy = ChangedBy.CONSUMER, timestamp = Some(timestamp))
           )
         } yield result
 
@@ -611,7 +617,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
       val response: Future[Problem] = makeFailingRequest(
         s"purposes/$purposeId/versions/$versionId/archive",
         HttpMethods.POST,
-        StateChangeDetails(changedBy = ChangedBy.CONSUMER, timestamp = timestamp)
+        StateChangeDetails(changedBy = ChangedBy.CONSUMER, timestamp = Some(timestamp))
       )
 
       val result = response.futureValue
@@ -641,7 +647,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
           result <- makeFailingRequest(
             s"purposes/$purposeId/versions/$versionId/archive",
             HttpMethods.POST,
-            StateChangeDetails(changedBy = ChangedBy.CONSUMER, timestamp = timestamp)
+            StateChangeDetails(changedBy = ChangedBy.CONSUMER, timestamp = Some(timestamp))
           )
         } yield result
 
@@ -735,7 +741,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
       val response: Future[Problem] = makeFailingRequest(
         s"purposes/$purposeId/versions/$versionId/waitForApproval",
         HttpMethods.POST,
-        StateChangeDetails(changedBy = ChangedBy.CONSUMER, timestamp = timestamp)
+        StateChangeDetails(changedBy = ChangedBy.CONSUMER, timestamp = Some(timestamp))
       )
 
       val result = response.futureValue
@@ -774,7 +780,7 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
           result <- makeFailingRequest(
             s"purposes/$purposeId/versions/$versionId/waitForApproval",
             HttpMethods.POST,
-            StateChangeDetails(changedBy = ChangedBy.CONSUMER, timestamp = timestamp)
+            StateChangeDetails(changedBy = ChangedBy.CONSUMER, timestamp = Some(timestamp))
           )
         } yield result
 

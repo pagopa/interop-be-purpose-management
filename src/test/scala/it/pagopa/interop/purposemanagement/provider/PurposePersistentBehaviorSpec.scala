@@ -21,7 +21,8 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
     dailyCalls = 100,
     createdAt = timestamp,
     updatedAt = None,
-    firstActivationAt = None
+    firstActivationAt = None,
+    suspendedAt = None
   )
   val purposeTemplate: PersistentPurpose        = PersistentPurpose(
     id = UUID.randomUUID(),
@@ -51,7 +52,7 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
         purpose,
         version,
         newVersionState = Active,
-        stateChangeDetails = StateChangeDetails(CONSUMER)
+        stateChangeDetails = StateChangeDetails(CONSUMER, newTimestamp)
       )(mockDateTimeSupplier)
 
       val expectedVersion =
@@ -72,7 +73,7 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
         purpose,
         version,
         newVersionState = Suspended,
-        stateChangeDetails = StateChangeDetails(ChangedBy.CONSUMER)
+        stateChangeDetails = StateChangeDetails(ChangedBy.CONSUMER, newTimestamp)
       )(mockDateTimeSupplier)
 
       val expectedVersion =
@@ -98,7 +99,7 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
         purpose,
         version,
         newVersionState = Suspended,
-        stateChangeDetails = StateChangeDetails(ChangedBy.PRODUCER)
+        stateChangeDetails = StateChangeDetails(ChangedBy.PRODUCER, newTimestamp)
       )(mockDateTimeSupplier)
 
       val expectedVersion =
@@ -124,7 +125,7 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
         purpose,
         version,
         newVersionState = Suspended,
-        stateChangeDetails = StateChangeDetails(ChangedBy.PRODUCER)
+        stateChangeDetails = StateChangeDetails(ChangedBy.PRODUCER, newTimestamp)
       )(mockDateTimeSupplier)
 
       val expectedVersion =
@@ -150,7 +151,7 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
         purpose,
         version,
         newVersionState = Active,
-        stateChangeDetails = StateChangeDetails(ChangedBy.PRODUCER)
+        stateChangeDetails = StateChangeDetails(ChangedBy.PRODUCER, newTimestamp)
       )(mockDateTimeSupplier)
 
       val expectedVersion =
@@ -176,7 +177,7 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
         purpose,
         version,
         newVersionState = Active,
-        stateChangeDetails = StateChangeDetails(ChangedBy.CONSUMER)
+        stateChangeDetails = StateChangeDetails(ChangedBy.CONSUMER, newTimestamp)
       )(mockDateTimeSupplier)
 
       val expectedVersion =
@@ -202,7 +203,7 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
         purpose,
         version,
         newVersionState = Active,
-        stateChangeDetails = StateChangeDetails(ChangedBy.CONSUMER)
+        stateChangeDetails = StateChangeDetails(ChangedBy.CONSUMER, newTimestamp)
       )(mockDateTimeSupplier)
 
       val expectedVersion =
@@ -228,7 +229,7 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
         purpose,
         version,
         newVersionState = Active,
-        stateChangeDetails = StateChangeDetails(ChangedBy.PRODUCER)
+        stateChangeDetails = StateChangeDetails(ChangedBy.PRODUCER, newTimestamp)
       )(mockDateTimeSupplier)
 
       val expectedVersion =

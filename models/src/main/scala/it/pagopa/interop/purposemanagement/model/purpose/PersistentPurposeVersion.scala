@@ -12,5 +12,6 @@ final case class PersistentPurposeVersion(
   dailyCalls: Int,
   createdAt: OffsetDateTime,
   updatedAt: Option[OffsetDateTime],
-  firstActivationAt: Option[OffsetDateTime]
+  firstActivationAt: Option[OffsetDateTime],
+  suspendedAt: Option[OffsetDateTime]
 )

@@ -17,6 +17,7 @@ import it.pagopa.interop.purposemanagement.model.{
 }
 import it.pagopa.interop.purposemanagement.model.persistence.Command
 import it.pagopa.interop.purposemanagement.server.impl.Main.purposePersistenceEntity
+import it.pagopa.interop.purposemanagement.timestamp
 import it.pagopa.interop.purposemanagement.util.{AuthorizedRoutes, ClusteredScalatestRouteTest}
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -77,7 +78,7 @@ class PurposeApiServiceAuthzSpec extends AnyWordSpecLike with ClusteredScalatest
     }
     "accept authorized roles for activatePurposeVersion " in {
       val endpoint    = AuthorizedRoutes.endpoints("activatePurposeVersion")
-      val fakePayload = ActivatePurposeVersionPayload(None, StateChangeDetails(ChangedBy.CONSUMER))
+      val fakePayload = ActivatePurposeVersionPayload(None, StateChangeDetails(ChangedBy.CONSUMER, timestamp))
       validateAuthorization(
         endpoint,
         { implicit c: Seq[(String, String)] => service.activatePurposeVersion("fakeSeed", "fake", fakePayload) }
@@ -89,7 +90,7 @@ class PurposeApiServiceAuthzSpec extends AnyWordSpecLike with ClusteredScalatest
       validateAuthorization(
         endpoint,
         { implicit c: Seq[(String, String)] =>
-          service.suspendPurposeVersion("fakeSeed", "fake", StateChangeDetails(ChangedBy.CONSUMER))
+          service.suspendPurposeVersion("fakeSeed", "fake", StateChangeDetails(ChangedBy.CONSUMER, timestamp))
         }
       )
     }
@@ -98,7 +99,7 @@ class PurposeApiServiceAuthzSpec extends AnyWordSpecLike with ClusteredScalatest
       validateAuthorization(
         endpoint,
         { implicit c: Seq[(String, String)] =>
-          service.waitForApprovalPurposeVersion("fakeSeed", "fake", StateChangeDetails(ChangedBy.CONSUMER))
+          service.waitForApprovalPurposeVersion("fakeSeed", "fake", StateChangeDetails(ChangedBy.CONSUMER, timestamp))
         }
       )
     }
@@ -107,7 +108,7 @@ class PurposeApiServiceAuthzSpec extends AnyWordSpecLike with ClusteredScalatest
       validateAuthorization(
         endpoint,
         { implicit c: Seq[(String, String)] =>
-          service.archivePurposeVersion("fake", "fake", StateChangeDetails(ChangedBy.CONSUMER))
+          service.archivePurposeVersion("fake", "fake", StateChangeDetails(ChangedBy.CONSUMER, timestamp))
         }
       )
     }

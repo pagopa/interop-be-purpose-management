@@ -367,15 +367,9 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         for {
           _       <- createPurpose(purposeId, purposeSeed)
           version <- createPurposeVersion(purposeId, versionId, versionSeed)
-          _       <- activateVersion(
-            purposeId,
-            versionId,
-            ChangedBy.CONSUMER,
-            versionSeed.riskAnalysis,
-            Some(firstActivationAt)
-          )
-          _       <- suspendVersion(purposeId, versionId, ChangedBy.CONSUMER)
-          result  <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, None, Some(secondActivationAt))
+          _ <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, versionSeed.riskAnalysis, firstActivationAt)
+          _ <- suspendVersion(purposeId, versionId, ChangedBy.CONSUMER)
+          result <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, None, secondActivationAt)
         } yield (version, result)
 
       val (version, result) = response.futureValue

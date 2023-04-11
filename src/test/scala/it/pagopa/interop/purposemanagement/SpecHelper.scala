@@ -126,13 +126,13 @@ trait SpecHelper {
     versionId: UUID,
     changedBy: ChangedBy,
     riskAnalysis: Option[PurposeVersionDocument],
-    activatedAt: Option[OffsetDateTime] = Some(timestamp)
+    timestamp: OffsetDateTime = timestamp
   )(implicit ec: ExecutionContext, actorSystem: actor.ActorSystem): Future[PurposeVersion] = {
     for {
       data <- Marshal(
         ActivatePurposeVersionPayload(
           riskAnalysis = riskAnalysis,
-          stateChangeDetails = StateChangeDetails(changedBy = changedBy, timestamp = activatedAt)
+          stateChangeDetails = StateChangeDetails(changedBy = changedBy, timestamp = Some(timestamp))
         )
       )
         .to[MessageEntity]

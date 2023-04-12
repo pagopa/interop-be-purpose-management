@@ -75,7 +75,7 @@ trait ItSpecHelper
 
   override def startServer(): Unit = {
     val persistentEntity: Entity[Command, ShardingEnvelope[Command]] =
-      Entity(PurposePersistentBehavior.TypeKey)(behaviorFactory(mockDateTimeSupplier))
+      Entity(PurposePersistentBehavior.TypeKey)(behaviorFactory())
 
     Cluster(system).manager ! Join(Cluster(system).selfMember.address)
     sharding.init(persistentEntity)

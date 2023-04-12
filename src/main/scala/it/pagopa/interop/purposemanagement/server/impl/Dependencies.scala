@@ -47,17 +47,16 @@ trait Dependencies {
   val uuidSupplier: UUIDSupplier               = UUIDSupplier
   val dateTimeSupplier: OffsetDateTimeSupplier = OffsetDateTimeSupplier
 
-  def behaviorFactory(offsetDateTimeSupplier: OffsetDateTimeSupplier): EntityContext[Command] => Behavior[Command] =
+  def behaviorFactory(): EntityContext[Command] => Behavior[Command] =
     entityContext =>
       PurposePersistentBehavior(
         entityContext.shard,
         PersistenceId(entityContext.entityTypeKey.name, entityContext.entityId),
-        offsetDateTimeSupplier,
         projectionTag(math.abs(entityContext.entityId.hashCode % numberOfProjectionTags))
       )
 
   val purposePersistenceEntity: Entity[Command, ShardingEnvelope[Command]] =
-    Entity(PurposePersistentBehavior.TypeKey)(behaviorFactory(dateTimeSupplier))
+    Entity(PurposePersistentBehavior.TypeKey)(behaviorFactory())
 
   def initProjections(
     blockingEc: ExecutionContextExecutor

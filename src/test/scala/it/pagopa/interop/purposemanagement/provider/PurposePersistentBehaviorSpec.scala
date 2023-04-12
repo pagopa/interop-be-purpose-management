@@ -53,7 +53,7 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
         version,
         newVersionState = Active,
         stateChangeDetails = StateChangeDetails(CONSUMER, newTimestamp)
-      )(mockDateTimeSupplier)
+      )
 
       val expectedVersion =
         version.copy(state = Active, updatedAt = Some(newTimestamp), firstActivationAt = Some(newTimestamp))
@@ -74,10 +74,10 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
         version,
         newVersionState = Suspended,
         stateChangeDetails = StateChangeDetails(ChangedBy.CONSUMER, newTimestamp)
-      )(mockDateTimeSupplier)
+      )
 
       val expectedVersion =
-        version.copy(state = Suspended, updatedAt = Some(newTimestamp))
+        version.copy(state = Suspended, updatedAt = Some(newTimestamp), suspendedAt = Some(newTimestamp))
       val expected        =
         purpose.copy(
           versions = Seq(expectedVersion),
@@ -100,10 +100,10 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
         version,
         newVersionState = Suspended,
         stateChangeDetails = StateChangeDetails(ChangedBy.PRODUCER, newTimestamp)
-      )(mockDateTimeSupplier)
+      )
 
       val expectedVersion =
-        version.copy(state = Suspended, updatedAt = Some(newTimestamp))
+        version.copy(state = Suspended, updatedAt = Some(newTimestamp), suspendedAt = Some(newTimestamp))
       val expected        =
         purpose.copy(
           versions = Seq(expectedVersion),
@@ -116,7 +116,7 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
     }
 
     "remain Suspended if it's Suspended by Consumer and Producer requests suspension" in {
-      val version = versionTemplate.copy(state = Suspended)
+      val version = versionTemplate.copy(state = Suspended, suspendedAt = Some(newTimestamp))
       val purpose = purposeTemplate.copy(suspendedByConsumer = Some(true))
 
       (() => mockDateTimeSupplier.get()).expects().returning(newTimestamp).once()
@@ -126,10 +126,10 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
         version,
         newVersionState = Suspended,
         stateChangeDetails = StateChangeDetails(ChangedBy.PRODUCER, newTimestamp)
-      )(mockDateTimeSupplier)
+      )
 
       val expectedVersion =
-        version.copy(state = Suspended, updatedAt = Some(newTimestamp))
+        version.copy(state = Suspended, updatedAt = Some(newTimestamp), suspendedAt = Some(newTimestamp))
       val expected        =
         purpose.copy(
           versions = Seq(expectedVersion),
@@ -142,7 +142,7 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
     }
 
     "remain Suspended if it's Suspended by Consumer and Producer requests activation" in {
-      val version = versionTemplate.copy(state = Suspended)
+      val version = versionTemplate.copy(state = Suspended, suspendedAt = Some(newTimestamp))
       val purpose = purposeTemplate.copy(suspendedByConsumer = Some(true), suspendedByProducer = Some(true))
 
       (() => mockDateTimeSupplier.get()).expects().returning(newTimestamp).once()
@@ -152,10 +152,10 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
         version,
         newVersionState = Active,
         stateChangeDetails = StateChangeDetails(ChangedBy.PRODUCER, newTimestamp)
-      )(mockDateTimeSupplier)
+      )
 
       val expectedVersion =
-        version.copy(state = Suspended, updatedAt = Some(newTimestamp))
+        version.copy(state = Suspended, updatedAt = Some(newTimestamp), suspendedAt = Some(newTimestamp))
       val expected        =
         purpose.copy(
           versions = Seq(expectedVersion),
@@ -168,7 +168,7 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
     }
 
     "remain Suspended if it's Suspended by Producer and Consumer requests activation" in {
-      val version = versionTemplate.copy(state = Suspended)
+      val version = versionTemplate.copy(state = Suspended, suspendedAt = Some(newTimestamp))
       val purpose = purposeTemplate.copy(suspendedByConsumer = Some(true), suspendedByProducer = Some(true))
 
       (() => mockDateTimeSupplier.get()).expects().returning(newTimestamp).once()
@@ -178,10 +178,10 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
         version,
         newVersionState = Active,
         stateChangeDetails = StateChangeDetails(ChangedBy.CONSUMER, newTimestamp)
-      )(mockDateTimeSupplier)
+      )
 
       val expectedVersion =
-        version.copy(state = Suspended, updatedAt = Some(newTimestamp))
+        version.copy(state = Suspended, updatedAt = Some(newTimestamp), suspendedAt = Some(newTimestamp))
       val expected        =
         purpose.copy(
           versions = Seq(expectedVersion),
@@ -194,7 +194,7 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
     }
 
     "change state to Active if it's Suspended by Consumer and Consumer requests activation" in {
-      val version = versionTemplate.copy(state = Suspended)
+      val version = versionTemplate.copy(state = Suspended, suspendedAt = Some(newTimestamp))
       val purpose = purposeTemplate.copy(suspendedByConsumer = Some(true), suspendedByProducer = Some(false))
 
       (() => mockDateTimeSupplier.get()).expects().returning(newTimestamp).once()
@@ -204,10 +204,10 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
         version,
         newVersionState = Active,
         stateChangeDetails = StateChangeDetails(ChangedBy.CONSUMER, newTimestamp)
-      )(mockDateTimeSupplier)
+      )
 
       val expectedVersion =
-        version.copy(state = Active, updatedAt = Some(newTimestamp))
+        version.copy(state = Active, updatedAt = Some(newTimestamp), suspendedAt = None)
       val expected        =
         purpose.copy(
           versions = Seq(expectedVersion),
@@ -220,7 +220,7 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
     }
 
     "change state to Active if it's Suspended by Producer and Producer requests activation" in {
-      val version = versionTemplate.copy(state = Suspended)
+      val version = versionTemplate.copy(state = Suspended, suspendedAt = Some(newTimestamp))
       val purpose = purposeTemplate.copy(suspendedByConsumer = Some(false), suspendedByProducer = Some(true))
 
       (() => mockDateTimeSupplier.get()).expects().returning(newTimestamp).once()
@@ -230,10 +230,10 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
         version,
         newVersionState = Active,
         stateChangeDetails = StateChangeDetails(ChangedBy.PRODUCER, newTimestamp)
-      )(mockDateTimeSupplier)
+      )
 
       val expectedVersion =
-        version.copy(state = Active, updatedAt = Some(newTimestamp))
+        version.copy(state = Active, updatedAt = Some(newTimestamp), suspendedAt = None)
       val expected        =
         purpose.copy(
           versions = Seq(expectedVersion),

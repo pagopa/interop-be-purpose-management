@@ -42,7 +42,7 @@ abstract class BaseIntegrationSpec
   implicit val classicSystem: actor.ActorSystem           = httpSystem.classicSystem
 
   override def beforeAll(): Unit = {
-    val persistentEntity = Entity(PurposePersistentBehavior.TypeKey)(behaviorFactory(mockDateTimeSupplier))
+    val persistentEntity = Entity(PurposePersistentBehavior.TypeKey)(behaviorFactory())
 
     Cluster(system).manager ! Join(Cluster(system).selfMember.address)
     sharding.init(persistentEntity)

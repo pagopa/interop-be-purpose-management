@@ -6,7 +6,6 @@ import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityTypeKey}
 import akka.pattern.StatusReply
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.{Effect, EffectBuilder, EventSourcedBehavior, RetentionCriteria}
-import it.pagopa.interop.commons.utils.service.OffsetDateTimeSupplier
 import it.pagopa.interop.purposemanagement.error.PurposeManagementErrors._
 import it.pagopa.interop.purposemanagement.model.persistence.Adapters._
 import it.pagopa.interop.purposemanagement.model.purpose._
@@ -21,8 +20,7 @@ object PurposePersistentBehavior {
 
   def commandHandler(
     shard: ActorRef[ClusterSharding.ShardCommand],
-    context: ActorContext[Command],
-    dateTimeSupplier: OffsetDateTimeSupplier
+    context: ActorContext[Command]
   ): (State, Command) => Effect[Event, State] = { (state, command) =>
     val idleTimeout =
       context.system.settings.config.getDuration("purpose-management.idle-timeout")
@@ -173,7 +171,7 @@ object PurposePersistentBehavior {
           Active,
           _.isActivable(purposeId),
           versionDocument
-        )(dateTimeSupplier)
+        )
 
         def archiveOldVersion(purpose: PersistentPurpose, newActiveVersionId: String): PersistentPurpose =
           purpose.copy(versions = purpose.versions.map { v =>
@@ -194,9 +192,7 @@ object PurposePersistentBehavior {
 
       case SuspendPurposeVersion(purposeId, versionId, stateChangeDetails, replyTo) =>
         val purpose: Either[Throwable, PersistentPurpose] =
-          getModifiedPurpose(state, purposeId, versionId, stateChangeDetails, Suspended, _.isSuspendable(purposeId))(
-            dateTimeSupplier
-          )
+          getModifiedPurpose(state, purposeId, versionId, stateChangeDetails, Suspended, _.isSuspendable(purposeId))
 
         purpose
           .fold(
@@ -212,7 +208,7 @@ object PurposePersistentBehavior {
           stateChangeDetails,
           WaitingForApproval,
           _.canWaitForApproval(purposeId)
-        )(dateTimeSupplier)
+        )
 
         purpose
           .fold(
@@ -222,9 +218,7 @@ object PurposePersistentBehavior {
 
       case ArchivePurposeVersion(purposeId, versionId, stateChangeDetails, replyTo) =>
         val purpose: Either[Throwable, PersistentPurpose] =
-          getModifiedPurpose(state, purposeId, versionId, stateChangeDetails, Archived, _.isArchivable(purposeId))(
-            dateTimeSupplier
-          )
+          getModifiedPurpose(state, purposeId, versionId, stateChangeDetails, Archived, _.isArchivable(purposeId))
 
         purpose
           .fold(
@@ -284,7 +278,6 @@ object PurposePersistentBehavior {
   def apply(
     shard: ActorRef[ClusterSharding.ShardCommand],
     persistenceId: PersistenceId,
-    dateTimeSupplier: OffsetDateTimeSupplier,
     persistenceTag: String
   ): Behavior[Command] = {
     Behaviors.setup { context =>
@@ -295,7 +288,7 @@ object PurposePersistentBehavior {
       EventSourcedBehavior[Command, Event, State](
         persistenceId = persistenceId,
         emptyState = State.empty,
-        commandHandler = commandHandler(shard, context, dateTimeSupplier),
+        commandHandler = commandHandler(shard, context),
         eventHandler = eventHandler
       ).withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = numberOfEvents, keepNSnapshots = 1))
         .withTagger(_ => Set(persistenceTag))
@@ -308,24 +301,28 @@ object PurposePersistentBehavior {
     version: PersistentPurposeVersion,
     newVersionState: PersistentPurposeVersionState,
     stateChangeDetails: StateChangeDetails
-  )(dateTimeSupplier: OffsetDateTimeSupplier): PersistentPurpose = {
+  ): PersistentPurpose = {
 
     def isSuspended = newVersionState == Suspended
 
-    val timestamp = dateTimeSupplier.get()
-
     def updateVersions(newState: PersistentPurposeVersionState): Seq[PersistentPurposeVersion] = {
       val firstActivationAt: Option[OffsetDateTime] = version.state match {
-        case Draft | WaitingForApproval => Some(timestamp)
+        case Draft | WaitingForApproval => Some(stateChangeDetails.timestamp)
         case _                          => version.firstActivationAt
+      }
+
+      val suspendedAt: Option[OffsetDateTime] = (version.state, newState) match {
+        case (Suspended, Suspended) => version.suspendedAt
+        case (_, Suspended)         => Some(stateChangeDetails.timestamp)
+        case _                      => None
       }
 
       val updatedVersion =
         version.copy(
           state = newState,
-          updatedAt = Some(timestamp),
+          updatedAt = Some(stateChangeDetails.timestamp),
           firstActivationAt = firstActivationAt,
-          suspendedAt = stateChangeDetails.timestamp
+          suspendedAt = suspendedAt
         )
       purpose.versions.filter(_.id != version.id) :+ updatedVersion
     }
@@ -341,7 +338,7 @@ object PurposePersistentBehavior {
         purpose.copy(
           versions = updatedVersions,
           suspendedByConsumer = Some(suspendedByRequester),
-          updatedAt = Some(timestamp)
+          updatedAt = Some(stateChangeDetails.timestamp)
         )
       case ChangedBy.PRODUCER =>
         if (version.state == WaitingForApproval && newVersionState == Active) {
@@ -352,7 +349,7 @@ object PurposePersistentBehavior {
             versions = updatedVersions,
             suspendedByConsumer = Some(false),
             suspendedByProducer = Some(false),
-            updatedAt = Some(timestamp)
+            updatedAt = Some(stateChangeDetails.timestamp)
           )
         } else {
           val suspendedByRequester = isSuspended ||
@@ -364,7 +361,7 @@ object PurposePersistentBehavior {
           purpose.copy(
             versions = updatedVersions,
             suspendedByProducer = Some(suspendedByRequester),
-            updatedAt = Some(timestamp)
+            updatedAt = Some(stateChangeDetails.timestamp)
           )
         }
 
@@ -401,12 +398,12 @@ object PurposePersistentBehavior {
     newState: PersistentPurposeVersionState,
     versionValidation: PersistentPurposeVersion => Either[Throwable, Unit],
     riskAnalysisOpt: Option[PurposeVersionDocument] = None
-  )(dateTimeSupplier: OffsetDateTimeSupplier): Either[Throwable, PersistentPurpose] = for {
+  ): Either[Throwable, PersistentPurpose] = for {
     purpose <- state.purposes.get(purposeId).toRight(PurposeNotFound(purposeId))
     version <- purpose.versions.find(_.id.toString == versionId).toRight(PurposeVersionNotFound(purposeId, versionId))
     riskAnalysisUpdated = riskAnalysisOpt.map(PersistentPurposeVersionDocument.fromAPI).orElse(version.riskAnalysis)
     versionWithRisk     = version.copy(riskAnalysis = riskAnalysisUpdated)
     _ <- versionValidation(versionWithRisk)
-  } yield updatePurposeFromState(purpose, versionWithRisk, newState, stateChangeDetails)(dateTimeSupplier)
+  } yield updatePurposeFromState(purpose, versionWithRisk, newState, stateChangeDetails)
 
 }

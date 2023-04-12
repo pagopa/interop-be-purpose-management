@@ -78,7 +78,7 @@ class PurposeApiServiceAuthzSpec extends AnyWordSpecLike with ClusteredScalatest
     }
     "accept authorized roles for activatePurposeVersion " in {
       val endpoint    = AuthorizedRoutes.endpoints("activatePurposeVersion")
-      val fakePayload = ActivatePurposeVersionPayload(None, StateChangeDetails(ChangedBy.CONSUMER, Some(timestamp)))
+      val fakePayload = ActivatePurposeVersionPayload(None, StateChangeDetails(ChangedBy.CONSUMER, timestamp))
       validateAuthorization(
         endpoint,
         { implicit c: Seq[(String, String)] => service.activatePurposeVersion("fakeSeed", "fake", fakePayload) }
@@ -90,7 +90,7 @@ class PurposeApiServiceAuthzSpec extends AnyWordSpecLike with ClusteredScalatest
       validateAuthorization(
         endpoint,
         { implicit c: Seq[(String, String)] =>
-          service.suspendPurposeVersion("fakeSeed", "fake", StateChangeDetails(ChangedBy.CONSUMER, Some(timestamp)))
+          service.suspendPurposeVersion("fakeSeed", "fake", StateChangeDetails(ChangedBy.CONSUMER, timestamp))
         }
       )
     }
@@ -99,11 +99,7 @@ class PurposeApiServiceAuthzSpec extends AnyWordSpecLike with ClusteredScalatest
       validateAuthorization(
         endpoint,
         { implicit c: Seq[(String, String)] =>
-          service.waitForApprovalPurposeVersion(
-            "fakeSeed",
-            "fake",
-            StateChangeDetails(ChangedBy.CONSUMER, Some(timestamp))
-          )
+          service.waitForApprovalPurposeVersion("fakeSeed", "fake", StateChangeDetails(ChangedBy.CONSUMER, timestamp))
         }
       )
     }
@@ -112,7 +108,7 @@ class PurposeApiServiceAuthzSpec extends AnyWordSpecLike with ClusteredScalatest
       validateAuthorization(
         endpoint,
         { implicit c: Seq[(String, String)] =>
-          service.archivePurposeVersion("fake", "fake", StateChangeDetails(ChangedBy.CONSUMER, Some(timestamp)))
+          service.archivePurposeVersion("fake", "fake", StateChangeDetails(ChangedBy.CONSUMER, timestamp))
         }
       )
     }

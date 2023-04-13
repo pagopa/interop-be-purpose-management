@@ -18,4 +18,4 @@ addSbtPlugin("io.chrisdavenport" % "sbt-no-publish" % "0.1.0")
 
 ThisBuild / libraryDependencySchemes ++= Seq("org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always)
 
-libraryDependencies += "com.thesamet.scalapb" %% "compilerplugin" % "0.11.11"
+libraryDependencies += "com.thesamet.scalapb" %% "compilerplugin" % "0.11.13"

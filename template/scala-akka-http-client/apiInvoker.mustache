@@ -265,8 +265,18 @@ class ApiInvoker(formats: Formats, ec: ExecutionContextExecutor)(implicit system
   private def defaultInvocationRecovery[T]
     : (ContextFieldsToLog, LoggerTakingImplicit[ContextFieldsToLog], String) => PartialFunction[Throwable, Future[T]] =
     (context, logger, message) => {
-      case ex @ ApiError(code, apiMessage, response, throwable, _) =>
+      case ex @ ApiError(code, apiMessage, response, throwable, _) if (code >= 500) =>
         logger.error(
+          "{} FAILED. code > {} - message > {} - response > {}",
+          message,
+          code,
+          apiMessage,
+          response,
+          throwable
+        )(context)
+        Future.failed[T](ex)
+      case ex @ ApiError(code, apiMessage, response, throwable, _) =>
+        logger.warn(
           "{} FAILED. code > {} - message > {} - response > {}",
           message,
           code,

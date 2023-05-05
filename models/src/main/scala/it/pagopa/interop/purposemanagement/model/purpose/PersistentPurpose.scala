@@ -11,6 +11,7 @@ final case class PersistentPurpose(
   versions: Seq[PersistentPurposeVersion],
   suspendedByConsumer: Option[Boolean],
   suspendedByProducer: Option[Boolean],
+  suspendedAt:Option[OffsetDateTime],
   title: String,
   description: String,
   riskAnalysisForm: Option[PersistentRiskAnalysisForm],

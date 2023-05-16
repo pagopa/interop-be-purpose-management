@@ -25,7 +25,9 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
         consumerId = consumerId,
         title = "Purpose",
         description = "Purpose description",
-        riskAnalysisForm = Some(riskAnalysisFormSeed)
+        riskAnalysisForm = Some(riskAnalysisFormSeed),
+        isFreeOfCharge = false,
+        freeOfChargeReason = None
       )
       val versionSeed = PurposeVersionSeed(dailyCalls = 100)
 
@@ -59,7 +61,9 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
         consumerId = consumerId,
         title = "Purpose",
         description = "Purpose description",
-        riskAnalysisForm = Some(riskAnalysisFormSeed)
+        riskAnalysisForm = Some(riskAnalysisFormSeed),
+        isFreeOfCharge = false,
+        freeOfChargeReason = None
       )
       val riskAnalysisDoc = PurposeVersionDocument(
         id = riskAnalysisId,
@@ -115,7 +119,9 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
         consumerId = consumerId,
         title = "Purpose",
         description = "Purpose description",
-        riskAnalysisForm = Some(riskAnalysisFormSeed)
+        riskAnalysisForm = Some(riskAnalysisFormSeed),
+        isFreeOfCharge = false,
+        freeOfChargeReason = None
       )
       val versionSeed = PurposeVersionSeed(dailyCalls = 100)
 
@@ -152,7 +158,9 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
         consumerId = consumerId,
         title = "Purpose",
         description = "Purpose description",
-        riskAnalysisForm = Some(riskAnalysisFormSeed)
+        riskAnalysisForm = Some(riskAnalysisFormSeed),
+        isFreeOfCharge = false,
+        freeOfChargeReason = None
       )
       val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
 
@@ -185,7 +193,9 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
         consumerId = consumerId,
         title = "Purpose",
         description = "Purpose description",
-        riskAnalysisForm = Some(riskAnalysisFormSeed)
+        riskAnalysisForm = Some(riskAnalysisFormSeed),
+        isFreeOfCharge = false,
+        freeOfChargeReason = None
       )
       val versionSeed = PurposeVersionSeed(dailyCalls = 100)
 
@@ -247,7 +257,9 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
         consumerId = consumerId,
         title = "Purpose",
         description = "Purpose description",
-        riskAnalysisForm = Some(riskAnalysisFormSeed)
+        riskAnalysisForm = Some(riskAnalysisFormSeed),
+        isFreeOfCharge = false,
+        freeOfChargeReason = None
       )
       val versionSeed   = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 200)
       val updateContent = DraftPurposeVersionUpdateContent(dailyCalls = 100)
@@ -286,7 +298,9 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
         consumerId = consumerId,
         title = "Purpose",
         description = "Purpose description",
-        riskAnalysisForm = Some(riskAnalysisFormSeed)
+        riskAnalysisForm = Some(riskAnalysisFormSeed),
+        isFreeOfCharge = false,
+        freeOfChargeReason = None
       )
       val versionSeed = PurposeVersionSeed(dailyCalls = 100)
 
@@ -353,7 +367,9 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
         consumerId = consumerId,
         title = "Purpose",
         description = "Purpose description",
-        riskAnalysisForm = Some(riskAnalysisFormSeed)
+        riskAnalysisForm = Some(riskAnalysisFormSeed),
+        isFreeOfCharge = false,
+        freeOfChargeReason = None
       )
       val versionSeed   = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 200)
       val updateContent = WaitingForApprovalPurposeVersionUpdateContent(expectedApprovalDate = timestamp)
@@ -391,7 +407,9 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
         consumerId = consumerId,
         title = "Purpose",
         description = "Purpose description",
-        riskAnalysisForm = Some(riskAnalysisFormSeed)
+        riskAnalysisForm = Some(riskAnalysisFormSeed),
+        isFreeOfCharge = false,
+        freeOfChargeReason = None
       )
       val versionSeed = PurposeVersionSeed(dailyCalls = 100)
 
@@ -424,7 +442,9 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
         consumerId = consumerId,
         title = "Purpose",
         description = "Purpose description",
-        riskAnalysisForm = Some(riskAnalysisFormSeed)
+        riskAnalysisForm = Some(riskAnalysisFormSeed),
+        isFreeOfCharge = false,
+        freeOfChargeReason = None
       )
       val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
 
@@ -459,7 +479,9 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
         consumerId = consumerId,
         title = "Purpose",
         description = "Purpose description",
-        riskAnalysisForm = Some(riskAnalysisFormSeed)
+        riskAnalysisForm = Some(riskAnalysisFormSeed),
+        isFreeOfCharge = false,
+        freeOfChargeReason = None
       )
       val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
 
@@ -502,7 +524,9 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
         consumerId = consumerId,
         title = "Purpose",
         description = "Purpose description",
-        riskAnalysisForm = Some(riskAnalysisFormSeed)
+        riskAnalysisForm = Some(riskAnalysisFormSeed),
+        isFreeOfCharge = false,
+        freeOfChargeReason = None
       )
       val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
 
@@ -538,7 +562,9 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
         consumerId = consumerId,
         title = "Purpose",
         description = "Purpose description",
-        riskAnalysisForm = Some(riskAnalysisFormSeed)
+        riskAnalysisForm = Some(riskAnalysisFormSeed),
+        isFreeOfCharge = false,
+        freeOfChargeReason = None
       )
       val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
 
@@ -575,7 +601,9 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
         consumerId = consumerId,
         title = "Purpose",
         description = "Purpose description",
-        riskAnalysisForm = Some(riskAnalysisFormSeed)
+        riskAnalysisForm = Some(riskAnalysisFormSeed),
+        isFreeOfCharge = false,
+        freeOfChargeReason = None
       )
       val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
 

@@ -168,7 +168,9 @@ object Adapters {
       description = p.description,
       riskAnalysisForm = p.riskAnalysisForm.map(_.toAPI),
       createdAt = p.createdAt,
-      updatedAt = p.updatedAt
+      updatedAt = p.updatedAt,
+      isFreeOfCharge = p.isFreeOfCharge,
+      freeOfChargeReason = p.freeOfChargeReason
     )
 
     def update(update: PurposeUpdate): PersistentPurpose =
@@ -191,7 +193,9 @@ object Adapters {
       description = seed.description,
       riskAnalysisForm = seed.riskAnalysisForm.map(PersistentRiskAnalysisForm.fromSeed(uuidSupplier)),
       createdAt = dateTimeSupplier.get(),
-      updatedAt = None
+      updatedAt = None,
+      isFreeOfCharge = seed.isFreeOfCharge,
+      freeOfChargeReason = seed.freeOfChargeReason
     )
   }
 

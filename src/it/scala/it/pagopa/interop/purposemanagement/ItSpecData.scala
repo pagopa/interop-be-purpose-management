@@ -23,7 +23,8 @@ object ItSpecData {
     dailyCalls = 1111,
     createdAt = timestamp,
     updatedAt = Some(timestamp),
-    firstActivationAt = Some(timestamp)
+    firstActivationAt = Some(timestamp),
+    suspendedAt = None
   )
 
   def persistentRiskAnalysisForm: PersistentRiskAnalysisForm =
@@ -40,6 +41,8 @@ object ItSpecData {
     description = "A description",
     riskAnalysisForm = Some(persistentRiskAnalysisForm),
     createdAt = timestamp,
-    updatedAt = Some(timestamp)
+    updatedAt = Some(timestamp),
+    isFreeOfCharge = false,
+    freeOfChargeReason = None
   )
 }

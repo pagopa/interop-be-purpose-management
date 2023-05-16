@@ -21,6 +21,8 @@ message PurposeV1 {
   optional RiskAnalysisFormV1 riskAnalysisForm = 10;
   required int64 createdAt = 11;
   optional int64 updatedAt = 12;
+  required bool isFreeOfCharge = 13;
+  optional string freeOfChargeReason = 14;
 }
 
 message PurposeVersionV1 {

@@ -39,7 +39,9 @@ object protobufUtils {
       description = protobufPurpose.description,
       riskAnalysisForm = riskAnalysisForm,
       createdAt = createdAt,
-      updatedAt = updatedAt
+      updatedAt = updatedAt,
+      isFreeOfCharge = protobufPurpose.isFreeOfCharge,
+      freeOfChargeReason = protobufPurpose.freeOfChargeReason
     )
     purpose.toEither
   }
@@ -57,7 +59,9 @@ object protobufUtils {
         description = persistentPurpose.description,
         riskAnalysisForm = persistentPurpose.riskAnalysisForm.map(toProtobufRiskAnalysis),
         createdAt = persistentPurpose.createdAt.toMillis,
-        updatedAt = persistentPurpose.updatedAt.map(_.toMillis)
+        updatedAt = persistentPurpose.updatedAt.map(_.toMillis),
+        isFreeOfCharge = persistentPurpose.isFreeOfCharge,
+        freeOfChargeReason = persistentPurpose.freeOfChargeReason
       )
     )
 

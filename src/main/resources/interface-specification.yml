@@ -642,7 +642,6 @@ components:
           $ref: '#/components/schemas/RiskAnalysisFormSeed'
         isFreeOfCharge:
           type: boolean
-          default: true
         freeOfChargeReason:
           type: string
       required:
@@ -729,7 +728,6 @@ components:
         - title
         - description
         - createdAt
-        - isFreeOfCharge
       description: business representation of a purpose
     Purposes:
       type: object

@@ -1,5 +1,6 @@
 package it.pagopa.interop.purposemanagement.model.persistence
 
+import cats.syntax.all._
 import it.pagopa.interop.commons.utils.service._
 import it.pagopa.interop.purposemanagement.error.PurposeManagementErrors.{
   PurposeMissingRiskAnalysis,
@@ -194,7 +195,7 @@ object Adapters {
       riskAnalysisForm = seed.riskAnalysisForm.map(PersistentRiskAnalysisForm.fromSeed(uuidSupplier)),
       createdAt = dateTimeSupplier.get(),
       updatedAt = None,
-      isFreeOfCharge = seed.isFreeOfCharge,
+      isFreeOfCharge = seed.isFreeOfCharge.some,
       freeOfChargeReason = seed.freeOfChargeReason
     )
   }

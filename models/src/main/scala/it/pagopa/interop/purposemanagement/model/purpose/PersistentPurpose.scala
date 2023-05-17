@@ -16,6 +16,6 @@ final case class PersistentPurpose(
   riskAnalysisForm: Option[PersistentRiskAnalysisForm],
   createdAt: OffsetDateTime,
   updatedAt: Option[OffsetDateTime],
-  isFreeOfCharge: Boolean,
+  isFreeOfCharge: Option[Boolean],
   freeOfChargeReason: Option[String]
 )

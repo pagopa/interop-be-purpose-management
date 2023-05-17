@@ -179,7 +179,7 @@ object PersistentSerializationSpec {
     (riskAnalysisForm, riskAnalysisFormV1) <- Gen.option(persistentRiskAnalysisFormGen).map(_.separate)
     (createdAt, createdAtV1)               <- offsetDatetimeGen
     (updatedAt, updatedAtV1)               <- Gen.option(offsetDatetimeGen).map(_.separate)
-    isFreeOfCharge                         <- Gen.oneOf(true, false)
+    isFreeOfCharge                         <- Gen.option(Gen.oneOf(true, false))
     freeOfChargeReason                     <- Gen.option(stringGen)
   } yield (
     PersistentPurpose(

@@ -36,7 +36,7 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
     riskAnalysisForm = Some(persistentRiskAnalysisForm),
     createdAt = timestamp,
     updatedAt = None,
-    isFreeOfCharge = Some(false),
+    isFreeOfCharge = true,
     freeOfChargeReason = None
   )
 

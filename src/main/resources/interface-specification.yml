@@ -728,6 +728,7 @@ components:
         - title
         - description
         - createdAt
+        - isFreeOfCharge
       description: business representation of a purpose
     Purposes:
       type: object

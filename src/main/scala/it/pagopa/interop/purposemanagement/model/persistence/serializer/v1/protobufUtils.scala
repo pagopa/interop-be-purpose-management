@@ -1,5 +1,6 @@
 package it.pagopa.interop.purposemanagement.model.persistence.serializer.v1
 
+import cats.syntax.all._
 import cats.implicits.toTraverseOps
 import it.pagopa.interop.commons.utils.TypeConversions.{LongOps, OffsetDateTimeOps, StringOps}
 import it.pagopa.interop.purposemanagement.model.persistence.serializer.v1.purpose.{
@@ -40,7 +41,7 @@ object protobufUtils {
       riskAnalysisForm = riskAnalysisForm,
       createdAt = createdAt,
       updatedAt = updatedAt,
-      isFreeOfCharge = protobufPurpose.isFreeOfCharge,
+      isFreeOfCharge = protobufPurpose.isFreeOfCharge.getOrElse(true),
       freeOfChargeReason = protobufPurpose.freeOfChargeReason
     )
     purpose.toEither
@@ -60,7 +61,7 @@ object protobufUtils {
         riskAnalysisForm = persistentPurpose.riskAnalysisForm.map(toProtobufRiskAnalysis),
         createdAt = persistentPurpose.createdAt.toMillis,
         updatedAt = persistentPurpose.updatedAt.map(_.toMillis),
-        isFreeOfCharge = persistentPurpose.isFreeOfCharge,
+        isFreeOfCharge = persistentPurpose.isFreeOfCharge.some,
         freeOfChargeReason = persistentPurpose.freeOfChargeReason
       )
     )

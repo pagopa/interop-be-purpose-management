@@ -22,7 +22,8 @@ class PurposeSpec extends BaseIntegrationSpec {
         title = "Purpose",
         description = "Purpose description",
         riskAnalysisForm = Some(riskAnalysisFormSeed),
-        isFreeOfCharge = false
+        isFreeOfCharge = true,
+        freeOfChargeReason = Some("Reason")
       )
 
       val response: Future[Purpose] = createPurpose(purposeId, purposeSeed)
@@ -39,7 +40,8 @@ class PurposeSpec extends BaseIntegrationSpec {
         riskAnalysisForm = Some(riskAnalysisForm),
         createdAt = timestamp,
         updatedAt = None,
-        isFreeOfCharge = Some(false)
+        isFreeOfCharge = true,
+        freeOfChargeReason = Some("Reason")
       )
 
       response.futureValue shouldBe expected
@@ -61,7 +63,7 @@ class PurposeSpec extends BaseIntegrationSpec {
         title = "Purpose",
         description = "Purpose description",
         riskAnalysisForm = Some(riskAnalysisFormSeed),
-        isFreeOfCharge = false
+        isFreeOfCharge = true
       )
       val versionSeed = PurposeVersionSeed(dailyCalls = 100)
 
@@ -92,7 +94,7 @@ class PurposeSpec extends BaseIntegrationSpec {
         riskAnalysisForm = Some(riskAnalysisForm),
         createdAt = timestamp,
         updatedAt = None,
-        isFreeOfCharge = Some(false)
+        isFreeOfCharge = true
       )
 
       response.futureValue shouldBe expected
@@ -126,7 +128,7 @@ class PurposeSpec extends BaseIntegrationSpec {
         title = "Purpose",
         description = "Purpose description",
         riskAnalysisForm = Some(riskAnalysisFormSeed),
-        isFreeOfCharge = false
+        isFreeOfCharge = true
       )
       val purposeSeed2 = PurposeSeed(
         eserviceId = eServiceId2,
@@ -134,7 +136,7 @@ class PurposeSpec extends BaseIntegrationSpec {
         title = "Purpose",
         description = "Purpose description",
         riskAnalysisForm = Some(riskAnalysisFormSeed),
-        isFreeOfCharge = false
+        isFreeOfCharge = true
       )
       val versionSeed  = PurposeVersionSeed(dailyCalls = 100)
 
@@ -168,7 +170,7 @@ class PurposeSpec extends BaseIntegrationSpec {
             riskAnalysisForm = Some(riskAnalysisForm),
             createdAt = timestamp,
             updatedAt = None,
-            isFreeOfCharge = Some(false)
+            isFreeOfCharge = true
           ),
           Purpose(
             id = purposeId2,
@@ -182,7 +184,7 @@ class PurposeSpec extends BaseIntegrationSpec {
             riskAnalysisForm = Some(riskAnalysisForm),
             createdAt = timestamp,
             updatedAt = None,
-            isFreeOfCharge = Some(false)
+            isFreeOfCharge = true
           )
         )
 
@@ -204,7 +206,7 @@ class PurposeSpec extends BaseIntegrationSpec {
         title = "Purpose",
         description = "Purpose description",
         riskAnalysisForm = Some(riskAnalysisFormSeed),
-        isFreeOfCharge = false
+        isFreeOfCharge = true
       )
       val purposeSeed2 = PurposeSeed(
         eserviceId = eServiceId2,
@@ -212,7 +214,7 @@ class PurposeSpec extends BaseIntegrationSpec {
         title = "Purpose",
         description = "Purpose description",
         riskAnalysisForm = Some(riskAnalysisFormSeed),
-        isFreeOfCharge = false
+        isFreeOfCharge = true
       )
       val versionSeed  = PurposeVersionSeed(dailyCalls = 100)
 
@@ -246,7 +248,7 @@ class PurposeSpec extends BaseIntegrationSpec {
             riskAnalysisForm = Some(riskAnalysisForm),
             createdAt = timestamp,
             updatedAt = None,
-            isFreeOfCharge = Some(false)
+            isFreeOfCharge = true
           )
         )
 
@@ -268,7 +270,7 @@ class PurposeSpec extends BaseIntegrationSpec {
         title = "Purpose",
         description = "Purpose description",
         riskAnalysisForm = Some(riskAnalysisFormSeed),
-        isFreeOfCharge = false
+        isFreeOfCharge = true
       )
       val purposeSeed2 = PurposeSeed(
         eserviceId = eServiceId2,
@@ -276,7 +278,7 @@ class PurposeSpec extends BaseIntegrationSpec {
         title = "Purpose",
         description = "Purpose description",
         riskAnalysisForm = Some(riskAnalysisFormSeed),
-        isFreeOfCharge = false
+        isFreeOfCharge = true
       )
       val versionSeed  = PurposeVersionSeed(dailyCalls = 100)
 
@@ -302,7 +304,7 @@ class PurposeSpec extends BaseIntegrationSpec {
             riskAnalysisForm = Some(riskAnalysisForm),
             createdAt = timestamp,
             updatedAt = None,
-            isFreeOfCharge = Some(false)
+            isFreeOfCharge = true
           )
         )
 
@@ -334,7 +336,7 @@ class PurposeSpec extends BaseIntegrationSpec {
         title = "Purpose",
         description = "Purpose description",
         riskAnalysisForm = Some(riskAnalysisFormSeed),
-        isFreeOfCharge = false
+        isFreeOfCharge = true
       )
       val purposeSeed2   = PurposeSeed(
         eserviceId = eServiceId,
@@ -342,7 +344,7 @@ class PurposeSpec extends BaseIntegrationSpec {
         title = "Purpose",
         description = "Purpose description",
         riskAnalysisForm = Some(riskAnalysisFormSeed),
-        isFreeOfCharge = false
+        isFreeOfCharge = true
       )
       val purposeSeed3   = PurposeSeed(
         eserviceId = eServiceId,
@@ -350,7 +352,7 @@ class PurposeSpec extends BaseIntegrationSpec {
         title = "Purpose",
         description = "Purpose description",
         riskAnalysisForm = Some(riskAnalysisFormSeed),
-        isFreeOfCharge = false
+        isFreeOfCharge = true
       )
       val versionSeed1_1 = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
       val versionSeed1_2 = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
@@ -411,7 +413,7 @@ class PurposeSpec extends BaseIntegrationSpec {
             riskAnalysisForm = Some(riskAnalysisForm),
             createdAt = timestamp,
             updatedAt = Some(timestamp),
-            isFreeOfCharge = Some(false)
+            isFreeOfCharge = true
           ),
           Purpose(
             id = purposeId2,
@@ -436,7 +438,7 @@ class PurposeSpec extends BaseIntegrationSpec {
             riskAnalysisForm = Some(riskAnalysisForm),
             createdAt = timestamp,
             updatedAt = Some(timestamp),
-            isFreeOfCharge = Some(false)
+            isFreeOfCharge = true
           )
         )
 
@@ -459,7 +461,7 @@ class PurposeSpec extends BaseIntegrationSpec {
         title = "Purpose",
         description = "Purpose description",
         riskAnalysisForm = Some(riskAnalysisFormSeed),
-        isFreeOfCharge = false
+        isFreeOfCharge = true
       )
 
       val response: Future[Option[String]] =
@@ -483,7 +485,7 @@ class PurposeSpec extends BaseIntegrationSpec {
         title = "Purpose",
         description = "Purpose description",
         riskAnalysisForm = Some(riskAnalysisFormSeed),
-        isFreeOfCharge = false
+        isFreeOfCharge = true
       )
       val versionSeed = PurposeVersionSeed(dailyCalls = 100)
 

@@ -180,7 +180,7 @@ object PersistentSerializationSpec {
     (createdAt, createdAtV1)               <- offsetDatetimeGen
     (updatedAt, updatedAtV1)               <- Gen.option(offsetDatetimeGen).map(_.separate)
     isFreeOfCharge                         <- Gen.oneOf(true, false)
-    freeOfChargeReason <- if (isFreeOfCharge) Gen.some("Sono una Pubblica Amministrazione") else Gen.fail
+    freeOfChargeReason                     <- if (isFreeOfCharge) Gen.some(stringGen) else Gen.fail
   } yield (
     PersistentPurpose(
       id = id,

@@ -29,6 +29,7 @@ object protobufUtils {
       riskAnalysisForm <- protobufPurpose.riskAnalysisForm.traverse(toPersistentRiskAnalysis).toTry
       createdAt        <- protobufPurpose.createdAt.toOffsetDateTime
       updatedAt        <- protobufPurpose.updatedAt.traverse(_.toOffsetDateTime)
+      isFreeOfCharge = protobufPurpose.isFreeOfCharge.getOrElse(true)
     } yield PersistentPurpose(
       id = id,
       eserviceId = eserviceId,
@@ -41,8 +42,10 @@ object protobufUtils {
       riskAnalysisForm = riskAnalysisForm,
       createdAt = createdAt,
       updatedAt = updatedAt,
-      isFreeOfCharge = protobufPurpose.isFreeOfCharge.getOrElse(true),
-      freeOfChargeReason = protobufPurpose.freeOfChargeReason
+      isFreeOfCharge = isFreeOfCharge,
+      freeOfChargeReason =
+        if (isFreeOfCharge) protobufPurpose.freeOfChargeReason.orElse("Sono una Pubblica Amministrazione".some)
+        else None
     )
     purpose.toEither
   }

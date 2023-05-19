@@ -44,8 +44,7 @@ object protobufUtils {
       updatedAt = updatedAt,
       isFreeOfCharge = isFreeOfCharge,
       freeOfChargeReason =
-        if (isFreeOfCharge) protobufPurpose.freeOfChargeReason.orElse("Sono una Pubblica Amministrazione".some)
-        else None
+        Option.when(isFreeOfCharge)(protobufPurpose.freeOfChargeReason.getOrElse("Sono una Pubblica Amministrazione"))
     )
     purpose.toEither
   }

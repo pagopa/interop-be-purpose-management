@@ -26,7 +26,7 @@ package object impl extends SprayJsonSupport with DefaultJsonProtocol {
   implicit val riskAnalysisMultiAnswerSeedFormat: RootJsonFormat[RiskAnalysisMultiAnswerSeed]   =
     jsonFormat2(RiskAnalysisMultiAnswerSeed)
   implicit val riskAnalysisFormSeedFormat: RootJsonFormat[RiskAnalysisFormSeed] = jsonFormat3(RiskAnalysisFormSeed)
-  implicit val purposeSeedFormat: RootJsonFormat[PurposeSeed]                   = jsonFormat5(PurposeSeed)
+  implicit val purposeSeedFormat: RootJsonFormat[PurposeSeed]                   = jsonFormat7(PurposeSeed)
   implicit val PurposeUpdateContentFormat: RootJsonFormat[PurposeUpdateContent] = jsonFormat3(PurposeUpdateContent)
   implicit val versionDocumentFormat: RootJsonFormat[PurposeVersionDocument]    = jsonFormat4(PurposeVersionDocument)
   implicit val purposeVersionSeedFormat: RootJsonFormat[PurposeVersionSeed]     = jsonFormat2(PurposeVersionSeed)
@@ -36,7 +36,7 @@ package object impl extends SprayJsonSupport with DefaultJsonProtocol {
     : RootJsonFormat[WaitingForApprovalPurposeVersionUpdateContent] =
     jsonFormat1(WaitingForApprovalPurposeVersionUpdateContent)
   implicit val purposeVersionFormat: RootJsonFormat[PurposeVersion]         = jsonFormat9(PurposeVersion)
-  implicit val purposeFormat: RootJsonFormat[Purpose]                       = jsonFormat11(Purpose)
+  implicit val purposeFormat: RootJsonFormat[Purpose]                       = jsonFormat13(Purpose)
   implicit val purposesFormat: RootJsonFormat[Purposes]                     = jsonFormat1(Purposes)
   implicit val stateChangeDetailsFormat: RootJsonFormat[StateChangeDetails] = jsonFormat2(StateChangeDetails)
   implicit val problemErrorFormat: RootJsonFormat[ProblemError]             = jsonFormat2(ProblemError)

@@ -640,11 +640,16 @@ components:
           type: string
         riskAnalysisForm:
           $ref: '#/components/schemas/RiskAnalysisFormSeed'
+        isFreeOfCharge:
+          type: boolean
+        freeOfChargeReason:
+          type: string
       required:
         - eserviceId
         - consumerId
         - title
         - description
+        - isFreeOfCharge
     PurposeVersionSeed:
       type: object
       description: contains the expected payload for purpose version persistence.
@@ -711,6 +716,10 @@ components:
         updatedAt:
           type: string
           format: date-time
+        isFreeOfCharge:
+          type: boolean
+        freeOfChargeReason:
+          type: string  
       required:
         - id
         - eserviceId
@@ -719,6 +728,7 @@ components:
         - title
         - description
         - createdAt
+        - isFreeOfCharge
       description: business representation of a purpose
     Purposes:
       type: object

@@ -8,6 +8,7 @@ import it.pagopa.interop.purposemanagement.model.persistence.JsonFormats._
 import it.pagopa.interop.purposemanagement.model.purpose.{Active, Archived, Draft, PersistentPurpose}
 import it.pagopa.interop.purposemanagement.model.{ChangedBy, StateChangeDetails}
 import it.pagopa.interop.purposemanagement.{ItSpecConfiguration, ItSpecHelper}
+import it.pagopa.interop.purposemanagement.ItSpecData
 
 class CqrsProjectionSpec extends ScalaTestWithActorTestKit(ItSpecConfiguration.config) with ItSpecHelper {
 
@@ -40,7 +41,7 @@ class CqrsProjectionSpec extends ScalaTestWithActorTestKit(ItSpecConfiguration.c
     }
 
     "succeed for event PurposeVersionActivated" in {
-      val stateChangeDetails = StateChangeDetails(changedBy = ChangedBy.PRODUCER)
+      val stateChangeDetails = StateChangeDetails(changedBy = ChangedBy.PRODUCER, timestamp = ItSpecData.timestamp)
 
       val draftVersion = persistentPurposeVersion.copy(state = Draft)
       val otherVersion = persistentPurposeVersion.copy(state = Archived)
@@ -55,7 +56,7 @@ class CqrsProjectionSpec extends ScalaTestWithActorTestKit(ItSpecConfiguration.c
     }
 
     "succeed for event PurposeVersionSuspended" in {
-      val stateChangeDetails = StateChangeDetails(changedBy = ChangedBy.PRODUCER)
+      val stateChangeDetails = StateChangeDetails(changedBy = ChangedBy.PRODUCER, timestamp = ItSpecData.timestamp)
 
       val activeVersion = persistentPurposeVersion.copy(state = Active)
       val otherVersion  = persistentPurposeVersion.copy(state = Archived)
@@ -70,7 +71,7 @@ class CqrsProjectionSpec extends ScalaTestWithActorTestKit(ItSpecConfiguration.c
     }
 
     "succeed for event PurposeVersionWaitedForApproval" in {
-      val stateChangeDetails = StateChangeDetails(changedBy = ChangedBy.PRODUCER)
+      val stateChangeDetails = StateChangeDetails(changedBy = ChangedBy.PRODUCER, timestamp = ItSpecData.timestamp)
 
       val draftVersion = persistentPurposeVersion.copy(state = Draft)
       val otherVersion = persistentPurposeVersion.copy(state = Archived)
@@ -85,7 +86,7 @@ class CqrsProjectionSpec extends ScalaTestWithActorTestKit(ItSpecConfiguration.c
     }
 
     "succeed for event PurposeVersionArchived" in {
-      val stateChangeDetails = StateChangeDetails(changedBy = ChangedBy.PRODUCER)
+      val stateChangeDetails = StateChangeDetails(changedBy = ChangedBy.PRODUCER, timestamp = ItSpecData.timestamp)
 
       val activeVersion = persistentPurposeVersion.copy(state = Active)
       val otherVersion  = persistentPurposeVersion.copy(state = Archived)

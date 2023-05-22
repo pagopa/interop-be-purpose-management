@@ -43,7 +43,7 @@ object JsonFormats {
 
   implicit val prafFormat: RootJsonFormat[PersistentRiskAnalysisForm] = jsonFormat4(PersistentRiskAnalysisForm.apply)
 
-  implicit val ppFormat: RootJsonFormat[PersistentPurpose] = jsonFormat11(PersistentPurpose.apply)
+  implicit val ppFormat: RootJsonFormat[PersistentPurpose] = jsonFormat13(PersistentPurpose.apply)
 
   implicit val pcFormat: RootJsonFormat[PurposeCreated]                     = jsonFormat1(PurposeCreated.apply)
   implicit val puFormat: RootJsonFormat[PurposeUpdated]                     = jsonFormat1(PurposeUpdated.apply)

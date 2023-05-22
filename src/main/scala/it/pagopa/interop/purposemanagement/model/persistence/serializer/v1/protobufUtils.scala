@@ -1,5 +1,6 @@
 package it.pagopa.interop.purposemanagement.model.persistence.serializer.v1
 
+import cats.syntax.all._
 import cats.implicits.toTraverseOps
 import it.pagopa.interop.commons.utils.TypeConversions.{LongOps, OffsetDateTimeOps, StringOps}
 import it.pagopa.interop.purposemanagement.model.persistence.serializer.v1.purpose.{
@@ -19,6 +20,8 @@ import scala.util.{Failure, Success, Try}
 
 object protobufUtils {
 
+  final val FREE_OF_CHARGE_DEFAULT_REASON = "Sono una Pubblica Amministrazione"
+
   def toPersistentPurpose(protobufPurpose: PurposeV1): Either[Throwable, PersistentPurpose] = {
     val purpose = for {
       id               <- protobufPurpose.id.toUUID
@@ -28,6 +31,7 @@ object protobufUtils {
       riskAnalysisForm <- protobufPurpose.riskAnalysisForm.traverse(toPersistentRiskAnalysis).toTry
       createdAt        <- protobufPurpose.createdAt.toOffsetDateTime
       updatedAt        <- protobufPurpose.updatedAt.traverse(_.toOffsetDateTime)
+      isFreeOfCharge = protobufPurpose.isFreeOfCharge.getOrElse(true)
     } yield PersistentPurpose(
       id = id,
       eserviceId = eserviceId,
@@ -39,7 +43,10 @@ object protobufUtils {
       description = protobufPurpose.description,
       riskAnalysisForm = riskAnalysisForm,
       createdAt = createdAt,
-      updatedAt = updatedAt
+      updatedAt = updatedAt,
+      isFreeOfCharge = isFreeOfCharge,
+      freeOfChargeReason =
+        Option.when(isFreeOfCharge)(protobufPurpose.freeOfChargeReason.getOrElse(FREE_OF_CHARGE_DEFAULT_REASON))
     )
     purpose.toEither
   }
@@ -57,7 +64,9 @@ object protobufUtils {
         description = persistentPurpose.description,
         riskAnalysisForm = persistentPurpose.riskAnalysisForm.map(toProtobufRiskAnalysis),
         createdAt = persistentPurpose.createdAt.toMillis,
-        updatedAt = persistentPurpose.updatedAt.map(_.toMillis)
+        updatedAt = persistentPurpose.updatedAt.map(_.toMillis),
+        isFreeOfCharge = persistentPurpose.isFreeOfCharge.some,
+        freeOfChargeReason = persistentPurpose.freeOfChargeReason
       )
     )
 

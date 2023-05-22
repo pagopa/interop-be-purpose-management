@@ -35,7 +35,9 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
     description = "Some description",
     riskAnalysisForm = Some(persistentRiskAnalysisForm),
     createdAt = timestamp,
-    updatedAt = None
+    updatedAt = None,
+    isFreeOfCharge = true,
+    freeOfChargeReason = None
   )
 
   val newTimestamp: OffsetDateTime = OffsetDateTime.of(2023, 12, 31, 11, 22, 33, 44, ZoneOffset.UTC)

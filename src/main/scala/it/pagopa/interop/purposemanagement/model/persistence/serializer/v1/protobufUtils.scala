@@ -20,6 +20,8 @@ import scala.util.{Failure, Success, Try}
 
 object protobufUtils {
 
+  final val FREE_OF_CHARGE_DEFAULT_REASON = "Sono una Pubblica Amministrazione"
+
   def toPersistentPurpose(protobufPurpose: PurposeV1): Either[Throwable, PersistentPurpose] = {
     val purpose = for {
       id               <- protobufPurpose.id.toUUID
@@ -44,7 +46,7 @@ object protobufUtils {
       updatedAt = updatedAt,
       isFreeOfCharge = isFreeOfCharge,
       freeOfChargeReason =
-        Option.when(isFreeOfCharge)(protobufPurpose.freeOfChargeReason.getOrElse("Sono una Pubblica Amministrazione"))
+        Option.when(isFreeOfCharge)(protobufPurpose.freeOfChargeReason.getOrElse(FREE_OF_CHARGE_DEFAULT_REASON))
     )
     purpose.toEither
   }

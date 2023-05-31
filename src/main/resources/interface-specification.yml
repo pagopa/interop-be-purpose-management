@@ -39,7 +39,7 @@ paths:
               $ref: '#/components/schemas/PurposeSeed'
         required: true
       responses:
-        '201':
+        '200':
           description: Purpose created
           content:
             application/json:
@@ -215,7 +215,7 @@ paths:
               $ref: '#/components/schemas/PurposeVersionSeed'
         required: true
       responses:
-        '201':
+        '200':
           description: Purpose Version created
           content:
             application/json:

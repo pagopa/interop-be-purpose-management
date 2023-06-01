@@ -62,7 +62,7 @@ final case class PurposeApiServiceImpl(
     val purpose: PersistentPurpose = PersistentPurpose.fromSeed(purposeSeed, uuidSupplier, dateTimeSupplier)
     val result: Future[Purpose] = commander(purpose.id.toString).askWithStatus(CreatePurpose(purpose, _)).map(_.toAPI)
 
-    onComplete(result) { createPurposeResponse[Purpose](operationLabel)(createPurpose201) }
+    onComplete(result) { createPurposeResponse[Purpose](operationLabel)(createPurpose200) }
   }
 
   override def getPurpose(purposeId: String)(implicit
@@ -106,7 +106,7 @@ final case class PurposeApiServiceImpl(
     val result: Future[PurposeVersion]           =
       commander(purposeId).askWithStatus(ref => CreatePurposeVersion(purposeId, purposeVersion, ref)).map(_.toAPI)
 
-    onComplete(result) { createPurposeVersionResponse[PurposeVersion](operationLabel)(createPurposeVersion201) }
+    onComplete(result) { createPurposeVersionResponse[PurposeVersion](operationLabel)(createPurposeVersion200) }
   }
 
   override def deletePurposeVersion(purposeId: String, versionId: String)(implicit

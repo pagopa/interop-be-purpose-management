@@ -25,8 +25,8 @@ class CqrsProjectionSpec extends ScalaTestWithActorTestKit(ItSpecConfiguration.c
       val update    = PurposeUpdate(
         title = "New title",
         description = "new Description",
-        isFreeOfCharge = false,
-        freeOfChargeReason = None,
+        isFreeOfCharge = true,
+        freeOfChargeReason = Some("Siamo una Pubblica Amministrazione"),
         Some(persistentRiskAnalysisForm)
       )
       val expected  = updatePurpose(purpose.id, update)

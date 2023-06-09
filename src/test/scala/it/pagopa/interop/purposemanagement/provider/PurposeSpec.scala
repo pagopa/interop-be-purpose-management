@@ -521,6 +521,8 @@ class PurposeSpec extends BaseIntegrationSpec {
       val updateContent = PurposeUpdateContent(
         title = "Another title",
         description = "Another description",
+        isFreeOfCharge = false,
+        freeOfChargeReason = None,
         riskAnalysisForm = Some(riskAnalysisFormSeed.copy(version = "2.0"))
       )
 
@@ -555,6 +557,8 @@ class PurposeSpec extends BaseIntegrationSpec {
       val updateContent = PurposeUpdateContent(
         title = "Another title",
         description = "Another description",
+        isFreeOfCharge = false,
+        freeOfChargeReason = None,
         riskAnalysisForm = Some(riskAnalysisFormSeed.copy(version = "2.0"))
       )
 
@@ -577,6 +581,8 @@ class PurposeSpec extends BaseIntegrationSpec {
       val updateContent = PurposeUpdateContent(
         title = "Another title",
         description = "Another description",
+        isFreeOfCharge = false,
+        freeOfChargeReason = None,
         riskAnalysisForm = Some(riskAnalysisFormSeed.copy(version = "2.0"))
       )
 
@@ -616,6 +622,8 @@ class PurposeSpec extends BaseIntegrationSpec {
       val updateContent = PurposeUpdateContent(
         title = "Another title",
         description = "Another description",
+        isFreeOfCharge = false,
+        freeOfChargeReason = None,
         riskAnalysisForm = Some(riskAnalysisFormSeed.copy(version = "2.0"))
       )
 
@@ -660,7 +668,9 @@ class PurposeSpec extends BaseIntegrationSpec {
       val updateContent = PurposeUpdateContent(
         title = "Another title",
         description = "Another description",
-        riskAnalysisForm = Some(riskAnalysisFormSeed.copy(version = "2.0"))
+        riskAnalysisForm = Some(riskAnalysisFormSeed.copy(version = "2.0")),
+        isFreeOfCharge = false,
+        freeOfChargeReason = None
       )
 
       val response: Future[Problem] =

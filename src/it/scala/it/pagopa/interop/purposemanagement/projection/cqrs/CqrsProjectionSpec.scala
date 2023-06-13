@@ -21,8 +21,14 @@ class CqrsProjectionSpec extends ScalaTestWithActorTestKit(ItSpecConfiguration.c
     }
 
     "succeed for event PurposeUpdated" in {
-      val purpose = createPurpose(persistentPurpose)
-      val update = PurposeUpdate(title = "New title", description = "new Description", Some(persistentRiskAnalysisForm))
+      val purpose   = createPurpose(persistentPurpose)
+      val update    = PurposeUpdate(
+        title = "New title",
+        description = "new Description",
+        isFreeOfCharge = true,
+        freeOfChargeReason = Some("Siamo una Pubblica Amministrazione"),
+        Some(persistentRiskAnalysisForm)
+      )
       val expected  = updatePurpose(purpose.id, update)
       val persisted = findOne[PersistentPurpose](expected.id.toString).futureValue
 

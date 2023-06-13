@@ -749,9 +749,14 @@ components:
           type: string
         riskAnalysisForm:
           $ref: '#/components/schemas/RiskAnalysisFormSeed'
+        isFreeOfCharge:
+          type: boolean
+        freeOfChargeReason:
+          type: string
       required:
         - title
         - description
+        - isFreeOfCharge
     PurposeVersion:
       type: object
       properties:

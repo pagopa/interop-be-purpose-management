@@ -120,7 +120,13 @@ class PurposeApiServiceAuthzSpec extends AnyWordSpecLike with ClusteredScalatest
     }
     "accept authorized roles for updatePurpose" in {
       val endpoint    = AuthorizedRoutes.endpoints("updatePurpose")
-      val fakeContent = PurposeUpdateContent("test", "Fake", None)
+      val fakeContent = PurposeUpdateContent(
+        title = "test",
+        description = "Fake",
+        isFreeOfCharge = false,
+        freeOfChargeReason = None,
+        riskAnalysisForm = None
+      )
       validateAuthorization(
         endpoint,
         { implicit c: Seq[(String, String)] => service.updatePurpose("fake", fakeContent) }

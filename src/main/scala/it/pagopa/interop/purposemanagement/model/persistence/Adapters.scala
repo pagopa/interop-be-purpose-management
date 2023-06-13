@@ -174,7 +174,13 @@ object Adapters {
     )
 
     def update(update: PurposeUpdate): PersistentPurpose =
-      p.copy(title = update.title, description = update.description, riskAnalysisForm = update.riskAnalysisForm)
+      p.copy(
+        title = update.title,
+        description = update.description,
+        isFreeOfCharge = update.isFreeOfCharge,
+        freeOfChargeReason = update.freeOfChargeReason,
+        riskAnalysisForm = update.riskAnalysisForm
+      )
   }
 
   implicit class PersistentPurposeObjectWrapper(private val p: PersistentPurpose.type) extends AnyVal {

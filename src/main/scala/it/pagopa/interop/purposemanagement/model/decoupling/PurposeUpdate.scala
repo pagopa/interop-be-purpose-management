@@ -5,9 +5,13 @@ import it.pagopa.interop.purposemanagement.model.PurposeUpdateContent
 import it.pagopa.interop.purposemanagement.model.persistence.Adapters._
 import it.pagopa.interop.purposemanagement.model.purpose.PersistentRiskAnalysisForm
 
+import java.util.UUID
+
 final case class PurposeUpdate(
   title: String,
   description: String,
+  eserviceId: UUID,
+  consumerId: UUID,
   isFreeOfCharge: Boolean,
   freeOfChargeReason: Option[String],
   riskAnalysisForm: Option[PersistentRiskAnalysisForm]
@@ -18,6 +22,8 @@ object PurposeUpdate {
     PurposeUpdate(
       title = payload.title,
       description = payload.description,
+      eserviceId = payload.eserviceId,
+      consumerId = payload.consumerId,
       isFreeOfCharge = payload.isFreeOfCharge,
       freeOfChargeReason = payload.freeOfChargeReason,
       riskAnalysisForm = payload.riskAnalysisForm.map(PersistentRiskAnalysisForm.fromSeed(uuidSupplier))

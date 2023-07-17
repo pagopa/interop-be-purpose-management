@@ -521,6 +521,8 @@ class PurposeSpec extends BaseIntegrationSpec {
       val updateContent = PurposeUpdateContent(
         title = "Another title",
         description = "Another description",
+        eserviceId = eServiceId,
+        consumerId = consumerId,
         isFreeOfCharge = false,
         freeOfChargeReason = None,
         riskAnalysisForm = Some(riskAnalysisFormSeed.copy(version = "2.0"))
@@ -557,6 +559,8 @@ class PurposeSpec extends BaseIntegrationSpec {
       val updateContent = PurposeUpdateContent(
         title = "Another title",
         description = "Another description",
+        eserviceId = eServiceId,
+        consumerId = consumerId,
         isFreeOfCharge = false,
         freeOfChargeReason = None,
         riskAnalysisForm = Some(riskAnalysisFormSeed.copy(version = "2.0"))
@@ -581,6 +585,8 @@ class PurposeSpec extends BaseIntegrationSpec {
       val updateContent = PurposeUpdateContent(
         title = "Another title",
         description = "Another description",
+        eserviceId = UUID.randomUUID,
+        consumerId = UUID.randomUUID,
         isFreeOfCharge = false,
         freeOfChargeReason = None,
         riskAnalysisForm = Some(riskAnalysisFormSeed.copy(version = "2.0"))
@@ -622,6 +628,8 @@ class PurposeSpec extends BaseIntegrationSpec {
       val updateContent = PurposeUpdateContent(
         title = "Another title",
         description = "Another description",
+        eserviceId = eServiceId,
+        consumerId = consumerId,
         isFreeOfCharge = false,
         freeOfChargeReason = None,
         riskAnalysisForm = Some(riskAnalysisFormSeed.copy(version = "2.0"))
@@ -668,6 +676,8 @@ class PurposeSpec extends BaseIntegrationSpec {
       val updateContent = PurposeUpdateContent(
         title = "Another title",
         description = "Another description",
+        eserviceId = eServiceId,
+        consumerId = consumerId,
         riskAnalysisForm = Some(riskAnalysisFormSeed.copy(version = "2.0")),
         isFreeOfCharge = false,
         freeOfChargeReason = None

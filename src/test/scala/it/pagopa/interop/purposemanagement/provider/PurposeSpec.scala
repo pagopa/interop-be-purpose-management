@@ -585,8 +585,8 @@ class PurposeSpec extends BaseIntegrationSpec {
       val updateContent = PurposeUpdateContent(
         title = "Another title",
         description = "Another description",
-        eserviceId = UUID.randomUUID,
-        consumerId = UUID.randomUUID,
+        eserviceId = UUID.randomUUID(),
+        consumerId = UUID.randomUUID(),
         isFreeOfCharge = false,
         freeOfChargeReason = None,
         riskAnalysisForm = Some(riskAnalysisFormSeed.copy(version = "2.0"))

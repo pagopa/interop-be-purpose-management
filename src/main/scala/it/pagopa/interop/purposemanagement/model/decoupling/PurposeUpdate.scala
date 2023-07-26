@@ -11,7 +11,6 @@ final case class PurposeUpdate(
   title: String,
   description: String,
   eserviceId: UUID,
-  consumerId: UUID,
   isFreeOfCharge: Boolean,
   freeOfChargeReason: Option[String],
   riskAnalysisForm: Option[PersistentRiskAnalysisForm]
@@ -23,7 +22,6 @@ object PurposeUpdate {
       title = payload.title,
       description = payload.description,
       eserviceId = payload.eserviceId,
-      consumerId = payload.consumerId,
       isFreeOfCharge = payload.isFreeOfCharge,
       freeOfChargeReason = payload.freeOfChargeReason,
       riskAnalysisForm = payload.riskAnalysisForm.map(PersistentRiskAnalysisForm.fromSeed(uuidSupplier))

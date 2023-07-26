@@ -124,7 +124,6 @@ class PurposeApiServiceAuthzSpec extends AnyWordSpecLike with ClusteredScalatest
         title = "test",
         description = "Fake",
         eserviceId = UUID.randomUUID(),
-        consumerId = UUID.randomUUID(),
         isFreeOfCharge = false,
         freeOfChargeReason = None,
         riskAnalysisForm = None

@@ -753,10 +753,14 @@ components:
           type: boolean
         freeOfChargeReason:
           type: string
+        eserviceId:
+          type: string
+          format: uuid
       required:
         - title
         - description
         - isFreeOfCharge
+        - eserviceId
     PurposeVersion:
       type: object
       properties:

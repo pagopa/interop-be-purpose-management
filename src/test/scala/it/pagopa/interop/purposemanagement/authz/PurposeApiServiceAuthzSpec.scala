@@ -123,6 +123,7 @@ class PurposeApiServiceAuthzSpec extends AnyWordSpecLike with ClusteredScalatest
       val fakeContent = PurposeUpdateContent(
         title = "test",
         description = "Fake",
+        eserviceId = UUID.randomUUID(),
         isFreeOfCharge = false,
         freeOfChargeReason = None,
         riskAnalysisForm = None

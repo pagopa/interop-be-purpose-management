@@ -177,6 +177,7 @@ object Adapters {
       p.copy(
         title = update.title,
         description = update.description,
+        eserviceId = update.eserviceId,
         isFreeOfCharge = update.isFreeOfCharge,
         freeOfChargeReason = update.freeOfChargeReason,
         riskAnalysisForm = update.riskAnalysisForm

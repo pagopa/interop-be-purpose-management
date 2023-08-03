@@ -50,7 +50,8 @@ class PurposeApiServiceAuthzSpec extends AnyWordSpecLike with ClusteredScalatest
         description = "???",
         riskAnalysisForm = None,
         isFreeOfCharge = false,
-        freeOfChargeReason = None
+        freeOfChargeReason = None,
+        dailyCalls = 100
       )
       validateAuthorization(endpoint, { implicit c: Seq[(String, String)] => service.createPurpose(fakeSeed) })
     }

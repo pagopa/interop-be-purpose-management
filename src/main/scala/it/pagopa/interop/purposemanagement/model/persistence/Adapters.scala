@@ -154,6 +154,22 @@ object Adapters {
       expectedApprovalDate = None,
       suspendedAt = None
     )
+
+    def fromPurposeSeed(
+      seed: PurposeSeed,
+      uuidSupplier: UUIDSupplier,
+      dateTimeSupplier: OffsetDateTimeSupplier
+    ): PersistentPurposeVersion = PersistentPurposeVersion(
+      id = uuidSupplier.get(),
+      state = Draft,
+      dailyCalls = seed.dailyCalls,
+      createdAt = dateTimeSupplier.get(),
+      updatedAt = None,
+      firstActivationAt = None,
+      riskAnalysis = None,
+      expectedApprovalDate = None,
+      suspendedAt = None
+    )
   }
 
   implicit class PersistentPurposeWrapper(private val p: PersistentPurpose) extends AnyVal {

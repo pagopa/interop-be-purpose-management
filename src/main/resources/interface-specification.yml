@@ -644,12 +644,16 @@ components:
           type: boolean
         freeOfChargeReason:
           type: string
+        dailyCalls: 
+          type: integer
+          format: int32
       required:
         - eserviceId
         - consumerId
         - title
         - description
         - isFreeOfCharge
+        - dailyCalls
     PurposeVersionSeed:
       type: object
       description: contains the expected payload for purpose version persistence.

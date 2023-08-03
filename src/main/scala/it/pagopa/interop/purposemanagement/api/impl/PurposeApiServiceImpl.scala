@@ -60,17 +60,10 @@ final case class PurposeApiServiceImpl(
     logger.info(operationLabel)
 
     val purpose: PersistentPurpose = PersistentPurpose.fromSeed(purposeSeed, uuidSupplier, dateTimeSupplier)
-    val purposeVersion: PersistentPurposeVersion =
-      PersistentPurposeVersion.fromPurposeSeed(purposeSeed, uuidSupplier, dateTimeSupplier)
 
-    val result: Future[Purpose] = for {
-      newPurpose <- commander(purpose.id.toString)
-        .askWithStatus(CreatePurpose(purpose, _))
-        .map(_.toAPI)
-      newVersion <- commander(purpose.id.toString)
-        .askWithStatus(CreatePurposeVersion(purpose.id.toString, purposeVersion, _))
-        .map(_.toAPI)
-    } yield newPurpose.copy(versions = Seq(newVersion))
+    val result: Future[Purpose] = commander(purpose.id.toString)
+      .askWithStatus(CreatePurpose(purpose, _))
+      .map(_.toAPI)
 
     onComplete(result) { createPurposeResponse[Purpose](operationLabel)(createPurpose200) }
   }

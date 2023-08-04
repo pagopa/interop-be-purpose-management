@@ -14,50 +14,19 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
   "Creation of a new purpose version" must {
 
     "succeed" in {
-      val purposeId  = UUID.randomUUID()
-      val versionId  = UUID.randomUUID()
-      val eServiceId = UUID.randomUUID()
-      val consumerId = UUID.randomUUID()
+      val purposeId      = UUID.randomUUID()
+      val versionId1     = UUID.randomUUID()
+      val versionId2     = UUID.randomUUID()
+      val eServiceId     = UUID.randomUUID()
+      val consumerId     = UUID.randomUUID()
+      val riskAnalysisId = UUID.randomUUID()
 
-      val purposeSeed               = PurposeSeed(
-        eserviceId = eServiceId,
-        consumerId = consumerId,
-        title = "Purpose",
-        description = "Purpose description",
-        riskAnalysisForm = Some(riskAnalysisFormSeed),
-        isFreeOfCharge = false,
-        freeOfChargeReason = None,
-        dailyCalls = 100
+      val riskAnalysisDoc = PurposeVersionDocument(
+        id = riskAnalysisId,
+        contentType = "a-content-type",
+        path = "a/store/path",
+        createdAt = timestamp
       )
-      val response: Future[Purpose] = createPurpose(purposeId, versionId, purposeSeed)
-
-      val expected =
-        Purpose(
-          id = purposeId,
-          eserviceId = purposeSeed.eserviceId,
-          consumerId = purposeSeed.consumerId,
-          versions = Seq(
-            PurposeVersion(id = versionId, state = PurposeVersionState.DRAFT, createdAt = timestamp, dailyCalls = 100)
-          ),
-          suspendedByConsumer = None,
-          suspendedByProducer = None,
-          title = purposeSeed.title,
-          description = purposeSeed.description,
-          riskAnalysisForm = Some(riskAnalysisForm),
-          createdAt = timestamp,
-          updatedAt = None,
-          isFreeOfCharge = false,
-          freeOfChargeReason = None
-        )
-
-      response.futureValue shouldBe expected
-    }
-
-    "succeed with risk analysis" in {
-      val purposeId  = UUID.randomUUID()
-      val versionId  = UUID.randomUUID()
-      val eServiceId = UUID.randomUUID()
-      val consumerId = UUID.randomUUID()
 
       val purposeSeed = PurposeSeed(
         eserviceId = eServiceId,
@@ -69,26 +38,84 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
         freeOfChargeReason = None,
         dailyCalls = 100
       )
+      val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
 
-      val response: Future[Purpose] = createPurpose(purposeId, versionId, purposeSeed)
+      val response: Future[PurposeVersion] =
+        for {
+          _      <- createPurpose(purposeId, versionId1, purposeSeed)
+          _      <- activateVersion(purposeId, versionId1, ChangedBy.CONSUMER, Some(riskAnalysisDoc))
+          _      <- suspendVersion(purposeId, versionId1, ChangedBy.CONSUMER)
+          result <- createPurposeVersion(purposeId, versionId2, versionSeed)
+        } yield result
 
       val expected =
-        Purpose(
-          id = purposeId,
-          eserviceId = purposeSeed.eserviceId,
-          consumerId = purposeSeed.consumerId,
-          versions = Seq(
-            PurposeVersion(id = versionId, state = PurposeVersionState.DRAFT, createdAt = timestamp, dailyCalls = 100)
-          ),
-          suspendedByConsumer = None,
-          suspendedByProducer = None,
-          title = purposeSeed.title,
-          description = purposeSeed.description,
-          riskAnalysisForm = Some(riskAnalysisForm),
+        PurposeVersion(
+          id = versionId2,
+          state = PurposeVersionState.DRAFT,
           createdAt = timestamp,
-          updatedAt = None,
-          isFreeOfCharge = false,
-          freeOfChargeReason = None
+          dailyCalls = 100,
+          riskAnalysis = Some(
+            PurposeVersionDocument(
+              id = riskAnalysisId,
+              contentType = "a-content-type",
+              path = "a/store/path",
+              createdAt = timestamp
+            )
+          )
+        )
+
+      response.futureValue shouldBe expected
+    }
+
+    "succeed with risk analysis" in {
+      val purposeId      = UUID.randomUUID()
+      val versionId1     = UUID.randomUUID()
+      val versionId2     = UUID.randomUUID()
+      val eServiceId     = UUID.randomUUID()
+      val consumerId     = UUID.randomUUID()
+      val riskAnalysisId = UUID.randomUUID()
+
+      val riskAnalysisDoc = PurposeVersionDocument(
+        id = riskAnalysisId,
+        contentType = "a-content-type",
+        path = "a/store/path",
+        createdAt = timestamp
+      )
+
+      val purposeSeed = PurposeSeed(
+        eserviceId = eServiceId,
+        consumerId = consumerId,
+        title = "Purpose",
+        description = "Purpose description",
+        riskAnalysisForm = Some(riskAnalysisFormSeed),
+        isFreeOfCharge = false,
+        freeOfChargeReason = None,
+        dailyCalls = 100
+      )
+      val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
+
+      val response: Future[PurposeVersion] =
+        for {
+          _      <- createPurpose(purposeId, versionId1, purposeSeed)
+          _      <- activateVersion(purposeId, versionId1, ChangedBy.CONSUMER, Some(riskAnalysisDoc))
+          _      <- suspendVersion(purposeId, versionId1, ChangedBy.CONSUMER)
+          result <- createPurposeVersion(purposeId, versionId2, versionSeed)
+        } yield result
+
+      val expected =
+        PurposeVersion(
+          id = versionId2,
+          state = PurposeVersionState.DRAFT,
+          createdAt = timestamp,
+          dailyCalls = 100,
+          riskAnalysis = Some(
+            PurposeVersionDocument(
+              id = riskAnalysisId,
+              contentType = "a-content-type",
+              path = "a/store/path",
+              createdAt = timestamp
+            )
+          )
         )
 
       response.futureValue shouldBe expected

@@ -23,10 +23,9 @@ trait SpecHelper {
   ): Future[Purpose] =
     for {
       data <- Marshal(seed).to[MessageEntity].map(_.dataBytes)
+      _ = (() => mockDateTimeSupplier.get()).expects().returning(timestamp).once()
       _ = (() => mockUUIDSupplier.get()).expects().returning(purposeId).once()
-      _ = (() => mockDateTimeSupplier.get()).expects().returning(timestamp).once()
       _ = (() => mockUUIDSupplier.get()).expects().returning(purposeVersionId).once()
-      _ = (() => mockDateTimeSupplier.get()).expects().returning(timestamp).once()
       _ = (() => mockUUIDSupplier.get()).expects().returning(riskAnalysisForm.id).once()
       purpose <- Unmarshal(makeRequest(data, "purposes", HttpMethods.POST)).to[Purpose]
     } yield purpose

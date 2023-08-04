@@ -10,8 +10,7 @@ import scala.concurrent.Future
 class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
 
   "Activation of purpose" must {
-
-    "succeed when risk analysis is added at activation" in {
+    "succeed when risk analysis is added at creation" in {
       val purposeId      = UUID.randomUUID()
       val versionId      = UUID.randomUUID()
       val eServiceId     = UUID.randomUUID()
@@ -42,14 +41,69 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
           result <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, Some(riskAnalysisDoc))
         } yield result
 
-      val version  = response.futureValue
+      val version = response.futureValue
+
+      val expected =
+        PurposeVersion(
+          id = versionId,
+          state = PurposeVersionState.ACTIVE,
+          createdAt = timestamp,
+          updatedAt = Some(timestamp),
+          firstActivationAt = Some(timestamp),
+          dailyCalls = 100,
+          riskAnalysis = Some(
+            PurposeVersionDocument(
+              id = riskAnalysisId,
+              contentType = "a-content-type",
+              path = "a/store/path",
+              createdAt = timestamp
+            )
+          )
+        )
+
+      version shouldBe expected
+    }
+
+    "succeed when risk analysis is added at activation" in {
+      val purposeId      = UUID.randomUUID()
+      val versionId      = UUID.randomUUID()
+      val eServiceId     = UUID.randomUUID()
+      val consumerId     = UUID.randomUUID()
+      val riskAnalysisId = UUID.randomUUID()
+
+      val riskAnalysisDoc = PurposeVersionDocument(
+        id = riskAnalysisId,
+        contentType = "a-content-type",
+        path = "a/store/path",
+        createdAt = timestamp
+      )
+
+      val purposeSeed = PurposeSeed(
+        eserviceId = eServiceId,
+        consumerId = consumerId,
+        title = "Purpose",
+        description = "Purpose description",
+        riskAnalysisForm = Some(riskAnalysisFormSeed),
+        isFreeOfCharge = false,
+        freeOfChargeReason = None,
+        dailyCalls = 100
+      )
+
+      val response: Future[(PurposeVersion, PurposeVersion)] =
+        for {
+          purpose <- createPurpose(purposeId, versionId, purposeSeed)
+          result  <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, Some(riskAnalysisDoc))
+        } yield (purpose.versions.head, result)
+
+      val (version, result) = response.futureValue
+
       val expected = version.copy(
         state = PurposeVersionState.ACTIVE,
         updatedAt = Some(timestamp),
         firstActivationAt = Some(timestamp),
         riskAnalysis = Some(riskAnalysisDoc)
       )
-      version shouldBe expected
+      result shouldBe expected
     }
 
     "succeed and archive old active version" in {
@@ -335,21 +389,29 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         dailyCalls = 100
       )
 
-      val response: Future[PurposeVersion] =
+      val response: Future[(PurposeVersion, PurposeVersion)] =
         for {
-          _      <- createPurpose(purposeId, versionId, purposeSeed)
-          _      <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, Some(riskAnalysisDoc), firstActivationAt)
-          _      <- suspendVersion(purposeId, versionId, ChangedBy.CONSUMER)
-          result <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, None, secondActivationAt)
-        } yield result
+          purpose <- createPurpose(purposeId, versionId, purposeSeed)
+          _       <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, Some(riskAnalysisDoc), firstActivationAt)
+          _       <- suspendVersion(purposeId, versionId, ChangedBy.CONSUMER)
+          result  <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, None, secondActivationAt)
+        } yield (purpose.versions.head, result)
 
-      val version  = response.futureValue
-      val expected = version.copy(
+      val (version, result) = response.futureValue
+      val expected          = version.copy(
         state = PurposeVersionState.ACTIVE,
         updatedAt = Some(secondActivationAt),
-        firstActivationAt = Some(firstActivationAt)
+        firstActivationAt = Some(firstActivationAt),
+        riskAnalysis = Some(
+          PurposeVersionDocument(
+            id = riskAnalysisId,
+            contentType = "a-content-type",
+            path = "a/store/path",
+            createdAt = timestamp
+          )
+        )
       )
-      version shouldBe expected
+      result shouldBe expected
     }
 
     "fail if not exist" in {
@@ -474,20 +536,29 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         dailyCalls = 100
       )
 
-      val response: Future[PurposeVersion] =
+      val response: Future[(PurposeVersion, PurposeVersion)] =
         for {
-          _      <- createPurpose(purposeId, versionId, purposeSeed)
-          _      <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, Some(riskAnalysisDoc))
-          result <- suspendVersion(purposeId, versionId, ChangedBy.CONSUMER)
-        } yield result
+          purpose <- createPurpose(purposeId, versionId, purposeSeed)
+          _       <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, Some(riskAnalysisDoc))
+          result  <- suspendVersion(purposeId, versionId, ChangedBy.CONSUMER)
+        } yield (purpose.versions.head, result)
 
-      val version  = response.futureValue
+      val (version, result) = response.futureValue
+
       val expected = version.copy(
         state = PurposeVersionState.SUSPENDED,
         updatedAt = Some(timestamp),
-        firstActivationAt = Some(timestamp)
+        firstActivationAt = Some(timestamp),
+        riskAnalysis = Some(
+          PurposeVersionDocument(
+            id = riskAnalysisId,
+            contentType = "a-content-type",
+            path = "a/store/path",
+            createdAt = timestamp
+          )
+        )
       )
-      version shouldBe expected
+      result shouldBe expected
     }
 
     "fail if not exist" in {
@@ -564,20 +635,28 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         dailyCalls = 100
       )
 
-      val response: Future[PurposeVersion] =
+      val response: Future[(PurposeVersion, PurposeVersion)] =
         for {
-          _      <- createPurpose(purposeId, versionId, purposeSeed)
-          _      <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, Some(riskAnalysisDoc))
-          result <- archiveVersion(purposeId, versionId, ChangedBy.CONSUMER)
-        } yield result
+          purpose <- createPurpose(purposeId, versionId, purposeSeed)
+          _       <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, Some(riskAnalysisDoc))
+          result  <- archiveVersion(purposeId, versionId, ChangedBy.CONSUMER)
+        } yield (purpose.versions.head, result)
 
-      val version  = response.futureValue
-      val expected = version.copy(
+      val (version, result) = response.futureValue
+      val expected          = version.copy(
         state = PurposeVersionState.ARCHIVED,
         updatedAt = Some(timestamp),
-        firstActivationAt = Some(timestamp)
+        firstActivationAt = Some(timestamp),
+        riskAnalysis = Some(
+          PurposeVersionDocument(
+            id = riskAnalysisId,
+            contentType = "a-content-type",
+            path = "a/store/path",
+            createdAt = timestamp
+          )
+        )
       )
-      version shouldBe expected
+      result shouldBe expected
     }
 
     "fail if not exist" in {
@@ -646,19 +725,19 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         dailyCalls = 100
       )
 
-      val response: Future[PurposeVersion] =
+      val response: Future[(PurposeVersion, PurposeVersion)] =
         for {
-          _      <- createPurpose(purposeId, versionId, purposeSeed)
-          result <- waitForApprovalVersion(purposeId, versionId, ChangedBy.CONSUMER)
-        } yield result
+          purpose <- createPurpose(purposeId, versionId, purposeSeed)
+          result  <- waitForApprovalVersion(purposeId, versionId, ChangedBy.CONSUMER)
+        } yield (purpose.versions.head, result)
 
-      val version  = response.futureValue
-      val expected = version.copy(
+      val (version, result) = response.futureValue
+      val expected          = version.copy(
         state = PurposeVersionState.WAITING_FOR_APPROVAL,
         updatedAt = Some(timestamp),
         firstActivationAt = Some(timestamp)
       )
-      version shouldBe expected
+      result shouldBe expected
     }
 
     "succeed and stay suspended by Producer if previous version was suspended" in {
@@ -764,5 +843,4 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
       result.errors.map(_.code) shouldBe Seq("011-0004")
     }
   }
-
 }

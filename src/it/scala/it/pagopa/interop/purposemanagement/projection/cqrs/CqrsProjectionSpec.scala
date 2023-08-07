@@ -27,9 +27,8 @@ class CqrsProjectionSpec extends ScalaTestWithActorTestKit(ItSpecConfiguration.c
         description = "new Description",
         isFreeOfCharge = true,
         eserviceId = purpose.eserviceId,
-        consumerId = purpose.consumerId,
         freeOfChargeReason = Some("Siamo una Pubblica Amministrazione"),
-        Some(persistentRiskAnalysisForm)
+        riskAnalysisForm = Some(persistentRiskAnalysisForm)
       )
       val expected  = updatePurpose(purpose.id, update)
       val persisted = findOne[PersistentPurpose](expected.id.toString).futureValue

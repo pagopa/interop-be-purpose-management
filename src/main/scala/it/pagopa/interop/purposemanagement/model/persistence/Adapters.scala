@@ -9,6 +9,8 @@ import it.pagopa.interop.purposemanagement.model._
 import it.pagopa.interop.purposemanagement.model.decoupling._
 import it.pagopa.interop.purposemanagement.model.purpose._
 
+import java.time.OffsetDateTime
+
 object Adapters {
 
   implicit class PersistentRiskAnalysisSingleAnswerWrapper(private val p: PersistentRiskAnalysisSingleAnswer)
@@ -185,25 +187,34 @@ object Adapters {
   }
 
   implicit class PersistentPurposeObjectWrapper(private val p: PersistentPurpose.type) extends AnyVal {
-    def fromSeed(
-      seed: PurposeSeed,
-      uuidSupplier: UUIDSupplier,
-      dateTimeSupplier: OffsetDateTimeSupplier
-    ): PersistentPurpose = PersistentPurpose(
-      id = uuidSupplier.get(),
-      eserviceId = seed.eserviceId,
-      consumerId = seed.consumerId,
-      versions = Seq.empty,
-      suspendedByConsumer = None,
-      suspendedByProducer = None,
-      title = seed.title,
-      description = seed.description,
-      riskAnalysisForm = seed.riskAnalysisForm.map(PersistentRiskAnalysisForm.fromSeed(uuidSupplier)),
-      createdAt = dateTimeSupplier.get(),
-      updatedAt = None,
-      isFreeOfCharge = seed.isFreeOfCharge,
-      freeOfChargeReason = seed.freeOfChargeReason
-    )
+    def fromSeed(seed: PurposeSeed, uuidSupplier: UUIDSupplier, now: OffsetDateTime): PersistentPurpose =
+      PersistentPurpose(
+        id = uuidSupplier.get(),
+        eserviceId = seed.eserviceId,
+        consumerId = seed.consumerId,
+        versions = Seq(
+          PersistentPurposeVersion(
+            id = uuidSupplier.get(),
+            state = Draft,
+            dailyCalls = seed.dailyCalls,
+            createdAt = now,
+            updatedAt = None,
+            firstActivationAt = None,
+            riskAnalysis = None,
+            expectedApprovalDate = None,
+            suspendedAt = None
+          )
+        ),
+        suspendedByConsumer = None,
+        suspendedByProducer = None,
+        title = seed.title,
+        description = seed.description,
+        riskAnalysisForm = seed.riskAnalysisForm.map(PersistentRiskAnalysisForm.fromSeed(uuidSupplier)),
+        createdAt = now,
+        updatedAt = None,
+        isFreeOfCharge = seed.isFreeOfCharge,
+        freeOfChargeReason = seed.freeOfChargeReason
+      )
   }
 
 }

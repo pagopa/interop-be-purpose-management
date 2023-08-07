@@ -59,8 +59,11 @@ final case class PurposeApiServiceImpl(
       s"Adding a purpose for Consumer ${purposeSeed.consumerId} and EService ${purposeSeed.eserviceId}"
     logger.info(operationLabel)
 
-    val purpose: PersistentPurpose = PersistentPurpose.fromSeed(purposeSeed, uuidSupplier, dateTimeSupplier)
-    val result: Future[Purpose] = commander(purpose.id.toString).askWithStatus(CreatePurpose(purpose, _)).map(_.toAPI)
+    val purpose: PersistentPurpose = PersistentPurpose.fromSeed(purposeSeed, uuidSupplier, dateTimeSupplier.get())
+
+    val result: Future[Purpose] = commander(purpose.id.toString)
+      .askWithStatus(CreatePurpose(purpose, _))
+      .map(_.toAPI)
 
     onComplete(result) { createPurposeResponse[Purpose](operationLabel)(createPurpose200) }
   }

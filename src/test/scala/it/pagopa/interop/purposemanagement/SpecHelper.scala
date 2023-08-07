@@ -17,14 +17,15 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 
 trait SpecHelper {
 
-  def createPurpose(purposeId: UUID, seed: PurposeSeed)(implicit
+  def createPurpose(purposeId: UUID, purposeVersionId: UUID, seed: PurposeSeed)(implicit
     ec: ExecutionContext,
     actorSystem: actor.ActorSystem
   ): Future[Purpose] =
     for {
       data <- Marshal(seed).to[MessageEntity].map(_.dataBytes)
-      _ = (() => mockUUIDSupplier.get()).expects().returning(purposeId).once()
       _ = (() => mockDateTimeSupplier.get()).expects().returning(timestamp).once()
+      _ = (() => mockUUIDSupplier.get()).expects().returning(purposeId).once()
+      _ = (() => mockUUIDSupplier.get()).expects().returning(purposeVersionId).once()
       _ = (() => mockUUIDSupplier.get()).expects().returning(riskAnalysisForm.id).once()
       purpose <- Unmarshal(makeRequest(data, "purposes", HttpMethods.POST)).to[Purpose]
     } yield purpose

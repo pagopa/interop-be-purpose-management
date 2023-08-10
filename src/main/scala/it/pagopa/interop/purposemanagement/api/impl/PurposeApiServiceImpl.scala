@@ -9,7 +9,6 @@ import akka.http.scaladsl.server.Route
 import akka.pattern.StatusReply
 import cats.implicits.toTraverseOps
 import com.typesafe.scalalogging.{Logger, LoggerTakingImplicit}
-import it.pagopa.interop.commons.jwt._
 import it.pagopa.interop.commons.logging.{CanLogContextFields, ContextFieldsToLog}
 import it.pagopa.interop.commons.utils.AkkaUtils.getShard
 import it.pagopa.interop.commons.utils.OpenapiUtils.parseArrayParameters
@@ -54,7 +53,7 @@ final case class PurposeApiServiceImpl(
     toEntityMarshallerPurpose: ToEntityMarshaller[Purpose],
     toEntityMarshallerProblem: ToEntityMarshaller[Problem],
     contexts: Seq[(String, String)]
-  ): Route = authorize(ADMIN_ROLE) {
+  ): Route = {
     val operationLabel =
       s"Adding a purpose for Consumer ${purposeSeed.consumerId} and EService ${purposeSeed.eserviceId}"
     logger.info(operationLabel)
@@ -72,7 +71,7 @@ final case class PurposeApiServiceImpl(
     toEntityMarshallerPurpose: ToEntityMarshaller[Purpose],
     toEntityMarshallerProblem: ToEntityMarshaller[Problem],
     contexts: Seq[(String, String)]
-  ): Route = authorize(ADMIN_ROLE, SECURITY_ROLE, API_ROLE, M2M_ROLE, INTERNAL_ROLE) {
+  ): Route = {
     val operationLabel = s"Retrieving purpose $purposeId"
     logger.info(operationLabel)
 
@@ -86,21 +85,20 @@ final case class PurposeApiServiceImpl(
 
   override def deletePurpose(
     purposeId: String
-  )(implicit toEntityMarshallerProblem: ToEntityMarshaller[Problem], contexts: Seq[(String, String)]): Route =
-    authorize(ADMIN_ROLE) {
-      val operationLabel = s"Deleting purpose $purposeId"
-      logger.info(operationLabel)
+  )(implicit toEntityMarshallerProblem: ToEntityMarshaller[Problem], contexts: Seq[(String, String)]): Route = {
+    val operationLabel = s"Deleting purpose $purposeId"
+    logger.info(operationLabel)
 
-      val result: Future[Unit] = commander(purposeId).askWithStatus(ref => DeletePurpose(purposeId, ref))
+    val result: Future[Unit] = commander(purposeId).askWithStatus(ref => DeletePurpose(purposeId, ref))
 
-      onComplete(result) { deletePurposeResponse[Unit](operationLabel)(_ => deletePurpose204) }
-    }
+    onComplete(result) { deletePurposeResponse[Unit](operationLabel)(_ => deletePurpose204) }
+  }
 
   override def createPurposeVersion(purposeId: String, purposeVersionSeed: PurposeVersionSeed)(implicit
     toEntityMarshallerPurposeVersion: ToEntityMarshaller[PurposeVersion],
     toEntityMarshallerProblem: ToEntityMarshaller[Problem],
     contexts: Seq[(String, String)]
-  ): Route = authorize(ADMIN_ROLE) {
+  ): Route = {
     val operationLabel = s"Adding a version to purpose $purposeId"
     logger.info(operationLabel)
 
@@ -115,7 +113,7 @@ final case class PurposeApiServiceImpl(
   override def deletePurposeVersion(purposeId: String, versionId: String)(implicit
     toEntityMarshallerProblem: ToEntityMarshaller[Problem],
     contexts: Seq[(String, String)]
-  ): Route = authorize(ADMIN_ROLE) {
+  ): Route = {
     val operationLabel = s"Deleting version $versionId of purpose $purposeId"
     logger.info(operationLabel)
 
@@ -132,7 +130,7 @@ final case class PurposeApiServiceImpl(
     toEntityMarshallerPurposeVersion: ToEntityMarshaller[PurposeVersion],
     toEntityMarshallerProblem: ToEntityMarshaller[Problem],
     contexts: Seq[(String, String)]
-  ): Route = authorize(ADMIN_ROLE) {
+  ): Route = {
     val operationLabel = s"Activating version $versionId of purpose $purposeId"
     logger.info(operationLabel)
 
@@ -156,7 +154,7 @@ final case class PurposeApiServiceImpl(
     toEntityMarshallerPurposeVersion: ToEntityMarshaller[PurposeVersion],
     toEntityMarshallerProblem: ToEntityMarshaller[Problem],
     contexts: Seq[(String, String)]
-  ): Route = authorize(ADMIN_ROLE) {
+  ): Route = {
     val operationLabel = s"Suspending version $versionId of purpose $purposeId"
     logger.info(operationLabel)
 
@@ -174,7 +172,7 @@ final case class PurposeApiServiceImpl(
     toEntityMarshallerPurposeVersion: ToEntityMarshaller[PurposeVersion],
     toEntityMarshallerProblem: ToEntityMarshaller[Problem],
     contexts: Seq[(String, String)]
-  ): Route = authorize(ADMIN_ROLE) {
+  ): Route = {
     val operationLabel = s"Wait for Approval version $versionId of purpose $purposeId"
     logger.info(operationLabel)
 
@@ -194,7 +192,7 @@ final case class PurposeApiServiceImpl(
     toEntityMarshallerPurposeVersion: ToEntityMarshaller[PurposeVersion],
     toEntityMarshallerProblem: ToEntityMarshaller[Problem],
     contexts: Seq[(String, String)]
-  ): Route = authorize(ADMIN_ROLE) {
+  ): Route = {
     val operationLabel = s"Archiving version $versionId of purpose $purposeId"
     logger.info(operationLabel)
 
@@ -208,7 +206,7 @@ final case class PurposeApiServiceImpl(
     toEntityMarshallerPurposes: ToEntityMarshaller[Purposes],
     toEntityMarshallerProblem: ToEntityMarshaller[Problem],
     contexts: Seq[(String, String)]
-  ): Route = authorize(ADMIN_ROLE, SECURITY_ROLE, API_ROLE, M2M_ROLE) {
+  ): Route = {
     val operationLabel = s"Getting purposes for consumer $consumerId, EService $eServiceId, States $states"
     logger.info(operationLabel)
 
@@ -236,7 +234,7 @@ final case class PurposeApiServiceImpl(
     toEntityMarshallerPurpose: ToEntityMarshaller[Purpose],
     toEntityMarshallerProblem: ToEntityMarshaller[Problem],
     contexts: Seq[(String, String)]
-  ): Route = authorize(ADMIN_ROLE) {
+  ): Route = {
     val operationLabel = s"Updating Purpose $purposeId"
     logger.info(operationLabel)
 
@@ -254,7 +252,7 @@ final case class PurposeApiServiceImpl(
     toEntityMarshallerPurposeVersion: ToEntityMarshaller[PurposeVersion],
     toEntityMarshallerProblem: ToEntityMarshaller[Problem],
     contexts: Seq[(String, String)]
-  ): Route = authorize(ADMIN_ROLE) {
+  ): Route = {
     val operationLabel = s"Updating Draft Version $versionId of Purpose $purposeId"
     logger.info(operationLabel)
 
@@ -278,7 +276,7 @@ final case class PurposeApiServiceImpl(
     toEntityMarshallerPurposeVersion: ToEntityMarshaller[PurposeVersion],
     toEntityMarshallerProblem: ToEntityMarshaller[Problem],
     contexts: Seq[(String, String)]
-  ): Route = authorize(ADMIN_ROLE) {
+  ): Route = {
     val operationLabel = s"Updating Waiting For Approval Version $versionId of Purpose $purposeId"
     logger.info(operationLabel)
 

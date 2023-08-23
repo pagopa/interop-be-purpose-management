@@ -27,20 +27,18 @@ package object impl extends SprayJsonSupport with DefaultJsonProtocol {
     jsonFormat2(RiskAnalysisMultiAnswerSeed)
   implicit val riskAnalysisFormSeedFormat: RootJsonFormat[RiskAnalysisFormSeed] = jsonFormat3(RiskAnalysisFormSeed)
   implicit val purposeSeedFormat: RootJsonFormat[PurposeSeed]                   = jsonFormat8(PurposeSeed)
-  implicit val PurposeUpdateContentFormat: RootJsonFormat[PurposeUpdateContent] = jsonFormat6(PurposeUpdateContent)
+  implicit val PurposeUpdateContentFormat: RootJsonFormat[PurposeUpdateContent] = jsonFormat7(PurposeUpdateContent)
   implicit val versionDocumentFormat: RootJsonFormat[PurposeVersionDocument]    = jsonFormat4(PurposeVersionDocument)
   implicit val purposeVersionSeedFormat: RootJsonFormat[PurposeVersionSeed]     = jsonFormat2(PurposeVersionSeed)
-  implicit val draftPurposeVersionUpdateFormat: RootJsonFormat[DraftPurposeVersionUpdateContent] =
-    jsonFormat1(DraftPurposeVersionUpdateContent)
   implicit val waitingForApprovalPurposeVersionUpdateFormat
     : RootJsonFormat[WaitingForApprovalPurposeVersionUpdateContent] =
     jsonFormat1(WaitingForApprovalPurposeVersionUpdateContent)
-  implicit val purposeVersionFormat: RootJsonFormat[PurposeVersion]         = jsonFormat9(PurposeVersion)
-  implicit val purposeFormat: RootJsonFormat[Purpose]                       = jsonFormat13(Purpose)
-  implicit val purposesFormat: RootJsonFormat[Purposes]                     = jsonFormat1(Purposes)
-  implicit val stateChangeDetailsFormat: RootJsonFormat[StateChangeDetails] = jsonFormat2(StateChangeDetails)
-  implicit val problemErrorFormat: RootJsonFormat[ProblemError]             = jsonFormat2(ProblemError)
-  implicit val problemFormat: RootJsonFormat[Problem]                       = jsonFormat6(Problem)
+  implicit val purposeVersionFormat: RootJsonFormat[PurposeVersion]             = jsonFormat9(PurposeVersion)
+  implicit val purposeFormat: RootJsonFormat[Purpose]                           = jsonFormat13(Purpose)
+  implicit val purposesFormat: RootJsonFormat[Purposes]                         = jsonFormat1(Purposes)
+  implicit val stateChangeDetailsFormat: RootJsonFormat[StateChangeDetails]     = jsonFormat2(StateChangeDetails)
+  implicit val problemErrorFormat: RootJsonFormat[ProblemError]                 = jsonFormat2(ProblemError)
+  implicit val problemFormat: RootJsonFormat[Problem]                           = jsonFormat6(Problem)
   implicit val activatePurposeVersionPayloadFormat: RootJsonFormat[ActivatePurposeVersionPayload] =
     jsonFormat2(ActivatePurposeVersionPayload)
 

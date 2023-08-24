@@ -240,6 +240,8 @@ final case class PurposeApiServiceImpl(
 
     val purposeUpdate = PurposeUpdate.fromApi(uuidSupplier)(payload)
 
+    // When refactoring the application, the update of the purpose and the update of the version
+    // should be done with a single command and a single event
     val result: Future[Purpose] = for {
       purpose <- commander(purposeId)
         .askWithStatus(UpdatePurpose(purposeId, purposeUpdate, _))

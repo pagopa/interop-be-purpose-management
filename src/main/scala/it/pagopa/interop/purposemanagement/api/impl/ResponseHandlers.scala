@@ -119,6 +119,7 @@ object ResponseHandlers extends AkkaResponses {
     result match {
       case Success(s)                                    => success(s)
       case Failure(ex: PurposeNotFound)                  => notFound(ex, logMessage)
+      case Failure(ex: DraftPurposeVersionNotFound)      => notFound(ex, logMessage)
       case Failure(ex: NotAllowedForPurposeVersionState) => conflict(ex, logMessage)
       case Failure(ex)                                   => internalServerError(ex, logMessage)
     }

@@ -551,8 +551,7 @@ class PurposeSpec extends BaseIntegrationSpec {
         eserviceId = eServiceId,
         isFreeOfCharge = false,
         freeOfChargeReason = None,
-        riskAnalysisForm = Some(riskAnalysisFormSeed.copy(version = "2.0")),
-        dailyCalls = 100
+        riskAnalysisForm = Some(riskAnalysisFormSeed.copy(version = "2.0"))
       )
 
       val response: Future[Purpose] =
@@ -589,8 +588,7 @@ class PurposeSpec extends BaseIntegrationSpec {
         eserviceId = eServiceId,
         isFreeOfCharge = false,
         freeOfChargeReason = None,
-        riskAnalysisForm = Some(riskAnalysisFormSeed.copy(version = "2.0")),
-        dailyCalls = 100
+        riskAnalysisForm = Some(riskAnalysisFormSeed.copy(version = "2.0"))
       )
 
       val response: Future[Purpose] =
@@ -614,8 +612,7 @@ class PurposeSpec extends BaseIntegrationSpec {
         eserviceId = UUID.randomUUID(),
         isFreeOfCharge = false,
         freeOfChargeReason = None,
-        riskAnalysisForm = Some(riskAnalysisFormSeed.copy(version = "2.0")),
-        dailyCalls = 100
+        riskAnalysisForm = Some(riskAnalysisFormSeed.copy(version = "2.0"))
       )
 
       (() => mockUUIDSupplier.get()).expects().returning(UUID.randomUUID()).once()
@@ -657,8 +654,7 @@ class PurposeSpec extends BaseIntegrationSpec {
         eserviceId = eServiceId,
         isFreeOfCharge = false,
         freeOfChargeReason = None,
-        riskAnalysisForm = Some(riskAnalysisFormSeed.copy(version = "2.0")),
-        dailyCalls = 100
+        riskAnalysisForm = Some(riskAnalysisFormSeed.copy(version = "2.0"))
       )
 
       val response: Future[Problem] =
@@ -705,8 +701,7 @@ class PurposeSpec extends BaseIntegrationSpec {
         eserviceId = eServiceId,
         riskAnalysisForm = Some(riskAnalysisFormSeed.copy(version = "2.0")),
         isFreeOfCharge = false,
-        freeOfChargeReason = None,
-        dailyCalls = 100
+        freeOfChargeReason = None
       )
 
       val response: Future[Problem] =

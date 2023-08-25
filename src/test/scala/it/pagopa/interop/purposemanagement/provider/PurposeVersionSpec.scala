@@ -209,6 +209,110 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
     }
   }
 
+  "Update of a purpose version in draft" must {
+
+    "succeed" in {
+      val purposeId  = UUID.randomUUID()
+      val versionId  = UUID.randomUUID()
+      val eServiceId = UUID.randomUUID()
+      val consumerId = UUID.randomUUID()
+
+      val purposeSeed = PurposeSeed(
+        eserviceId = eServiceId,
+        consumerId = consumerId,
+        title = "Purpose",
+        description = "Purpose description",
+        riskAnalysisForm = Some(riskAnalysisFormSeed),
+        isFreeOfCharge = false,
+        freeOfChargeReason = None,
+        dailyCalls = 100
+      )
+
+      val updateContent = DraftPurposeVersionUpdateContent(dailyCalls = 200)
+
+      val response: Future[PurposeVersion] =
+        for {
+          _      <- createPurpose(purposeId, versionId, purposeSeed)
+          result <- updateDraftPurposeVersion(purposeId, versionId, updateContent)
+        } yield result
+
+      val expected =
+        PurposeVersion(
+          id = versionId,
+          state = PurposeVersionState.DRAFT,
+          createdAt = timestamp,
+          updatedAt = Some(timestamp),
+          dailyCalls = 200,
+          expectedApprovalDate = None,
+          riskAnalysis = None
+        )
+
+      response.futureValue shouldBe expected
+    }
+
+    "fail if version does not exist" in {
+      val purposeId = UUID.randomUUID()
+      val versionId = UUID.randomUUID()
+
+      val updateContent = DraftPurposeVersionUpdateContent(dailyCalls = 100)
+
+      (() => mockDateTimeSupplier.get()).expects().returning(timestamp).once()
+
+      val response: Future[Problem] =
+        makeFailingRequest(s"purposes/$purposeId/versions/$versionId/update/draft", HttpMethods.POST, updateContent)
+
+      val result = response.futureValue
+      result.status shouldBe 404
+      result.errors.map(_.code) shouldBe Seq("011-0006")
+    }
+
+    "fail if version is not draft" in {
+      val purposeId      = UUID.randomUUID()
+      val versionId      = UUID.randomUUID()
+      val riskAnalysisId = UUID.randomUUID()
+      val eServiceId     = UUID.randomUUID()
+      val consumerId     = UUID.randomUUID()
+
+      val riskAnalysisDoc = PurposeVersionDocument(
+        id = riskAnalysisId,
+        contentType = "a-content-type",
+        path = "a/store/path",
+        createdAt = timestamp
+      )
+
+      val purposeSeed = PurposeSeed(
+        eserviceId = eServiceId,
+        consumerId = consumerId,
+        title = "Purpose",
+        description = "Purpose description",
+        riskAnalysisForm = Some(riskAnalysisFormSeed),
+        isFreeOfCharge = false,
+        freeOfChargeReason = None,
+        dailyCalls = 200
+      )
+
+      val updateContent = DraftPurposeVersionUpdateContent(dailyCalls = 100)
+
+      (() => mockDateTimeSupplier.get()).expects().returning(timestamp).once()
+
+      val response: Future[Problem] =
+        for {
+          _      <- createPurpose(purposeId, versionId, purposeSeed)
+          _      <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, Some(riskAnalysisDoc))
+          result <- makeFailingRequest(
+            s"purposes/$purposeId/versions/$versionId/update/draft",
+            HttpMethods.POST,
+            updateContent
+          )
+        } yield result
+
+      val result = response.futureValue
+      result.status shouldBe 400
+      result.errors.map(_.code) shouldBe Seq("011-0004")
+    }
+
+  }
+
   "Update of a purpose version in waiting for approval" must {
     "succeed" in {
       val purposeId        = UUID.randomUUID()

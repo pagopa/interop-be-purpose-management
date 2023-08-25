@@ -38,6 +38,4 @@ object PurposeManagementErrors {
   final case class PurposeVersionsNotEmpty(purposeId: String)
       extends ComponentError("0007", s"Purpose $purposeId contains versions")
 
-  final case class DraftPurposeVersionNotFound(purposeId: String)
-      extends ComponentError("0008", s"Draft version of Purpose $purposeId not found")
 }

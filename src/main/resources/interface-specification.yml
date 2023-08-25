@@ -469,6 +469,58 @@ paths:
       tags:
         - purpose
       description: archives the purpose version by id
+  /purposes/{purposeId}/versions/{versionId}/update/draft:
+    parameters:
+      - $ref: '#/components/parameters/CorrelationIdHeader'
+      - $ref: '#/components/parameters/IpAddress'
+      - name: purposeId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: versionId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    post:
+      tags:
+        - purpose
+      summary: Update a purpose version in draft
+      operationId: updateDraftPurposeVersion
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DraftPurposeVersionUpdateContent'
+        required: true
+      responses:
+        '200':
+          description: Purpose Version updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurposeVersion'
+        '400':
+          description: Invalid input
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: Purpose version not in draft state
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
   /purposes/{purposeId}/versions/{versionId}/update/waitingForApproval:
     parameters:
       - $ref: '#/components/parameters/CorrelationIdHeader'
@@ -615,6 +667,17 @@ components:
           minimum: 0
         riskAnalysis:
           $ref: '#/components/schemas/PurposeVersionDocument'
+    DraftPurposeVersionUpdateContent:
+      type: object
+      description: contains the expected payload for purpose version update.
+      properties:
+        dailyCalls:
+          description: 'maximum number of daily calls that this version can perform.'
+          type: integer
+          format: int32
+          minimum: 0
+      required:
+        - dailyCalls
     WaitingForApprovalPurposeVersionUpdateContent:
       type: object
       description: contains the expected payload for purpose version update.
@@ -697,17 +760,11 @@ components:
         eserviceId:
           type: string
           format: uuid
-        dailyCalls:
-          description: 'maximum number of daily calls that this version can perform.'
-          type: integer
-          format: int32
-          minimum: 0
       required:
         - title
         - description
         - isFreeOfCharge
         - eserviceId
-        - dailyCalls
     PurposeVersion:
       type: object
       properties:

@@ -188,7 +188,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
         '404':
-          description: Purpose or draft version not found
+          description: Purpose not found
           content:
             application/problem+json:
               schema:

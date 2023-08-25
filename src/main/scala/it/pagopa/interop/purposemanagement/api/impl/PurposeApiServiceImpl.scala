@@ -238,34 +238,23 @@ final case class PurposeApiServiceImpl(
     val operationLabel = s"Updating Purpose $purposeId"
     logger.info(operationLabel)
 
-    val update                  = PurposeUpdate.fromApi(uuidSupplier)(payload)
-    val result: Future[Purpose] = commander(purposeId).askWithStatus(UpdatePurpose(purposeId, update, _)).map(_.toAPI)
+    val purposeUpdate = PurposeUpdate.fromApi(uuidSupplier)(payload)
 
-    onComplete(result) { updatePurposeResponse[Purpose](operationLabel)(updatePurpose200) }
-  }
-
-  override def updateDraftPurposeVersion(
-    purposeId: String,
-    versionId: String,
-    updateContent: DraftPurposeVersionUpdateContent
-  )(implicit
-    toEntityMarshallerPurposeVersion: ToEntityMarshaller[PurposeVersion],
-    toEntityMarshallerProblem: ToEntityMarshaller[Problem],
-    contexts: Seq[(String, String)]
-  ): Route = {
-    val operationLabel = s"Updating Draft Version $versionId of Purpose $purposeId"
-    logger.info(operationLabel)
-
-    val update = DraftPurposeVersionUpdate.fromApi(updateContent, dateTimeSupplier)
-
-    val result: Future[PurposeVersion] =
-      commander(purposeId)
-        .askWithStatus(ref => UpdateDraftPurposeVersion(purposeId, versionId, update, ref))
+    // When refactoring the application, the update of the purpose and the update of the version
+    // should be done with a single command and a single event
+    val result: Future[Purpose] = for {
+      purpose <- commander(purposeId)
+        .askWithStatus(UpdatePurpose(purposeId, purposeUpdate, _))
         .map(_.toAPI)
 
-    onComplete(result) {
-      updateDraftPurposeVersionResponse[PurposeVersion](operationLabel)(updateDraftPurposeVersion200)
-    }
+      draftPurposeVersionUpdate = DraftPurposeVersionUpdate(payload.dailyCalls, dateTimeSupplier.get())
+      versionId <- purpose.versions.headOption.toFuture(DraftPurposeVersionNotFound(purposeId)).map(_.id.toString)
+
+      _ <- commander(purposeId)
+        .askWithStatus(ref => UpdateDraftPurposeVersion(purposeId, versionId, draftPurposeVersionUpdate, ref))
+    } yield purpose
+
+    onComplete(result) { updatePurposeResponse[Purpose](operationLabel)(updatePurpose200) }
   }
 
   override def updateWaitingForApprovalPurposeVersion(
@@ -288,7 +277,9 @@ final case class PurposeApiServiceImpl(
         .map(_.toAPI)
 
     onComplete(result) {
-      updateWaitingForApprovalPurposeVersionResponse[PurposeVersion](operationLabel)(updateDraftPurposeVersion200)
+      updateWaitingForApprovalPurposeVersionResponse[PurposeVersion](operationLabel)(
+        updateWaitingForApprovalPurposeVersion200
+      )
     }
   }
 

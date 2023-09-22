@@ -154,11 +154,13 @@ object protobufUtils {
     protobufRiskAnalysis: RiskAnalysisFormV1
   ): Either[Throwable, PersistentRiskAnalysisForm] =
     for {
-      id            <- protobufRiskAnalysis.id.toUUID.toEither
-      singleAnswers <- protobufRiskAnalysis.singleAnswers.traverse(toPersistentRiskAnalysisSingleAnswer)
-      multiAnswers  <- protobufRiskAnalysis.multiAnswers.traverse(toPersistentRiskAnalysisMultiAnswer)
+      id             <- protobufRiskAnalysis.id.toUUID.toEither
+      riskAnalysisId <- protobufRiskAnalysis.riskAnalysisId.traverse(_.toUUID).toEither
+      singleAnswers  <- protobufRiskAnalysis.singleAnswers.traverse(toPersistentRiskAnalysisSingleAnswer)
+      multiAnswers   <- protobufRiskAnalysis.multiAnswers.traverse(toPersistentRiskAnalysisMultiAnswer)
     } yield PersistentRiskAnalysisForm(
       id = id,
+      riskAnalysisId = riskAnalysisId,
       version = protobufRiskAnalysis.version,
       singleAnswers = singleAnswers,
       multiAnswers = multiAnswers
@@ -167,6 +169,7 @@ object protobufUtils {
   def toProtobufRiskAnalysis(persistentRiskAnalysis: PersistentRiskAnalysisForm): RiskAnalysisFormV1 =
     RiskAnalysisFormV1(
       id = persistentRiskAnalysis.id.toString,
+      riskAnalysisId = persistentRiskAnalysis.riskAnalysisId.map(_.toString),
       version = persistentRiskAnalysis.version,
       singleAnswers = persistentRiskAnalysis.singleAnswers.map(toProtobufRiskAnalysisSingleAnswer),
       multiAnswers = persistentRiskAnalysis.multiAnswers.map(toProtobufRiskAnalysisMultiAnswer)

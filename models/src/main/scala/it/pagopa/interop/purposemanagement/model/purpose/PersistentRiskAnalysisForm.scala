@@ -5,6 +5,7 @@ import java.util.UUID
 object PersistentRiskAnalysisForm
 final case class PersistentRiskAnalysisForm(
   id: UUID,
+  riskAnalysisId: Option[UUID],
   version: String,
   singleAnswers: Seq[PersistentRiskAnalysisSingleAnswer],
   multiAnswers: Seq[PersistentRiskAnalysisMultiAnswer]

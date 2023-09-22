@@ -159,12 +159,13 @@ object PersistentSerializationSpec {
 
   val persistentRiskAnalysisFormGen: Gen[(PersistentRiskAnalysisForm, RiskAnalysisFormV1)] = for {
     id                               <- Gen.uuid
+    riskAnalysisId                   <- Gen.uuid
     version                          <- stringGen
     (singleAnswers, singleAnswersV1) <- listOf(persistentRiskAnalysisSingleAnswerGen).map(_.separate)
     (multiAnswers, multiAnswersV1)   <- listOf(persistentRiskAnalysisMultiAnswerGen).map(_.separate)
   } yield (
-    PersistentRiskAnalysisForm(id, version, singleAnswers, multiAnswers),
-    RiskAnalysisFormV1(id.toString(), version, singleAnswersV1, multiAnswersV1)
+    PersistentRiskAnalysisForm(id, riskAnalysisId.some, version, singleAnswers, multiAnswers),
+    RiskAnalysisFormV1(id.toString(), version, singleAnswersV1, multiAnswersV1, riskAnalysisId.toString().some)
   )
 
   val persistentPurposeGen: Gen[(PersistentPurpose, PurposeV1)] = for {

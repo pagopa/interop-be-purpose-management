@@ -30,9 +30,16 @@ package object purposemanagement extends MockFactory {
 
   final val timestamp                  = OffsetDateTime.of(2022, 12, 31, 11, 22, 33, 44, ZoneOffset.UTC)
   final val riskAnalysisFormSeed       = RiskAnalysisFormSeed(version = "1.0", Seq.empty, Seq.empty)
-  final val riskAnalysisForm           = RiskAnalysisForm(id = UUID.randomUUID(), version = "1.0", Seq.empty, Seq.empty)
+  final val riskAnalysisForm           =
+    RiskAnalysisForm(id = UUID.randomUUID(), riskAnalysisId = None, version = "1.0", Seq.empty, Seq.empty)
   final val persistentRiskAnalysisForm =
-    PersistentRiskAnalysisForm(id = riskAnalysisForm.id, version = riskAnalysisForm.version, Seq.empty, Seq.empty)
+    PersistentRiskAnalysisForm(
+      id = riskAnalysisForm.id,
+      riskAnalysisId = None,
+      version = riskAnalysisForm.version,
+      Seq.empty,
+      Seq.empty
+    )
 
   val mockUUIDSupplier: UUIDSupplier               = mock[UUIDSupplier]
   val mockDateTimeSupplier: OffsetDateTimeSupplier = mock[OffsetDateTimeSupplier]

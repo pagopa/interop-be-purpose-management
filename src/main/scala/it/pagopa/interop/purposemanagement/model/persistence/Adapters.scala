@@ -50,6 +50,7 @@ object Adapters {
     def fromSeed(uuidSupplier: UUIDSupplier)(seed: RiskAnalysisFormSeed): PersistentRiskAnalysisForm =
       PersistentRiskAnalysisForm(
         id = uuidSupplier.get(),
+        riskAnalysisId = None,
         version = seed.version,
         singleAnswers = seed.singleAnswers.map(PersistentRiskAnalysisSingleAnswer.fromSeed(uuidSupplier)),
         multiAnswers = seed.multiAnswers.map(PersistentRiskAnalysisMultiAnswer.fromSeed(uuidSupplier))

@@ -806,6 +806,9 @@ components:
         id:
           type: string
           format: uuid
+        riskAnalysisId:
+          type: string
+          format: uuid  
         version:
           type: string
         singleAnswers:

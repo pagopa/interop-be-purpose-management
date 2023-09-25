@@ -28,17 +28,29 @@ package object purposemanagement extends MockFactory {
       headers.`X-Forwarded-For`(RemoteAddress(InetAddress.getByName("127.0.0.1")))
     )
 
+  final val riskAnalysisId             = UUID.randomUUID()
   final val timestamp                  = OffsetDateTime.of(2022, 12, 31, 11, 22, 33, 44, ZoneOffset.UTC)
-  final val riskAnalysisFormSeed       = RiskAnalysisFormSeed(version = "1.0", Seq.empty, Seq.empty)
+  final val riskAnalysisFormSeed       = RiskAnalysisFormSeed(
+    riskAnalysisId = Some(riskAnalysisId),
+    version = "1.0",
+    singleAnswers = Seq.empty,
+    multiAnswers = Seq.empty
+  )
   final val riskAnalysisForm           =
-    RiskAnalysisForm(id = UUID.randomUUID(), riskAnalysisId = None, version = "1.0", Seq.empty, Seq.empty)
+    RiskAnalysisForm(
+      id = UUID.randomUUID(),
+      riskAnalysisId = Some(riskAnalysisId),
+      version = "1.0",
+      singleAnswers = Seq.empty,
+      multiAnswers = Seq.empty
+    )
   final val persistentRiskAnalysisForm =
     PersistentRiskAnalysisForm(
       id = riskAnalysisForm.id,
-      riskAnalysisId = None,
+      riskAnalysisId = Some(riskAnalysisId),
       version = riskAnalysisForm.version,
-      Seq.empty,
-      Seq.empty
+      singleAnswers = Seq.empty,
+      multiAnswers = Seq.empty
     )
 
   val mockUUIDSupplier: UUIDSupplier               = mock[UUIDSupplier]

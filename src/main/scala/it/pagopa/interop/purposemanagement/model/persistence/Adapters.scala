@@ -40,6 +40,7 @@ object Adapters {
     def toAPI: RiskAnalysisForm = RiskAnalysisForm(
       id = p.id,
       version = p.version,
+      riskAnalysisId = p.riskAnalysisId,
       singleAnswers = p.singleAnswers.map(_.toAPI),
       multiAnswers = p.multiAnswers.map(_.toAPI)
     )
@@ -50,7 +51,7 @@ object Adapters {
     def fromSeed(uuidSupplier: UUIDSupplier)(seed: RiskAnalysisFormSeed): PersistentRiskAnalysisForm =
       PersistentRiskAnalysisForm(
         id = uuidSupplier.get(),
-        riskAnalysisId = None,
+        riskAnalysisId = seed.riskAnalysisId,
         version = seed.version,
         singleAnswers = seed.singleAnswers.map(PersistentRiskAnalysisSingleAnswer.fromSeed(uuidSupplier)),
         multiAnswers = seed.multiAnswers.map(PersistentRiskAnalysisMultiAnswer.fromSeed(uuidSupplier))

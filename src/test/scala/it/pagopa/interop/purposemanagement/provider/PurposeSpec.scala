@@ -548,7 +548,6 @@ class PurposeSpec extends BaseIntegrationSpec {
       val updateContent = PurposeUpdateContent(
         title = "Another title",
         description = "Another description",
-        eserviceId = eServiceId,
         isFreeOfCharge = false,
         freeOfChargeReason = None,
         riskAnalysisForm = Some(riskAnalysisFormSeed.copy(version = "2.0")),
@@ -586,7 +585,6 @@ class PurposeSpec extends BaseIntegrationSpec {
       val updateContent = PurposeUpdateContent(
         title = "Another title",
         description = "Another description",
-        eserviceId = eServiceId,
         isFreeOfCharge = false,
         freeOfChargeReason = None,
         riskAnalysisForm = Some(riskAnalysisFormSeed.copy(version = "2.0")),
@@ -611,7 +609,6 @@ class PurposeSpec extends BaseIntegrationSpec {
       val updateContent = PurposeUpdateContent(
         title = "Another title",
         description = "Another description",
-        eserviceId = UUID.randomUUID(),
         isFreeOfCharge = false,
         freeOfChargeReason = None,
         riskAnalysisForm = Some(riskAnalysisFormSeed.copy(version = "2.0")),
@@ -654,7 +651,6 @@ class PurposeSpec extends BaseIntegrationSpec {
       val updateContent = PurposeUpdateContent(
         title = "Another title",
         description = "Another description",
-        eserviceId = eServiceId,
         isFreeOfCharge = false,
         freeOfChargeReason = None,
         riskAnalysisForm = Some(riskAnalysisFormSeed.copy(version = "2.0")),
@@ -702,7 +698,6 @@ class PurposeSpec extends BaseIntegrationSpec {
       val updateContent = PurposeUpdateContent(
         title = "Another title",
         description = "Another description",
-        eserviceId = eServiceId,
         riskAnalysisForm = Some(riskAnalysisFormSeed.copy(version = "2.0")),
         isFreeOfCharge = false,
         freeOfChargeReason = None,

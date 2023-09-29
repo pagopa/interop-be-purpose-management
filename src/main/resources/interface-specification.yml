@@ -694,9 +694,6 @@ components:
           type: boolean
         freeOfChargeReason:
           type: string
-        eserviceId:
-          type: string
-          format: uuid
         dailyCalls:
           description: 'maximum number of daily calls that this version can perform.'
           type: integer
@@ -706,7 +703,6 @@ components:
         - title
         - description
         - isFreeOfCharge
-        - eserviceId
         - dailyCalls
     PurposeVersion:
       type: object

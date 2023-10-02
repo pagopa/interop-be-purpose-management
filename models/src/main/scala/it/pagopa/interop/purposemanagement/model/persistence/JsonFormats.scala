@@ -41,7 +41,7 @@ object JsonFormats {
     PersistentRiskAnalysisSingleAnswer.apply
   )
 
-  implicit val prafFormat: RootJsonFormat[PersistentRiskAnalysisForm] = jsonFormat4(PersistentRiskAnalysisForm.apply)
+  implicit val prafFormat: RootJsonFormat[PersistentRiskAnalysisForm] = jsonFormat5(PersistentRiskAnalysisForm.apply)
 
   implicit val ppFormat: RootJsonFormat[PersistentPurpose] = jsonFormat13(PersistentPurpose.apply)
 

@@ -761,6 +761,9 @@ components:
     RiskAnalysisFormSeed:
       type: object
       properties:
+        riskAnalysisId:
+          type: string
+          format: uuid  
         version:
           type: string
         singleAnswers:
@@ -802,6 +805,9 @@ components:
         id:
           type: string
           format: uuid
+        riskAnalysisId:
+          type: string
+          format: uuid  
         version:
           type: string
         singleAnswers:

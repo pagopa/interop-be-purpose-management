@@ -25,7 +25,6 @@ paths:
   /purposes:
     parameters:
       - $ref: '#/components/parameters/CorrelationIdHeader'
-      - $ref: '#/components/parameters/IpAddress'
     post:
       tags:
         - purpose
@@ -98,7 +97,6 @@ paths:
   /purposes/{id}:
     parameters:
       - $ref: '#/components/parameters/CorrelationIdHeader'
-      - $ref: '#/components/parameters/IpAddress'
       - name: id
         in: path
         description: the purpose id
@@ -196,7 +194,6 @@ paths:
   /purposes/{purposeId}/versions:
     parameters:
       - $ref: '#/components/parameters/CorrelationIdHeader'
-      - $ref: '#/components/parameters/IpAddress'
       - name: purposeId
         in: path
         required: true
@@ -242,7 +239,6 @@ paths:
   /purposes/{purposeId}/versions/{versionId}:
     parameters:
       - $ref: '#/components/parameters/CorrelationIdHeader'
-      - $ref: '#/components/parameters/IpAddress'
       - name: purposeId
         in: path
         required: true
@@ -284,7 +280,6 @@ paths:
   /purposes/{purposeId}/versions/{versionId}/activate:
     parameters:
       - $ref: '#/components/parameters/CorrelationIdHeader'
-      - $ref: '#/components/parameters/IpAddress'
       - name: purposeId
         in: path
         required: true
@@ -331,7 +326,6 @@ paths:
   /purposes/{purposeId}/versions/{versionId}/suspend:
     parameters:
       - $ref: '#/components/parameters/CorrelationIdHeader'
-      - $ref: '#/components/parameters/IpAddress'
       - name: purposeId
         in: path
         required: true
@@ -378,7 +372,6 @@ paths:
   /purposes/{purposeId}/versions/{versionId}/waitForApproval:
     parameters:
       - $ref: '#/components/parameters/CorrelationIdHeader'
-      - $ref: '#/components/parameters/IpAddress'
       - name: purposeId
         in: path
         required: true
@@ -425,7 +418,6 @@ paths:
   /purposes/{purposeId}/versions/{versionId}/archive:
     parameters:
       - $ref: '#/components/parameters/CorrelationIdHeader'
-      - $ref: '#/components/parameters/IpAddress'
       - name: purposeId
         in: path
         required: true
@@ -472,7 +464,6 @@ paths:
   /purposes/{purposeId}/versions/{versionId}/update/waitingForApproval:
     parameters:
       - $ref: '#/components/parameters/CorrelationIdHeader'
-      - $ref: '#/components/parameters/IpAddress'
       - name: purposeId
         in: path
         required: true
@@ -527,11 +518,6 @@ components:
       in: header
       name: X-Correlation-Id
       required: true
-      schema:
-        type: string
-    IpAddress:
-      in: header
-      name: X-Forwarded-For
       schema:
         type: string
   schemas:

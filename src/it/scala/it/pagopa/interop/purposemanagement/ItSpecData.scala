@@ -13,7 +13,13 @@ object ItSpecData {
     PersistentPurposeVersionDocument(id = UUID.randomUUID(), contentType = "json", path = "path", createdAt = timestamp)
 
   def riskAnalysisForm: RiskAnalysisForm =
-    RiskAnalysisForm(id = UUID.randomUUID(), version = UUID.randomUUID().toString, Seq.empty, Seq.empty)
+    RiskAnalysisForm(
+      id = UUID.randomUUID(),
+      riskAnalysisId = Some(UUID.randomUUID()),
+      version = UUID.randomUUID().toString,
+      singleAnswers = Seq.empty,
+      multiAnswers = Seq.empty
+    )
 
   def persistentPurposeVersion: PersistentPurposeVersion = PersistentPurposeVersion(
     id = UUID.randomUUID(),
@@ -24,11 +30,18 @@ object ItSpecData {
     createdAt = timestamp,
     updatedAt = Some(timestamp),
     firstActivationAt = Some(timestamp),
-    suspendedAt = None
+    suspendedAt = None,
+    rejectionReason = None
   )
 
   def persistentRiskAnalysisForm: PersistentRiskAnalysisForm =
-    PersistentRiskAnalysisForm(id = riskAnalysisForm.id, version = riskAnalysisForm.version, Seq.empty, Seq.empty)
+    PersistentRiskAnalysisForm(
+      id = riskAnalysisForm.id,
+      riskAnalysisId = riskAnalysisForm.riskAnalysisId,
+      version = riskAnalysisForm.version,
+      Seq.empty,
+      Seq.empty
+    )
 
   def persistentPurpose: PersistentPurpose = PersistentPurpose(
     id = UUID.randomUUID(),

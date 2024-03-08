@@ -13,6 +13,7 @@ object JsonFormats {
         case JsString("Draft")              => Draft
         case JsString("Active")             => Active
         case JsString("Suspended")          => Suspended
+        case JsString("Rejected")           => Rejected
         case JsString("Archived")           => Archived
         case JsString("WaitingForApproval") => WaitingForApproval
         case _ => deserializationError("Unable to deserialize json as a PersistentPurposeVersionState")
@@ -21,6 +22,7 @@ object JsonFormats {
       override def write(obj: PersistentPurposeVersionState): JsValue = obj match {
         case Archived           => JsString("Archived")
         case Suspended          => JsString("Suspended")
+        case Rejected           => JsString("Rejected")
         case Draft              => JsString("Draft")
         case WaitingForApproval => JsString("WaitingForApproval")
         case Active             => JsString("Active")
@@ -31,7 +33,7 @@ object JsonFormats {
     PersistentPurposeVersionDocument.apply
   )
 
-  implicit val ppvFormat: RootJsonFormat[PersistentPurposeVersion] = jsonFormat9(PersistentPurposeVersion.apply)
+  implicit val ppvFormat: RootJsonFormat[PersistentPurposeVersion] = jsonFormat10(PersistentPurposeVersion.apply)
 
   implicit val pramaFormat: RootJsonFormat[PersistentRiskAnalysisMultiAnswer] = jsonFormat3(
     PersistentRiskAnalysisMultiAnswer.apply
@@ -53,6 +55,7 @@ object JsonFormats {
   implicit val pvwfaFormat: RootJsonFormat[PurposeVersionWaitedForApproval] = jsonFormat1(
     PurposeVersionWaitedForApproval.apply
   )
+  implicit val pvreFormat: RootJsonFormat[PurposeVersionRejected]           = jsonFormat2(PurposeVersionRejected.apply)
   implicit val pvarFormat: RootJsonFormat[PurposeVersionArchived]           = jsonFormat1(PurposeVersionArchived.apply)
   implicit val pvuFormat: RootJsonFormat[PurposeVersionUpdated]             = jsonFormat2(PurposeVersionUpdated.apply)
   implicit val pvdFormat: RootJsonFormat[PurposeVersionDeleted]             = jsonFormat2(PurposeVersionDeleted.apply)

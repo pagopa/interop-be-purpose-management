@@ -707,6 +707,115 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
     }
   }
 
+  "Rejection of purpose" must {
+    "succeed" in {
+      val purposeId       = UUID.randomUUID()
+      val versionId       = UUID.randomUUID()
+      val eServiceId      = UUID.randomUUID()
+      val consumerId      = UUID.randomUUID()
+      val riskAnalysisId  = UUID.randomUUID()
+      val rejectionReason = "reason"
+
+      val riskAnalysisDoc = PurposeVersionDocument(
+        id = riskAnalysisId,
+        contentType = "a-content-type",
+        path = "a/store/path",
+        createdAt = timestamp
+      )
+
+      val purposeSeed = PurposeSeed(
+        eserviceId = eServiceId,
+        consumerId = consumerId,
+        title = "Purpose",
+        description = "Purpose description",
+        riskAnalysisForm = Some(riskAnalysisFormSeed),
+        isFreeOfCharge = false,
+        freeOfChargeReason = None,
+        dailyCalls = 100
+      )
+
+      val response: Future[Purpose] =
+        for {
+          _              <- createPurpose(purposeId, versionId, purposeSeed)
+          _              <- activateVersion(purposeId, versionId, ChangedBy.PRODUCER, Some(riskAnalysisDoc))
+          _              <- rejectVersion(purposeId, versionId, ChangedBy.PRODUCER, rejectionReason)
+          updatedPurpose <- getPurpose(purposeId)
+        } yield updatedPurpose
+
+      val result: Purpose = response.futureValue
+
+      val expected = result.versions.head.copy(
+        state = PurposeVersionState.REJECTED,
+        updatedAt = Some(timestamp),
+        rejectionReason = Some(rejectionReason)
+      )
+
+      result.versions.head shouldBe expected
+    }
+
+    "fail if not exist" in {
+      val purposeId = UUID.randomUUID()
+      val versionId = UUID.randomUUID()
+
+      val response: Future[Problem] = makeFailingRequest(
+        s"purposes/$purposeId/versions/$versionId/reject",
+        HttpMethods.POST,
+        RejectPurposeVersionPayload(
+          rejectionReason = "reason",
+          stateChangeDetails = StateChangeDetails(changedBy = ChangedBy.PRODUCER, timestamp = timestamp)
+        )
+      )
+
+      val result = response.futureValue
+      result.status shouldBe 404
+      result.errors.map(_.code) shouldBe Seq("011-0002")
+    }
+
+    "fail on wrong current version state" in {
+      val purposeId  = UUID.randomUUID()
+      val versionId  = UUID.randomUUID()
+      val eServiceId = UUID.randomUUID()
+      val consumerId = UUID.randomUUID()
+
+      val riskAnalysisDoc = PurposeVersionDocument(
+        id = riskAnalysisId,
+        contentType = "a-content-type",
+        path = "a/store/path",
+        createdAt = timestamp
+      )
+
+      val purposeSeed = PurposeSeed(
+        eserviceId = eServiceId,
+        consumerId = consumerId,
+        title = "Purpose",
+        description = "Purpose description",
+        riskAnalysisForm = Some(riskAnalysisFormSeed),
+        isFreeOfCharge = false,
+        freeOfChargeReason = None,
+        dailyCalls = 100
+      )
+
+      val response: Future[Problem] =
+        for {
+          _      <- createPurpose(purposeId, versionId, purposeSeed)
+          _      <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, Some(riskAnalysisDoc))
+          _      <- archiveVersion(purposeId, versionId, ChangedBy.CONSUMER)
+          result <- makeFailingRequest(
+            s"purposes/$purposeId/versions/$versionId/reject",
+            HttpMethods.POST,
+            RejectPurposeVersionPayload(
+              rejectionReason = "reason",
+              stateChangeDetails = StateChangeDetails(changedBy = ChangedBy.PRODUCER, timestamp = timestamp)
+            )
+          )
+        } yield result
+
+      val result = response.futureValue
+      result.status shouldBe 400
+      result.errors.map(_.code) shouldBe Seq("011-0004")
+    }
+  }
+
   "Wait for approval of purpose" must {
     "succeed" in {
       val purposeId  = UUID.randomUUID()

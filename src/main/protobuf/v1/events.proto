@@ -30,6 +30,11 @@ message PurposeVersionActivatedV1 {
   required PurposeV1 purpose = 1;
 }
 
+message PurposeVersionRejectedV1 {
+  required PurposeV1 purpose = 1;
+  required string versionId = 2;
+}
+
 message PurposeVersionSuspendedV1 {
   required PurposeV1 purpose = 1;
 }

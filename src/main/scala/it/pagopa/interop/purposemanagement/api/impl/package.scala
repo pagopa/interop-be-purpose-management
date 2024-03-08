@@ -33,7 +33,7 @@ package object impl extends SprayJsonSupport with DefaultJsonProtocol {
   implicit val waitingForApprovalPurposeVersionUpdateFormat
     : RootJsonFormat[WaitingForApprovalPurposeVersionUpdateContent] =
     jsonFormat1(WaitingForApprovalPurposeVersionUpdateContent)
-  implicit val purposeVersionFormat: RootJsonFormat[PurposeVersion]             = jsonFormat9(PurposeVersion)
+  implicit val purposeVersionFormat: RootJsonFormat[PurposeVersion]             = jsonFormat10(PurposeVersion)
   implicit val purposeFormat: RootJsonFormat[Purpose]                           = jsonFormat13(Purpose)
   implicit val purposesFormat: RootJsonFormat[Purposes]                         = jsonFormat1(Purposes)
   implicit val stateChangeDetailsFormat: RootJsonFormat[StateChangeDetails]     = jsonFormat2(StateChangeDetails)
@@ -41,7 +41,8 @@ package object impl extends SprayJsonSupport with DefaultJsonProtocol {
   implicit val problemFormat: RootJsonFormat[Problem]                           = jsonFormat6(Problem)
   implicit val activatePurposeVersionPayloadFormat: RootJsonFormat[ActivatePurposeVersionPayload] =
     jsonFormat2(ActivatePurposeVersionPayload)
-
+  implicit val rejectPurposeVersionPayloadFormat: RootJsonFormat[RejectPurposeVersionPayload]     =
+    jsonFormat2(RejectPurposeVersionPayload)
   final val entityMarshallerProblem: ToEntityMarshaller[Problem] = sprayJsonMarshaller[Problem]
 
   def slices[A, B <: Command](commander: EntityRef[B], sliceSize: Int)(

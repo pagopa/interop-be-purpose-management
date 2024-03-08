@@ -38,6 +38,8 @@ object PurposeCqrsProjection {
       ActionWithBson(collection.updateOne(Filters.eq("data.id", p.id.toString), _), Updates.set("data", p.toDocument))
     case PurposeVersionArchived(p)          =>
       ActionWithBson(collection.updateOne(Filters.eq("data.id", p.id.toString), _), Updates.set("data", p.toDocument))
+    case PurposeVersionRejected(p, _)       =>
+      ActionWithBson(collection.updateOne(Filters.eq("data.id", p.id.toString), _), Updates.set("data", p.toDocument))
     case PurposeVersionUpdated(pId, v)      =>
       ActionWithBson(
         collection.updateMany(

@@ -139,6 +139,12 @@ trait SpecHelper {
   ): Future[PurposeVersion] =
     changeVersionState(purposeId, versionId, changedBy, "suspend")
 
+  def rejectVersion(purposeId: UUID, versionId: UUID, changedBy: ChangedBy, rejectionReason: String)(implicit
+    ec: ExecutionContext,
+    actorSystem: actor.ActorSystem
+  ): Future[Option[String]] =
+    reject(purposeId, versionId, changedBy, rejectionReason)
+
   def waitForApprovalVersion(purposeId: UUID, versionId: UUID, changedBy: ChangedBy)(implicit
     ec: ExecutionContext,
     actorSystem: actor.ActorSystem
@@ -150,6 +156,23 @@ trait SpecHelper {
     actorSystem: actor.ActorSystem
   ): Future[PurposeVersion] =
     changeVersionState(purposeId, versionId, changedBy, "archive")
+
+  def reject(purposeId: UUID, versionId: UUID, changedBy: ChangedBy, rejectionReason: String)(implicit
+    ec: ExecutionContext,
+    actorSystem: actor.ActorSystem
+  ): Future[Option[String]] = for {
+    data <- Marshal(
+      RejectPurposeVersionPayload(
+        rejectionReason = rejectionReason,
+        stateChangeDetails = StateChangeDetails(changedBy = changedBy, timestamp = timestamp)
+      )
+    )
+      .to[MessageEntity]
+      .map(_.dataBytes)
+    _ = (() => mockDateTimeSupplier.get()).expects().returning(timestamp).once()
+    result <- Unmarshal(makeRequest(data, s"purposes/$purposeId/versions/$versionId/reject", HttpMethods.POST))
+      .to[Option[String]]
+  } yield result
 
   def changeVersionState(purposeId: UUID, versionId: UUID, changedBy: ChangedBy, statePath: String)(implicit
     ec: ExecutionContext,

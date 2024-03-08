@@ -87,11 +87,11 @@ object PurposePersistentBehavior {
             Effect.none[PurposeVersionDeleted, State]
           } { v =>
             v.state match {
-              case Draft | WaitingForApproval =>
+              case Draft | WaitingForApproval | Rejected =>
                 Effect
                   .persist(PurposeVersionDeleted(purposeId, versionId))
                   .thenRun((_: State) => replyTo ! StatusReply.Success(()))
-              case versionState               =>
+              case versionState                          =>
                 replyTo ! StatusReply.Error[Unit](NotAllowedForPurposeVersionState(purposeId, versionId, versionState))
                 Effect.none[PurposeVersionDeleted, State]
             }
@@ -161,6 +161,25 @@ object PurposePersistentBehavior {
         val purpose: Option[PersistentPurpose] = state.purposes.get(purposeId)
         replyTo ! StatusReply.Success[Option[PersistentPurpose]](purpose)
         Effect.none[Event, State]
+
+      case RejectPurposeVersion(purposeId, versionId, rejectionReason, stateChangeDetails, replyTo) =>
+        val purpose: Either[Throwable, PersistentPurpose] =
+          getModifiedPurpose(
+            state,
+            purposeId,
+            versionId,
+            stateChangeDetails,
+            Rejected,
+            _.isRejectable(purposeId),
+            None,
+            Some(rejectionReason)
+          )
+
+        purpose
+          .fold(
+            handleFailure[PurposeVersionRejected](_)(replyTo),
+            persistStateAndReply(_, PurposeVersionRejected(_, versionId))(replyTo)
+          )
 
       case ActivatePurposeVersion(purposeId, versionId, versionDocument, stateChangeDetails, replyTo) =>
         val purpose: Either[Throwable, PersistentPurpose] = getModifiedPurpose(
@@ -270,6 +289,7 @@ object PurposePersistentBehavior {
       case PurposeVersionSuspended(purpose)            => state.updatePurpose(purpose)
       case PurposeVersionWaitedForApproval(purpose)    => state.updatePurpose(purpose)
       case PurposeVersionArchived(purpose)             => state.updatePurpose(purpose)
+      case PurposeVersionRejected(purpose, _)          => state.updatePurpose(purpose)
     }
 
   val TypeKey: EntityTypeKey[Command] =
@@ -397,12 +417,13 @@ object PurposePersistentBehavior {
     stateChangeDetails: StateChangeDetails,
     newState: PersistentPurposeVersionState,
     versionValidation: PersistentPurposeVersion => Either[Throwable, Unit],
-    riskAnalysisOpt: Option[PurposeVersionDocument] = None
+    riskAnalysisOpt: Option[PurposeVersionDocument] = None,
+    rejectionReason: Option[String] = None
   ): Either[Throwable, PersistentPurpose] = for {
     purpose <- state.purposes.get(purposeId).toRight(PurposeNotFound(purposeId))
     version <- purpose.versions.find(_.id.toString == versionId).toRight(PurposeVersionNotFound(purposeId, versionId))
     riskAnalysisUpdated = riskAnalysisOpt.map(PersistentPurposeVersionDocument.fromAPI).orElse(version.riskAnalysis)
-    versionWithRisk     = version.copy(riskAnalysis = riskAnalysisUpdated)
+    versionWithRisk     = version.copy(rejectionReason = rejectionReason, riskAnalysis = riskAnalysisUpdated)
     _ <- versionValidation(versionWithRisk)
   } yield updatePurposeFromState(purpose, versionWithRisk, newState, stateChangeDetails)
 

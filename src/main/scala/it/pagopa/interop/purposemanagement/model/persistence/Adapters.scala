@@ -64,6 +64,7 @@ object Adapters {
       case Active             => PurposeVersionState.ACTIVE
       case Suspended          => PurposeVersionState.SUSPENDED
       case Archived           => PurposeVersionState.ARCHIVED
+      case Rejected           => PurposeVersionState.REJECTED
       case WaitingForApproval => PurposeVersionState.WAITING_FOR_APPROVAL
     }
   }
@@ -75,6 +76,7 @@ object Adapters {
       case PurposeVersionState.ACTIVE               => Active
       case PurposeVersionState.SUSPENDED            => Suspended
       case PurposeVersionState.ARCHIVED             => Archived
+      case PurposeVersionState.REJECTED             => Rejected
       case PurposeVersionState.WAITING_FOR_APPROVAL => WaitingForApproval
     }
   }
@@ -99,6 +101,7 @@ object Adapters {
 
     val ACTIVABLE_STATES             = Seq(Draft, Suspended, WaitingForApproval)
     val SUSPENDABLE_STATES           = Seq(Active, Suspended)
+    val REJECTABLE_STATES            = Seq(Draft, Active, Suspended, WaitingForApproval)
     val WAITABLE_FOR_APPROVAL_STATES = Seq(Draft)
     val ARCHIVABLE_STATES            = Seq(Active, Suspended)
 
@@ -113,6 +116,12 @@ object Adapters {
 
     def isSuspendable(purposeId: String): Either[Throwable, Unit] = Either.cond(
       SUSPENDABLE_STATES.contains(v.state),
+      (),
+      NotAllowedForPurposeVersionState(purposeId, v.id.toString, v.state)
+    )
+
+    def isRejectable(purposeId: String): Either[Throwable, Unit] = Either.cond(
+      REJECTABLE_STATES.contains(v.state),
       (),
       NotAllowedForPurposeVersionState(purposeId, v.id.toString, v.state)
     )
@@ -138,7 +147,8 @@ object Adapters {
       updatedAt = v.updatedAt,
       firstActivationAt = v.firstActivationAt,
       expectedApprovalDate = v.expectedApprovalDate,
-      dailyCalls = v.dailyCalls
+      dailyCalls = v.dailyCalls,
+      rejectionReason = v.rejectionReason
     )
   }
 
@@ -156,7 +166,8 @@ object Adapters {
       firstActivationAt = None,
       riskAnalysis = seed.riskAnalysis.map(PersistentPurposeVersionDocument.fromAPI),
       expectedApprovalDate = None,
-      suspendedAt = None
+      suspendedAt = None,
+      rejectionReason = None
     )
   }
 
@@ -203,7 +214,8 @@ object Adapters {
             firstActivationAt = None,
             riskAnalysis = None,
             expectedApprovalDate = None,
-            suspendedAt = None
+            suspendedAt = None,
+            rejectionReason = None
           )
         ),
         suspendedByConsumer = None,

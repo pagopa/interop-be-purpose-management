@@ -710,7 +710,8 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
   "Rejection of purpose" must {
     "succeed" in {
       val purposeId       = UUID.randomUUID()
-      val versionId       = UUID.randomUUID()
+      val versionId1      = UUID.randomUUID()
+      val versionId2      = UUID.randomUUID()
       val eServiceId      = UUID.randomUUID()
       val consumerId      = UUID.randomUUID()
       val riskAnalysisId  = UUID.randomUUID()
@@ -733,24 +734,42 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
         freeOfChargeReason = None,
         dailyCalls = 100
       )
+      val versionSeed = PurposeVersionSeed(riskAnalysis = Some(riskAnalysisDoc), dailyCalls = 100)
 
       val response: Future[Purpose] =
         for {
-          _              <- createPurpose(purposeId, versionId, purposeSeed)
-          _              <- activateVersion(purposeId, versionId, ChangedBy.PRODUCER, Some(riskAnalysisDoc))
-          _              <- rejectVersion(purposeId, versionId, ChangedBy.PRODUCER, rejectionReason)
+          _              <- createPurpose(purposeId, versionId1, purposeSeed)
+          _              <- activateVersion(purposeId, versionId1, ChangedBy.CONSUMER, Some(riskAnalysisDoc))
+          _              <- createPurposeVersion(purposeId, versionId2, versionSeed)
+          _              <- waitForApprovalVersion(purposeId, versionId2, ChangedBy.CONSUMER)
+          _              <- rejectVersion(purposeId, versionId2, ChangedBy.PRODUCER, rejectionReason)
           updatedPurpose <- getPurpose(purposeId)
         } yield updatedPurpose
 
-      val result: Purpose = response.futureValue
-
-      val expected = result.versions.head.copy(
-        state = PurposeVersionState.REJECTED,
-        updatedAt = Some(timestamp),
-        rejectionReason = Some(rejectionReason)
+      val expectedVersions = Seq(
+        PurposeVersion(
+          id = versionId1,
+          state = PurposeVersionState.ACTIVE,
+          createdAt = timestamp,
+          updatedAt = Some(timestamp),
+          firstActivationAt = Some(timestamp),
+          expectedApprovalDate = None,
+          riskAnalysis = Some(riskAnalysisDoc),
+          dailyCalls = 100
+        ),
+        PurposeVersion(
+          id = versionId2,
+          state = PurposeVersionState.REJECTED,
+          createdAt = timestamp,
+          updatedAt = Some(timestamp),
+          firstActivationAt = Some(timestamp),
+          expectedApprovalDate = None,
+          riskAnalysis = Some(riskAnalysisDoc),
+          dailyCalls = 100,
+          rejectionReason = Some(rejectionReason)
+        )
       )
-
-      result.versions.head shouldBe expected
+      response.futureValue.versions should contain theSameElementsAs expectedVersions
     }
 
     "fail if not exist" in {

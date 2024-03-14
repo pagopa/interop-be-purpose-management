@@ -101,7 +101,7 @@ object Adapters {
 
     val ACTIVABLE_STATES             = Seq(Draft, Suspended, WaitingForApproval)
     val SUSPENDABLE_STATES           = Seq(Active, Suspended)
-    val REJECTABLE_STATES            = Seq(Draft, Active, Suspended, WaitingForApproval)
+    val REJECTABLE_STATES            = Seq(WaitingForApproval)
     val WAITABLE_FOR_APPROVAL_STATES = Seq(Draft)
     val ARCHIVABLE_STATES            = Seq(Active, Suspended)
 

@@ -66,27 +66,6 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
       result shouldBe expected
     }
 
-    "change state from Active to Rejected" in {
-      val version = versionTemplate.copy(state = Active)
-      val purpose = purposeTemplate
-
-      (() => mockDateTimeSupplier.get()).expects().returning(newTimestamp).once()
-
-      val result = updatePurposeFromState(
-        purpose,
-        version,
-        newVersionState = Rejected,
-        stateChangeDetails = StateChangeDetails(CONSUMER, newTimestamp)
-      )
-
-      val expectedVersion =
-        version.copy(state = Rejected, updatedAt = Some(newTimestamp))
-      val expected        =
-        purpose.copy(versions = Seq(expectedVersion), suspendedByConsumer = Some(false), updatedAt = Some(newTimestamp))
-
-      result shouldBe expected
-    }
-
     "change state from Active to Suspended by Consumer" in {
       val version = versionTemplate.copy(state = Active)
       val purpose = purposeTemplate

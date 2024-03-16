@@ -87,11 +87,11 @@ object PurposePersistentBehavior {
             Effect.none[PurposeVersionDeleted, State]
           } { v =>
             v.state match {
-              case Draft | WaitingForApproval | Rejected =>
+              case Draft | WaitingForApproval =>
                 Effect
                   .persist(PurposeVersionDeleted(purposeId, versionId))
                   .thenRun((_: State) => replyTo ! StatusReply.Success(()))
-              case versionState                          =>
+              case versionState               =>
                 replyTo ! StatusReply.Error[Unit](NotAllowedForPurposeVersionState(purposeId, versionId, versionState))
                 Effect.none[PurposeVersionDeleted, State]
             }

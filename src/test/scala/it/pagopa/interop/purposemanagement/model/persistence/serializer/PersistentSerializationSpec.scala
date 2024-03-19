@@ -120,7 +120,7 @@ object PersistentSerializationSpec {
     (updatedAt, updatedAtV1)                       <- Gen.option(offsetDatetimeGen).map(_.separate)
     (firstActivationAt, firstActivationAtV1)       <- Gen.option(offsetDatetimeGen).map(_.separate)
     (suspendedAt, suspendedAtV1)                   <- Gen.option(offsetDatetimeGen).map(_.separate)
-    rejectionReason                                <- if (state == Rejected) Gen.some(stringGen) else Gen.option(stringGen)
+    rejectionReason                                <- if (state == Rejected) Gen.some(stringGen) else Gen.const(None)
   } yield (
     PersistentPurposeVersion(
       id = id,
@@ -186,7 +186,7 @@ object PersistentSerializationSpec {
     (createdAt, createdAtV1)               <- offsetDatetimeGen
     (updatedAt, updatedAtV1)               <- Gen.option(offsetDatetimeGen).map(_.separate)
     isFreeOfCharge                         <- Gen.oneOf(true, false)
-    freeOfChargeReason                     <- if (isFreeOfCharge) Gen.some(stringGen) else Gen.fail
+    freeOfChargeReason                     <- if (isFreeOfCharge) Gen.some(stringGen) else Gen.const(None)
   } yield (
     PersistentPurpose(
       id = id,

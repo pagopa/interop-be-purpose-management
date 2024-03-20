@@ -91,7 +91,8 @@ object protobufUtils {
       updatedAt = updatedAt,
       firstActivationAt = firstActivationAt,
       expectedApprovalDate = expectedApprovalDate,
-      suspendedAt = suspendedAt
+      suspendedAt = suspendedAt,
+      rejectionReason = protobufPurposeVersion.rejectionReason
     )
     purpose.toEither
   }
@@ -106,7 +107,8 @@ object protobufUtils {
       firstActivationAt = persistentPurposeVersion.firstActivationAt.map(_.toMillis),
       expectedApprovalDate = persistentPurposeVersion.expectedApprovalDate.map(_.toMillis),
       riskAnalysis = persistentPurposeVersion.riskAnalysis.map(toProtobufPurposeVersionDocument),
-      suspendedAt = persistentPurposeVersion.suspendedAt.map(_.toMillis)
+      suspendedAt = persistentPurposeVersion.suspendedAt.map(_.toMillis),
+      rejectionReason = persistentPurposeVersion.rejectionReason
     )
 
   def toProtobufPurposeState(status: PersistentPurposeVersionState): PurposeStateV1 = status match {
@@ -114,6 +116,7 @@ object protobufUtils {
     case Active             => PurposeStateV1.ACTIVE
     case Suspended          => PurposeStateV1.SUSPENDED
     case Archived           => PurposeStateV1.ARCHIVED
+    case Rejected           => PurposeStateV1.REJECTED
     case WaitingForApproval => PurposeStateV1.WAITING_FOR_APPROVAL
   }
 
@@ -122,6 +125,7 @@ object protobufUtils {
     case PurposeStateV1.ACTIVE               => Success(Active)
     case PurposeStateV1.SUSPENDED            => Success(Suspended)
     case PurposeStateV1.ARCHIVED             => Success(Archived)
+    case PurposeStateV1.REJECTED             => Success(Rejected)
     case PurposeStateV1.WAITING_FOR_APPROVAL => Success(WaitingForApproval)
     case PurposeStateV1.Unrecognized(value)  =>
       Failure(new RuntimeException(s"Protobuf PurposeStatus deserialization failed. Unrecognized value: $value"))

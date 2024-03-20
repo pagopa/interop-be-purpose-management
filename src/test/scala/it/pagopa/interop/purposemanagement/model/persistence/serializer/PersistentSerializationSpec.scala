@@ -35,6 +35,8 @@ class PersistentSerializationSpec extends ScalaCheckSuite with DiffxAssertions {
   deserCheck[PurposeVersionSuspended, PurposeVersionSuspendedV1](purposeVersionSuspendedGen)
   serdeCheck[PurposeVersionArchived, PurposeVersionArchivedV1](purposeVersionArchivedGen)
   deserCheck[PurposeVersionArchived, PurposeVersionArchivedV1](purposeVersionArchivedGen)
+  serdeCheck[PurposeVersionRejected, PurposeVersionRejectedV1](purposeVersionRejectedGen)
+  deserCheck[PurposeVersionRejected, PurposeVersionRejectedV1](purposeVersionRejectedGen)
   serdeCheck[PurposeVersionUpdated, PurposeVersionUpdatedV1](purposeVersionUpdatedGen)
   deserCheck[PurposeVersionUpdated, PurposeVersionUpdatedV1](purposeVersionUpdatedGen)
   serdeCheck[PurposeVersionDeleted, PurposeVersionDeletedV1](purposeVersionDeletedGen)
@@ -94,6 +96,7 @@ object PersistentSerializationSpec {
     (Active, ACTIVE),
     (Suspended, SUSPENDED),
     (Archived, ARCHIVED),
+    (Rejected, REJECTED),
     (WaitingForApproval, WAITING_FOR_APPROVAL)
   )
 
@@ -117,7 +120,7 @@ object PersistentSerializationSpec {
     (updatedAt, updatedAtV1)                       <- Gen.option(offsetDatetimeGen).map(_.separate)
     (firstActivationAt, firstActivationAtV1)       <- Gen.option(offsetDatetimeGen).map(_.separate)
     (suspendedAt, suspendedAtV1)                   <- Gen.option(offsetDatetimeGen).map(_.separate)
-
+    rejectionReason                                <- if (state == Rejected) Gen.some(stringGen) else Gen.const(None)
   } yield (
     PersistentPurposeVersion(
       id = id,
@@ -128,7 +131,8 @@ object PersistentSerializationSpec {
       createdAt = createdAt,
       updatedAt = updatedAt,
       firstActivationAt = firstActivationAt,
-      suspendedAt = suspendedAt
+      suspendedAt = suspendedAt,
+      rejectionReason = rejectionReason
     ),
     PurposeVersionV1(
       id = id.toString(),
@@ -139,7 +143,8 @@ object PersistentSerializationSpec {
       updatedAt = updatedAtV1,
       firstActivationAt = firstActivationAtV1,
       expectedApprovalDate = expectedApprovalDateV1,
-      suspendedAt = suspendedAtV1
+      suspendedAt = suspendedAtV1,
+      rejectionReason = rejectionReason
     )
   )
 
@@ -181,7 +186,7 @@ object PersistentSerializationSpec {
     (createdAt, createdAtV1)               <- offsetDatetimeGen
     (updatedAt, updatedAtV1)               <- Gen.option(offsetDatetimeGen).map(_.separate)
     isFreeOfCharge                         <- Gen.oneOf(true, false)
-    freeOfChargeReason                     <- if (isFreeOfCharge) Gen.some(stringGen) else Gen.fail
+    freeOfChargeReason                     <- if (isFreeOfCharge) Gen.some(stringGen) else Gen.const(None)
   } yield (
     PersistentPurpose(
       id = id,
@@ -249,6 +254,11 @@ object PersistentSerializationSpec {
   val purposeVersionArchivedGen: Gen[(PurposeVersionArchived, PurposeVersionArchivedV1)] = persistentPurposeGen.map {
     case (a, b) => (PurposeVersionArchived(a), PurposeVersionArchivedV1(b))
   }
+
+  val purposeVersionRejectedGen: Gen[(PurposeVersionRejected, PurposeVersionRejectedV1)] = for {
+    (a, b)    <- persistentPurposeGen
+    versionId <- stringGen
+  } yield (PurposeVersionRejected(a, versionId), PurposeVersionRejectedV1(b, versionId))
 
   val purposeVersionCreatedGen: Gen[(PurposeVersionCreated, PurposeVersionCreatedV1)] = for {
     purposeId                          <- stringGen

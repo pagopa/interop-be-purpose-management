@@ -22,7 +22,8 @@ class PurposePersistentBehaviorSpec extends ScalaTestWithActorTestKit(SpecConfig
     createdAt = timestamp,
     updatedAt = None,
     firstActivationAt = None,
-    suspendedAt = None
+    suspendedAt = None,
+    rejectionReason = None
   )
   val purposeTemplate: PersistentPurpose        = PersistentPurpose(
     id = UUID.randomUUID(),

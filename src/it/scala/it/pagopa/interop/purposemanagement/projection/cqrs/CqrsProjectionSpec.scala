@@ -26,7 +26,6 @@ class CqrsProjectionSpec extends ScalaTestWithActorTestKit(ItSpecConfiguration.c
         title = "New title",
         description = "new Description",
         isFreeOfCharge = true,
-        eserviceId = purpose.eserviceId,
         freeOfChargeReason = Some("Siamo una Pubblica Amministrazione"),
         riskAnalysisForm = Some(persistentRiskAnalysisForm)
       )

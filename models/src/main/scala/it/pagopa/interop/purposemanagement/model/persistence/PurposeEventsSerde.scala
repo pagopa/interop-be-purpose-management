@@ -18,6 +18,7 @@ object PurposeEventsSerde {
     case x: PurposeVersionSuspended         => x.toJson
     case x: PurposeVersionWaitedForApproval => x.toJson
     case x: PurposeVersionArchived          => x.toJson
+    case x: PurposeVersionRejected          => x.toJson
     case x: PurposeVersionUpdated           => x.toJson
     case x: PurposeVersionDeleted           => x.toJson
     case x: PurposeDeleted                  => x.toJson
@@ -31,6 +32,7 @@ object PurposeEventsSerde {
     case `purposeVersionSuspended`         => _.convertTo[PurposeVersionSuspended]
     case `purposeVersionWaitedForApproval` => _.convertTo[PurposeVersionWaitedForApproval]
     case `purposeVersionArchived`          => _.convertTo[PurposeVersionArchived]
+    case `purposeVersionRejected`          => _.convertTo[PurposeVersionRejected]
     case `purposeVersionUpdated`           => _.convertTo[PurposeVersionUpdated]
     case `purposeVersionDeleted`           => _.convertTo[PurposeVersionDeleted]
     case `purposeDeleted`                  => _.convertTo[PurposeDeleted]
@@ -44,6 +46,7 @@ object PurposeEventsSerde {
     case PurposeVersionSuspended(_)         => purposeVersionSuspended
     case PurposeVersionWaitedForApproval(_) => purposeVersionWaitedForApproval
     case PurposeVersionArchived(_)          => purposeVersionArchived
+    case PurposeVersionRejected(_, _)       => purposeVersionRejected
     case PurposeVersionUpdated(_, _)        => purposeVersionUpdated
     case PurposeVersionDeleted(_, _)        => purposeVersionDeleted
     case PurposeDeleted(_)                  => purposeDeleted
@@ -56,6 +59,7 @@ object PurposeEventsSerde {
   private val purposeVersionSuspended: String         = "purpose_version_suspended"
   private val purposeVersionWaitedForApproval: String = "purpose_version_waited_for_approval"
   private val purposeVersionArchived: String          = "purpose_version_archived"
+  private val purposeVersionRejected: String          = "purpose_version_rejected"
   private val purposeVersionUpdated: String           = "purpose_version_updated"
   private val purposeVersionDeleted: String           = "purpose_version_deleted"
   private val purposeDeleted: String                  = "purpose_deleted"

@@ -93,4 +93,7 @@ package object purposemanagement extends MockFactory {
   implicit def fromEntityUnmarshallerPurposeVersion: FromEntityUnmarshaller[PurposeVersion] =
     sprayJsonUnmarshaller[PurposeVersion]
 
+  implicit def toEntityMarshallerRejectVersionSeed: ToEntityMarshaller[RejectPurposeVersionPayload] =
+    sprayJsonMarshaller[RejectPurposeVersionPayload]
+
 }

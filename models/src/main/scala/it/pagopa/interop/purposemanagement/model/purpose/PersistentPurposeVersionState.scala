@@ -9,3 +9,4 @@ case object Active             extends PersistentPurposeVersionState
 case object Suspended          extends PersistentPurposeVersionState
 case object Archived           extends PersistentPurposeVersionState
 case object WaitingForApproval extends PersistentPurposeVersionState
+case object Rejected           extends PersistentPurposeVersionState

@@ -122,6 +122,29 @@ final case class PurposeApiServiceImpl(
     onComplete(result) { deletePurposeVersionResponse[Unit](operationLabel)(_ => deletePurposeVersion204) }
   }
 
+  override def rejectPurposeVersion(
+    purposeId: String,
+    versionId: String,
+    rejectPurposeVersionPayload: RejectPurposeVersionPayload
+  )(implicit toEntityMarshallerProblem: ToEntityMarshaller[Problem], contexts: Seq[(String, String)]): Route = {
+    val operationLabel = s"Rejecting version $versionId of purpose $purposeId"
+    logger.info(operationLabel)
+
+    val result: Future[Unit] = updateVersionState(
+      purposeId,
+      versionId,
+      RejectPurposeVersion(
+        purposeId,
+        versionId,
+        rejectPurposeVersionPayload.rejectionReason,
+        rejectPurposeVersionPayload.stateChangeDetails,
+        _
+      )
+    ).map(_ => ())
+
+    onComplete(result) { rejectPurposeVersionResponse[Unit](operationLabel)(_ => rejectPurposeVersion204) }
+  }
+
   override def activatePurposeVersion(
     purposeId: String,
     versionId: String,

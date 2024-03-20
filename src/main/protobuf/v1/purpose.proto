@@ -35,6 +35,7 @@ message PurposeVersionV1 {
   optional int64 firstActivationAt = 7;
   optional int64 expectedApprovalDate = 8;
   optional int64 suspendedAt = 9;
+  optional string rejectionReason = 10;
 }
 
 enum PurposeStateV1 {
@@ -43,6 +44,7 @@ enum PurposeStateV1 {
   SUSPENDED = 3;
   WAITING_FOR_APPROVAL = 4;
   ARCHIVED = 5;
+  REJECTED = 6;
 }
 
 message PurposeVersionDocumentV1 {

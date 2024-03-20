@@ -372,6 +372,33 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
       response.futureValue shouldBe Some("")
     }
 
+    "succeed if version is Rejected" in {
+      val purposeId  = UUID.randomUUID()
+      val versionId  = UUID.randomUUID()
+      val eServiceId = UUID.randomUUID()
+      val consumerId = UUID.randomUUID()
+
+      val purposeSeed = PurposeSeed(
+        eserviceId = eServiceId,
+        consumerId = consumerId,
+        title = "Purpose",
+        description = "Purpose description",
+        riskAnalysisForm = Some(riskAnalysisFormSeed),
+        isFreeOfCharge = false,
+        freeOfChargeReason = None,
+        dailyCalls = 100
+      )
+
+      val response: Future[Option[String]] =
+        for {
+          _      <- createPurpose(purposeId, versionId, purposeSeed)
+          _      <- rejectVersion(purposeId, versionId, ChangedBy.PRODUCER, "reason")
+          result <- deletePurposeVersion(purposeId, versionId)
+        } yield result
+
+      response.futureValue shouldBe Some("")
+    }
+
     "succeed if version is in Waiting for Approval and previous version was Suspended" in {
       val purposeId      = UUID.randomUUID()
       val versionId      = UUID.randomUUID()

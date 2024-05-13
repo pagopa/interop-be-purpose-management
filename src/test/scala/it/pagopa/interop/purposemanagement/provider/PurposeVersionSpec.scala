@@ -5,7 +5,6 @@ import it.pagopa.interop.purposemanagement._
 import it.pagopa.interop.purposemanagement.model.ChangedBy.CONSUMER
 import it.pagopa.interop.purposemanagement.model._
 
-import java.time.OffsetDateTime
 import java.util.UUID
 import scala.concurrent.Future
 
@@ -206,114 +205,6 @@ class PurposeVersionSpec extends BaseIntegrationSpec {
       val result = response.futureValue
       result.status shouldBe 409
       result.errors.map(_.code) shouldBe Seq("011-0005")
-    }
-  }
-
-  "Update of a purpose version in waiting for approval" must {
-    "succeed" in {
-      val purposeId        = UUID.randomUUID()
-      val versionId        = UUID.randomUUID()
-      val eServiceId       = UUID.randomUUID()
-      val consumerId       = UUID.randomUUID()
-      val approvalDateTime = OffsetDateTime.now()
-
-      val purposeSeed = PurposeSeed(
-        eserviceId = eServiceId,
-        consumerId = consumerId,
-        title = "Purpose",
-        description = "Purpose description",
-        riskAnalysisForm = Some(riskAnalysisFormSeed),
-        isFreeOfCharge = false,
-        freeOfChargeReason = None,
-        dailyCalls = 100
-      )
-
-      val updateContent = WaitingForApprovalPurposeVersionUpdateContent(expectedApprovalDate = approvalDateTime)
-
-      val response: Future[PurposeVersion] =
-        for {
-          _      <- createPurpose(purposeId, versionId, purposeSeed)
-          _      <- waitForApprovalVersion(purposeId, versionId, ChangedBy.PRODUCER)
-          result <- updateWaitingForApprovalPurposeVersion(purposeId, versionId, updateContent)
-        } yield result
-
-      val expected =
-        PurposeVersion(
-          id = versionId,
-          state = PurposeVersionState.WAITING_FOR_APPROVAL,
-          createdAt = timestamp,
-          updatedAt = Some(timestamp),
-          dailyCalls = 100,
-          firstActivationAt = Some(timestamp),
-          expectedApprovalDate = Some(approvalDateTime),
-          riskAnalysis = None
-        )
-
-      response.futureValue shouldBe expected
-    }
-
-    "fail if version does not exist" in {
-      val purposeId = UUID.randomUUID()
-      val versionId = UUID.randomUUID()
-
-      val updateContent = WaitingForApprovalPurposeVersionUpdateContent(expectedApprovalDate = timestamp)
-
-      (() => mockDateTimeSupplier.get()).expects().returning(timestamp).once()
-
-      val response: Future[Problem] =
-        makeFailingRequest(
-          s"purposes/$purposeId/versions/$versionId/update/waitingForApproval",
-          HttpMethods.POST,
-          updateContent
-        )
-
-      val result = response.futureValue
-      result.status shouldBe 404
-      result.errors.map(_.code) shouldBe Seq("011-0006")
-    }
-    "fail if version is not in waiting for approval" in {
-      val purposeId      = UUID.randomUUID()
-      val versionId      = UUID.randomUUID()
-      val riskAnalysisId = UUID.randomUUID()
-      val eServiceId     = UUID.randomUUID()
-      val consumerId     = UUID.randomUUID()
-
-      val riskAnalysisDoc = PurposeVersionDocument(
-        id = riskAnalysisId,
-        contentType = "a-content-type",
-        path = "a/store/path",
-        createdAt = timestamp
-      )
-
-      val purposeSeed = PurposeSeed(
-        eserviceId = eServiceId,
-        consumerId = consumerId,
-        title = "Purpose",
-        description = "Purpose description",
-        riskAnalysisForm = Some(riskAnalysisFormSeed),
-        isFreeOfCharge = false,
-        freeOfChargeReason = None,
-        dailyCalls = 200
-      )
-
-      val updateContent = WaitingForApprovalPurposeVersionUpdateContent(expectedApprovalDate = timestamp)
-
-      (() => mockDateTimeSupplier.get()).expects().returning(timestamp).once()
-
-      val response: Future[Problem] =
-        for {
-          _      <- createPurpose(purposeId, versionId, purposeSeed)
-          _      <- activateVersion(purposeId, versionId, ChangedBy.CONSUMER, Some(riskAnalysisDoc))
-          result <- makeFailingRequest(
-            s"purposes/$purposeId/versions/$versionId/update/waitingForApproval",
-            HttpMethods.POST,
-            updateContent
-          )
-        } yield result
-
-      val result = response.futureValue
-      result.status shouldBe 400
-      result.errors.map(_.code) shouldBe Seq("011-0004")
     }
   }
 

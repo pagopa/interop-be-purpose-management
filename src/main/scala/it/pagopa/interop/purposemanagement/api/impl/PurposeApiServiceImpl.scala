@@ -20,11 +20,7 @@ import it.pagopa.interop.purposemanagement.api.impl.ResponseHandlers._
 import it.pagopa.interop.purposemanagement.common.system._
 import it.pagopa.interop.purposemanagement.error.PurposeManagementErrors._
 import it.pagopa.interop.purposemanagement.model._
-import it.pagopa.interop.purposemanagement.model.decoupling.{
-  DraftPurposeVersionUpdate,
-  PurposeUpdate,
-  WaitingForApprovalPurposeVersionUpdate
-}
+import it.pagopa.interop.purposemanagement.model.decoupling.{DraftPurposeVersionUpdate, PurposeUpdate}
 import it.pagopa.interop.purposemanagement.model.persistence.Adapters._
 import it.pagopa.interop.purposemanagement.model.persistence._
 import it.pagopa.interop.purposemanagement.model.purpose.{
@@ -278,32 +274,6 @@ final case class PurposeApiServiceImpl(
     } yield purpose
 
     onComplete(result) { updatePurposeResponse[Purpose](operationLabel)(updatePurpose200) }
-  }
-
-  override def updateWaitingForApprovalPurposeVersion(
-    purposeId: String,
-    versionId: String,
-    updateContent: WaitingForApprovalPurposeVersionUpdateContent
-  )(implicit
-    toEntityMarshallerPurposeVersion: ToEntityMarshaller[PurposeVersion],
-    toEntityMarshallerProblem: ToEntityMarshaller[Problem],
-    contexts: Seq[(String, String)]
-  ): Route = {
-    val operationLabel = s"Updating Waiting For Approval Version $versionId of Purpose $purposeId"
-    logger.info(operationLabel)
-
-    val update = WaitingForApprovalPurposeVersionUpdate.fromApi(updateContent, dateTimeSupplier)
-
-    val result: Future[PurposeVersion] =
-      commander(purposeId)
-        .askWithStatus(ref => UpdateWaitingForApprovalPurposeVersion(purposeId, versionId, update, ref))
-        .map(_.toAPI)
-
-    onComplete(result) {
-      updateWaitingForApprovalPurposeVersionResponse[PurposeVersion](operationLabel)(
-        updateWaitingForApprovalPurposeVersion200
-      )
-    }
   }
 
   private def updateVersionState(

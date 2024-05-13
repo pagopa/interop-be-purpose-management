@@ -52,20 +52,6 @@ trait SpecHelper {
         .to[Purpose]
     } yield purpose
 
-  def updateWaitingForApprovalPurposeVersion(
-    purposeId: UUID,
-    versionId: UUID,
-    seed: WaitingForApprovalPurposeVersionUpdateContent
-  )(implicit ec: ExecutionContext, actorSystem: actor.ActorSystem): Future[PurposeVersion] =
-    for {
-      data <- Marshal(seed).to[MessageEntity].map(_.dataBytes)
-      _ = (() => mockDateTimeSupplier.get()).expects().returning(timestamp).once()
-      purpose <- Unmarshal(
-        makeRequest(data, s"purposes/$purposeId/versions/$versionId/update/waitingForApproval", HttpMethods.POST)
-      )
-        .to[PurposeVersion]
-    } yield purpose
-
   def deletePurpose(
     purposeId: UUID
   )(implicit ec: ExecutionContext, actorSystem: actor.ActorSystem): Future[Option[String]] =

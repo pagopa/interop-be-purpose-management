@@ -137,26 +137,6 @@ object PurposePersistentBehavior {
             }
           }
 
-      case UpdateWaitingForApprovalPurposeVersion(purposeId, versionId, update, replyTo) =>
-        state
-          .getPurposeVersion(purposeId, versionId)
-          .fold {
-            replyTo ! StatusReply.Error[PersistentPurposeVersion](PurposeVersionNotFound(purposeId, versionId))
-            Effect.none[PurposeVersionUpdated, State]
-          } { v =>
-            isWaitingForApprovalVersion(purposeId, v) match {
-              case Right(_) =>
-                val updatedVersion =
-                  v.copy(expectedApprovalDate = Some(update.expectedApprovalDate), updatedAt = Some(update.timestamp))
-                Effect
-                  .persist(PurposeVersionUpdated(purposeId, updatedVersion))
-                  .thenRun((_: State) => replyTo ! StatusReply.Success(updatedVersion))
-              case Left(ex) =>
-                replyTo ! StatusReply.Error[PersistentPurposeVersion](ex)
-                Effect.none[PurposeVersionUpdated, State]
-            }
-          }
-
       case GetPurpose(purposeId, replyTo) =>
         val purpose: Option[PersistentPurpose] = state.purposes.get(purposeId)
         replyTo ! StatusReply.Success[Option[PersistentPurpose]](purpose)

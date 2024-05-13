@@ -149,7 +149,6 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
           createdAt = timestamp,
           updatedAt = Some(timestamp),
           firstActivationAt = Some(timestamp),
-          expectedApprovalDate = None,
           riskAnalysis = Some(riskAnalysisDoc),
           dailyCalls = 100
         ),
@@ -159,7 +158,6 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
           createdAt = timestamp,
           updatedAt = Some(timestamp),
           firstActivationAt = Some(timestamp),
-          expectedApprovalDate = None,
           riskAnalysis = Some(riskAnalysisDoc),
           dailyCalls = 100
         )
@@ -212,7 +210,6 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
           createdAt = timestamp,
           updatedAt = Some(timestamp),
           firstActivationAt = Some(timestamp),
-          expectedApprovalDate = None,
           riskAnalysis = Some(riskAnalysisDoc),
           dailyCalls = 100
         ),
@@ -222,7 +219,6 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
           createdAt = timestamp,
           updatedAt = Some(timestamp),
           firstActivationAt = Some(timestamp),
-          expectedApprovalDate = None,
           riskAnalysis = Some(riskAnalysisDoc),
           dailyCalls = 100
         )
@@ -276,7 +272,6 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
           createdAt = timestamp,
           updatedAt = Some(timestamp),
           firstActivationAt = Some(timestamp),
-          expectedApprovalDate = None,
           riskAnalysis = Some(riskAnalysisDoc),
           dailyCalls = 100
         ),
@@ -286,7 +281,6 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
           createdAt = timestamp,
           updatedAt = Some(timestamp),
           firstActivationAt = Some(timestamp),
-          expectedApprovalDate = None,
           riskAnalysis = Some(riskAnalysisDoc),
           dailyCalls = 100
         )
@@ -342,7 +336,6 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
           createdAt = timestamp,
           updatedAt = Some(timestamp),
           firstActivationAt = Some(timestamp),
-          expectedApprovalDate = None,
           riskAnalysis = Some(riskAnalysisDoc),
           dailyCalls = 100
         ),
@@ -352,7 +345,6 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
           createdAt = timestamp,
           updatedAt = Some(timestamp),
           firstActivationAt = Some(timestamp),
-          expectedApprovalDate = None,
           riskAnalysis = Some(riskAnalysisDoc),
           dailyCalls = 100
         )
@@ -753,7 +745,6 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
           createdAt = timestamp,
           updatedAt = Some(timestamp),
           firstActivationAt = Some(timestamp),
-          expectedApprovalDate = None,
           riskAnalysis = Some(riskAnalysisDoc),
           dailyCalls = 100
         ),
@@ -763,7 +754,6 @@ class PurposeVersionStateChangeSpec extends BaseIntegrationSpec {
           createdAt = timestamp,
           updatedAt = Some(timestamp),
           firstActivationAt = Some(timestamp),
-          expectedApprovalDate = None,
           riskAnalysis = Some(riskAnalysisDoc),
           dailyCalls = 100,
           rejectionReason = Some(rejectionReason)

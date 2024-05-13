@@ -2,11 +2,7 @@ package it.pagopa.interop.purposemanagement.model.persistence
 
 import akka.actor.typed.ActorRef
 import akka.pattern.StatusReply
-import it.pagopa.interop.purposemanagement.model.decoupling.{
-  DraftPurposeVersionUpdate,
-  PurposeUpdate,
-  WaitingForApprovalPurposeVersionUpdate
-}
+import it.pagopa.interop.purposemanagement.model.decoupling.{DraftPurposeVersionUpdate, PurposeUpdate}
 import it.pagopa.interop.purposemanagement.model.purpose.{
   PersistentPurpose,
   PersistentPurposeVersion,
@@ -45,12 +41,6 @@ final case class UpdateDraftPurposeVersion(
   purposeId: String,
   versionId: String,
   update: DraftPurposeVersionUpdate,
-  replyTo: ActorRef[StatusReply[PersistentPurposeVersion]]
-) extends Command
-final case class UpdateWaitingForApprovalPurposeVersion(
-  purposeId: String,
-  versionId: String,
-  update: WaitingForApprovalPurposeVersionUpdate,
   replyTo: ActorRef[StatusReply[PersistentPurposeVersion]]
 ) extends Command
 final case class ActivatePurposeVersion(

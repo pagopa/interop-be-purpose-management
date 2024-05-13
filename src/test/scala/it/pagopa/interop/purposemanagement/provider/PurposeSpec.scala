@@ -87,13 +87,7 @@ class PurposeSpec extends BaseIntegrationSpec {
         eserviceId = purposeSeed.eserviceId,
         consumerId = purposeSeed.consumerId,
         versions = Seq(
-          PurposeVersion(
-            id = versionId,
-            state = PurposeVersionState.DRAFT,
-            createdAt = timestamp,
-            expectedApprovalDate = None,
-            dailyCalls = 100
-          )
+          PurposeVersion(id = versionId, state = PurposeVersionState.DRAFT, createdAt = timestamp, dailyCalls = 100)
         ),
         suspendedByConsumer = None,
         suspendedByProducer = None,
@@ -168,7 +162,6 @@ class PurposeSpec extends BaseIntegrationSpec {
                 id = versionId1,
                 state = PurposeVersionState.DRAFT,
                 createdAt = timestamp,
-                expectedApprovalDate = None,
                 dailyCalls = 100
               )
             ),
@@ -190,7 +183,6 @@ class PurposeSpec extends BaseIntegrationSpec {
                 id = versionId2,
                 state = PurposeVersionState.DRAFT,
                 createdAt = timestamp,
-                expectedApprovalDate = None,
                 dailyCalls = 100
               )
             ),
@@ -255,7 +247,6 @@ class PurposeSpec extends BaseIntegrationSpec {
                 id = versionId1,
                 state = PurposeVersionState.DRAFT,
                 createdAt = timestamp,
-                expectedApprovalDate = None,
                 dailyCalls = 100
               )
             ),
@@ -320,7 +311,6 @@ class PurposeSpec extends BaseIntegrationSpec {
                 id = versionId2,
                 state = PurposeVersionState.DRAFT,
                 createdAt = timestamp,
-                expectedApprovalDate = None,
                 dailyCalls = 100
               )
             ),
@@ -417,7 +407,6 @@ class PurposeSpec extends BaseIntegrationSpec {
                 createdAt = timestamp,
                 updatedAt = Some(timestamp),
                 firstActivationAt = Some(timestamp),
-                expectedApprovalDate = None,
                 riskAnalysis = Some(riskAnalysisDoc),
                 dailyCalls = 100
               ),
@@ -425,7 +414,6 @@ class PurposeSpec extends BaseIntegrationSpec {
                 id = versionId1_2,
                 state = PurposeVersionState.DRAFT,
                 createdAt = timestamp,
-                expectedApprovalDate = None,
                 riskAnalysis = Some(riskAnalysisDoc),
                 dailyCalls = 100
               )
@@ -450,7 +438,6 @@ class PurposeSpec extends BaseIntegrationSpec {
                 createdAt = timestamp,
                 updatedAt = Some(timestamp),
                 firstActivationAt = Some(timestamp),
-                expectedApprovalDate = None,
                 riskAnalysis = Some(riskAnalysisDoc),
                 dailyCalls = 100
               )

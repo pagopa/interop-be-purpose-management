@@ -146,7 +146,6 @@ object Adapters {
       createdAt = v.createdAt,
       updatedAt = v.updatedAt,
       firstActivationAt = v.firstActivationAt,
-      expectedApprovalDate = v.expectedApprovalDate,
       dailyCalls = v.dailyCalls,
       rejectionReason = v.rejectionReason
     )

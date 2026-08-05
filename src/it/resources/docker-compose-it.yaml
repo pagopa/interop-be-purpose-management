@@ -1,7 +1,7 @@
 version: '3.0'
 services:
   postgres:
-    image: postgres:10.6
+    image: postgres:10.6@sha256:1bd46192a12a1012d52f41186c83dc343b4b2d07ad9836fb37a08cdf22041537
     ports:
       - '54329:5432'
     environment:
@@ -11,7 +11,7 @@ services:
     volumes:
       - ./postgre_init.sql:/docker-entrypoint-initdb.d/postgre_init.sql
   mongo:
-    image: mongo:4.0.28
+    image: mongo:4.0.28@sha256:4ca81c89ad08f4cfa9906005126112bffe8fb363800466ef5e50f6238f6f6af1
     ports:
       - '27019:27017'
     environment:
